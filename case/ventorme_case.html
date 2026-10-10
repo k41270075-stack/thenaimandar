@@ -1,0 +1,2017 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f8faff;color:#3b3b3b}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Почему не регистрируются</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;800&display=swap">
+<style>
+  :root {
+    --shell: #f8faff;
+    --shell-glass: rgba(248, 250, 255, 0.92);
+    --card: #ffffff;
+    --card-2: #faf9fb;
+    --ink: #3b3b3b;
+    --muted: rgba(59, 59, 59, 0.66);
+    --faint: rgba(59, 59, 59, 0.46);
+    --line: rgba(0, 0, 0, 0.06);
+    --line-strong: rgba(0, 0, 0, 0.1);
+    --accent: #3b47ff;
+    --accent-text: #2048ff;
+    --accent-soft: #eef0ff;
+    --blue-bg: #dbe1ff;
+    --blue: #2048ff;
+    --green-bg: #cffcd2;
+    --green: #1f9d6c;
+    --orange-bg: #ffe8db;
+    --orange: #e4885d;
+    --violet-bg: #ece7ff;
+    --violet: #7c5cff;
+    --red-bg: #fccfcf;
+    --red: #e5484d;
+    --seg-a: #3b47ff;
+    --seg-b: #1f9d6c;
+    --seg-c: #7c5cff;
+    --field: #faf9fb;
+    --field-line: #e5e7eb;
+    --frame: #1f2233;
+    --track: #eceef7;
+    --chip-bg: #dbe1ff;
+    --chip-ink: #2048ff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --shell: #0d0f15;
+      --shell-glass: rgba(13, 15, 21, 0.9);
+      --card: #151821;
+      --card-2: #1a1e29;
+      --ink: #f4f5f8;
+      --muted: rgba(244, 245, 248, 0.68);
+      --faint: rgba(244, 245, 248, 0.46);
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.14);
+      --accent-text: #a3aaff;
+      --accent-soft: rgba(88, 100, 255, 0.16);
+      --blue-bg: rgba(59, 71, 255, 0.24);
+      --blue: #b0b6ff;
+      --green-bg: rgba(31, 157, 108, 0.22);
+      --green: #72dbae;
+      --orange-bg: rgba(228, 136, 93, 0.22);
+      --orange: #f3b08f;
+      --violet-bg: rgba(124, 92, 255, 0.24);
+      --violet: #c2b3ff;
+      --red-bg: rgba(229, 72, 77, 0.22);
+      --red: #ffa3a6;
+      --seg-a: #5864ff;
+      --seg-b: #27b07b;
+      --seg-c: #9277ff;
+      --field: #1a1e29;
+      --field-line: rgba(255, 255, 255, 0.12);
+      --frame: #2a2e42;
+      --track: rgba(255, 255, 255, 0.1);
+      --chip-bg: rgba(59, 71, 255, 0.24);
+      --chip-ink: #b0b6ff;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --shell: #0d0f15;
+    --shell-glass: rgba(13, 15, 21, 0.9);
+    --card: #151821;
+    --card-2: #1a1e29;
+    --ink: #f4f5f8;
+    --muted: rgba(244, 245, 248, 0.68);
+    --faint: rgba(244, 245, 248, 0.46);
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --accent-text: #a3aaff;
+    --accent-soft: rgba(88, 100, 255, 0.16);
+    --blue-bg: rgba(59, 71, 255, 0.24);
+    --blue: #b0b6ff;
+    --green-bg: rgba(31, 157, 108, 0.22);
+    --green: #72dbae;
+    --orange-bg: rgba(228, 136, 93, 0.22);
+    --orange: #f3b08f;
+    --violet-bg: rgba(124, 92, 255, 0.24);
+    --violet: #c2b3ff;
+    --red-bg: rgba(229, 72, 77, 0.22);
+    --red: #ffa3a6;
+    --seg-a: #5864ff;
+    --seg-b: #27b07b;
+    --seg-c: #9277ff;
+    --field: #1a1e29;
+    --field-line: rgba(255, 255, 255, 0.12);
+    --frame: #2a2e42;
+    --track: rgba(255, 255, 255, 0.1);
+    --chip-bg: rgba(59, 71, 255, 0.24);
+    --chip-ink: #b0b6ff;
+  }
+
+  body {
+    background: var(--shell);
+    color: var(--ink);
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.6;
+    padding-inline: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-block: 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  a {
+    color: var(--accent-text);
+    text-underline-offset: 3px;
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: #3b47ff;
+    color: #ffffff;
+    border-radius: 24px;
+    padding: 34px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 32px;
+    align-items: stretch;
+  }
+
+  .hero-wm {
+    position: absolute;
+    right: -60px;
+    bottom: -44px;
+    width: 520px;
+    max-width: 90%;
+    height: auto;
+    pointer-events: none;
+  }
+
+  .hero-main,
+  .hero-stat {
+    position: relative;
+  }
+
+  .hero-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pill {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  h1 {
+    margin: 4px 0 0;
+    font-size: clamp(34px, 6.2vw, 54px);
+    line-height: 1.04;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .lead {
+    margin: 0;
+    max-width: 32em;
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 50px;
+    padding-inline: 20px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-white {
+    background: #ffffff;
+    color: #2733e6;
+  }
+
+  .btn-white:hover {
+    background: #eef0ff;
+  }
+
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    color: #ffffff;
+  }
+
+  .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .btn-primary {
+    background: #3b47ff;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #2f3bf0;
+  }
+
+  .btn-outline {
+    background: var(--card);
+    border: 1.5px solid var(--line-strong);
+    color: var(--ink);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--accent);
+  }
+
+  .hero-stat {
+    align-self: end;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hero-stat .big {
+    font-size: 64px;
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: #dfff00;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero-stat .cap {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .hero-stat .cap-sub {
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  @media (max-width: 760px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 24px 22px;
+      gap: 22px;
+    }
+
+    .hero-stat {
+      align-self: stretch;
+    }
+
+    .hero-stat .big {
+      font-size: 52px;
+    }
+  }
+
+  /* stage path */
+  .path {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 16px 20px;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .stage .dot {
+    width: 14px;
+    height: 14px;
+    margin-top: 5px;
+    border-radius: 999px;
+    border: 2px solid var(--line-strong);
+    background: var(--card);
+  }
+
+  .stage.now .dot {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .st-k {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .stage.now .st-k {
+    color: var(--accent-text);
+  }
+
+  .st-t {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .st-d {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .path-line {
+    height: 2px;
+    border-radius: 999px;
+    background: var(--line-strong);
+  }
+
+  @media (max-width: 600px) {
+    .path {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .path-line {
+      width: 2px;
+      height: 16px;
+      margin-left: 6px;
+    }
+  }
+
+  /* section nav */
+  .secnav {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    margin-inline: -16px;
+    margin-block: -28px -20px;
+    padding: 10px 16px;
+    background: var(--shell-glass);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .secnav-inner {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .secnav-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .secnav a {
+    flex: none;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+  }
+
+  .secnav a:hover {
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* sections */
+  section.block {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    scroll-margin-top: 76px;
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sec-head h2 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .chip {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+  }
+
+  .chip svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .chip.blue { background: var(--blue-bg); color: var(--blue); }
+  .chip.green { background: var(--green-bg); color: var(--green); }
+  .chip.orange { background: var(--orange-bg); color: var(--orange); }
+  .chip.violet { background: var(--violet-bg); color: var(--violet); }
+  .chip.red { background: var(--red-bg); color: var(--red); }
+
+  .text {
+    margin: 0;
+    max-width: 44em;
+    color: var(--muted);
+  }
+
+  .text strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 14px;
+    line-height: 1.3;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 28px;
+  }
+
+  @media (max-width: 560px) {
+    .card {
+      padding: 20px 18px;
+    }
+  }
+
+  /* steps */
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 18px;
+    padding-bottom: 26px;
+  }
+
+  .step:last-child {
+    padding-bottom: 0;
+  }
+
+  .step::before {
+    content: "";
+    position: absolute;
+    left: 17.5px;
+    top: 42px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--line-strong);
+  }
+
+  .step:last-child::before {
+    display: none;
+  }
+
+  .snum {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .step h3 {
+    margin: 5px 0 0;
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .step p {
+    margin: 0;
+    max-width: 44em;
+    color: var(--muted);
+  }
+
+  .outcome {
+    align-self: flex-start;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+
+  /* form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 36px;
+    align-items: center;
+  }
+
+  @media (max-width: 760px) {
+    .form-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+  }
+
+  .mock {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .phone {
+    width: min(300px, 100%);
+    border: 9px solid var(--frame);
+    border-radius: 24px;
+    background: var(--card);
+    overflow: hidden;
+  }
+
+  .phone-bar {
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
+  }
+
+  .phone-bar span {
+    width: 64px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--frame);
+  }
+
+  .mock-body {
+    padding: 16px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mock-brand {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--accent-text);
+  }
+
+  .mock-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .q-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .q-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .q-chip {
+    font-size: 12px;
+    line-height: 1.3;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px dashed var(--line-strong);
+    color: var(--muted);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .req {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--blue-bg);
+    color: var(--accent-text);
+  }
+
+  .input {
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--field-line);
+    background: var(--field);
+    padding-inline: 14px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: var(--faint);
+  }
+
+  .consent {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 9px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .tick {
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+  }
+
+  .tick svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .fake-btn {
+    height: 48px;
+    border-radius: 14px;
+    background: #3b47ff;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mock figcaption {
+    font-size: 13px;
+    color: var(--faint);
+  }
+
+  .checks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .checks li {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 12px;
+    color: var(--muted);
+  }
+
+  .checks li strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .li-icon {
+    width: 24px;
+    height: 24px;
+    margin-top: 1px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+  }
+
+  .li-icon svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .li-icon.ok { background: var(--green-bg); color: var(--green); }
+  .li-icon.no { background: var(--red-bg); color: var(--red); }
+  .li-icon.info { background: var(--blue-bg); color: var(--blue); }
+
+  /* deliverables */
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  @media (max-width: 760px) {
+    .grid3 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .tile {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tile h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .tile p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .note {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: 20px;
+    padding: 16px 18px;
+  }
+
+  .note p {
+    margin: 0;
+  }
+
+  /* scoring */
+  .bar {
+    display: grid;
+    grid-template-columns: 40fr 35fr 25fr;
+    gap: 4px;
+    height: 16px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .bar span:nth-child(1) { background: var(--seg-a); }
+  .bar span:nth-child(2) { background: var(--seg-b); }
+  .bar span:nth-child(3) { background: var(--seg-c); }
+
+  .crit-grid {
+    display: grid;
+    grid-template-columns: 40fr 35fr 25fr;
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  @media (max-width: 760px) {
+    .crit-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .crit {
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .crit-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .crit h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .crit h3::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--dot);
+  }
+
+  .crit:nth-child(1) { --dot: var(--seg-a); }
+  .crit:nth-child(2) { --dot: var(--seg-b); }
+  .crit:nth-child(3) { --dot: var(--seg-c); }
+
+  .pct {
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .crit p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .formula {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--card);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* rules */
+  .grid2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .grid2 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .rule-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .rule-card h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* what we give */
+  .give-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 760px) {
+    .give-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .give-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .give-card h3 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .give-card p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .give-card .btn {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
+  .t-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .t-item {
+    font-size: 13px;
+    line-height: 1.3;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+  }
+
+  .t-item b {
+    font-weight: 800;
+    color: var(--accent-text);
+  }
+
+  .foot {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-strong);
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .foot p {
+    margin: 0;
+    max-width: 48em;
+  }
+
+  .foot .brand {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+    }
+  }
+
+  /* team link */
+  .linkbox {
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: 20px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .linkbox .lbl-s {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .url {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-all;
+    color: var(--ink);
+  }
+
+  .url mark {
+    background: var(--green-bg);
+    color: var(--green);
+    border-radius: 6px;
+    padding: 1px 5px;
+    font-weight: 700;
+  }
+
+  .mock-url {
+    font-size: 11px;
+    color: var(--faint);
+    background: var(--field);
+    border: 1px solid var(--field-line);
+    border-radius: 10px;
+    padding: 6px 10px;
+    word-break: break-all;
+  }
+
+  .mock-url b {
+    color: var(--green);
+  }
+
+  .mock-h {
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .mock-p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .mock-line {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--track);
+  }
+
+  .mock-line.short { width: 60%; }
+
+  /* site guide */
+  .ways {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  @media (max-width: 860px) {
+    .ways { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .way {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .way h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .way .who {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .way ol {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .way ol strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 5px;
+  }
+
+  .grid2-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .grid2-tiles { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* data part */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .kpi .v {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi .l { font-size: 13px; color: var(--muted); }
+  .kpi.hl { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+  .kpi.hl .l { color: rgba(255, 255, 255, 0.82); }
+
+  @media (max-width: 560px) {
+    .kpis { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .dcard {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dcard h3 { margin: 0; font-size: 18px; font-weight: 600; }
+
+  .defs {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 28px;
+  }
+
+  .defs div { display: flex; flex-direction: column; gap: 2px; }
+  .defs dt { font-weight: 600; font-size: 14px; }
+  .defs dd { margin: 0; font-size: 14px; color: var(--muted); }
+
+  @media (max-width: 680px) {
+    .defs { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .caveats {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .tchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .tchip b { font-weight: 800; color: var(--accent-text); }
+  .tchip:hover { border-color: var(--accent); }
+
+  .tcard {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 22px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-margin-top: 76px;
+  }
+
+  .thead-line { display: flex; align-items: center; gap: 12px; }
+
+  .tbadge {
+    flex: none;
+    min-width: 40px;
+    height: 32px;
+    padding-inline: 10px;
+    border-radius: 14px;
+    background: var(--chip-bg);
+    color: var(--chip-ink);
+    font-weight: 800;
+    font-size: 13px;
+    display: grid;
+    place-items: center;
+  }
+
+  .thead-line h2 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .copy {
+    flex: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line-strong);
+    background: var(--card-2);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .copy:hover { border-color: var(--accent); }
+  .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .copy.done { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; }
+
+  .tnote { margin: 0; font-size: 13px; color: var(--muted); max-width: 62em; }
+  .seg { margin: 8px 0 0; font-size: 15px; font-weight: 600; }
+
+  .tscroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+
+  thead th {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--muted);
+    background: var(--card-2);
+    text-align: right;
+    vertical-align: bottom;
+  }
+
+  th.lbl {
+    text-align: left;
+    font-weight: 500;
+    position: sticky;
+    left: 0;
+    background: var(--card);
+    min-width: 200px;
+    max-width: 320px;
+  }
+
+  thead th.lbl { background: var(--card-2); font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+  tr.strong th, tr.strong td { font-weight: 600; }
+
+  .pc { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .track { display: block; width: 64px; height: 4px; border-radius: 999px; background: var(--track); overflow: hidden; }
+  .fill { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+
+  .src { margin: 0; font-size: 13px; color: var(--muted); max-width: 62em; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="intro">
+    <header class="hero">
+      <svg class="hero-wm" viewBox="0 0 593.933 358.686" fill="none" aria-hidden="true">
+        <path opacity="0.2" d="M7.52551 120.177L291.493 21.7007L30.0509 299.28L548.492 35.2411L233.518 337.07L586.168 210.405" stroke="#F2F2F2" stroke-opacity="0.7" stroke-width="45.9371"/>
+      </svg>
+      <div class="hero-main">
+        <div class="pills">
+          <span class="pill">HACKNEXT × Ventorme</span>
+          <span class="pill">1 тур, онлайн · 11–14 октября</span>
+        </div>
+        <h1>Почему не регистрируются</h1>
+        <p class="lead">Больше 80% новых посетителей главной страницы Ventorme уходят, так и не зарегистрировавшись. Разберитесь почему, соберите свой лендинг и докажите регистрациями, что он работает лучше.</p>
+        <div class="cta-row">
+          <a class="btn btn-white" href="#data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><rect x="5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="5" width="3" height="12" rx="1"/><rect x="16" y="8" width="3" height="9" rx="1"/></svg>
+            Смотреть данные
+          </a>
+          <a class="btn btn-glass" href="https://ventorme.ai" target="_blank" rel="noopener">Открыть ventorme.ai</a>
+        </div>
+      </div>
+      <aside class="hero-stat" aria-label="Главная цифра кейса">
+        <div class="big">80%+</div>
+        <div class="cap">новых посетителей главной ушли без регистрации</div>
+        <div class="cap-sub">1 277 посетителей с 17 августа по 20 сентября 2026 года</div>
+      </aside>
+    </header>
+
+    <div class="path" aria-label="Этапы хакатона">
+      <div class="stage now">
+        <span class="dot"></span>
+        <div>
+          <div class="st-k">Сейчас</div>
+          <div class="st-t">1 тур, онлайн</div>
+          <div class="st-d">Разбор, лендинг, регистрации. Дедлайн 14 октября, 23:59</div>
+        </div>
+      </div>
+      <div class="path-line" aria-hidden="true"></div>
+      <div class="stage">
+        <span class="dot"></span>
+        <div>
+          <div class="st-k">Дальше</div>
+          <div class="st-t">2 тур, офлайн-финал</div>
+          <div class="st-d">18 октября, задание получат финалисты</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="secnav" aria-label="Разделы задания">
+    <div class="secnav-inner">
+      <a href="#task">Задача</a>
+      <a href="#steps">Шаги</a>
+      <a href="#link">Ссылка команды</a>
+      <a href="#site">Как сделать сайт</a>
+      <a href="#deliver">Что сдать</a>
+      <a href="#score">Оценка</a>
+      <a href="#rules">Правила</a>
+      <a href="#data">Данные</a>
+    </div>
+  </nav>
+
+  <section class="block" id="task" aria-labelledby="task-h">
+    <div class="sec-head">
+      <span class="chip blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></span>
+      <h2 id="task-h">Задача</h2>
+    </div>
+    <p class="text"><strong>Ventorme помогает школьникам выбрать профессию и поступить в вуз.</strong> Первое, что видит новый человек, это главная страница <a href="https://ventorme.ai" target="_blank" rel="noopener">ventorme.ai</a>, и большинство уходит прямо с неё. Найдите, почему так происходит, и докажите это данными и разговорами со сверстниками. Потом соберите свой лендинг Ventorme, который исправляет найденные причины, приведите на него людей и покажите, сколько из них зарегистрировались.</p>
+    <div class="tags" aria-label="Что есть на платформе">
+      <span class="tag">Профтест</span>
+      <span class="tag">Подбор вузов</span>
+      <span class="tag">Подготовка к IELTS и SAT</span>
+      <span class="tag">Калькулятор гранта по ЕНТ</span>
+      <span class="tag">Помощь с эссе</span>
+      <span class="tag">ИИ-помощник Venti</span>
+    </div>
+  </section>
+
+  <section class="block" id="steps" aria-labelledby="steps-h">
+    <div class="sec-head">
+      <span class="chip violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><circle cx="4.5" cy="6" r="1.5"/><circle cx="4.5" cy="12" r="1.5"/><circle cx="4.5" cy="18" r="1.5"/></svg></span>
+      <h2 id="steps-h">Что сделать</h2>
+    </div>
+    <div class="card">
+      <ol class="steps">
+        <li class="step">
+          <span class="snum">1</span>
+          <div class="step-body">
+            <h3>Разберитесь, почему уходят</h3>
+            <p>Изучите <a href="#data">данные</a> ниже: 11 таблиц о том, кто приходит на главную и что там делает. Проведите минимум 5 кастдевов со сверстниками, которые ventorme.ai ещё не видели. Кастдев это разговор о чужом опыте: вы смотрите, как человек открывает сайт с телефона, и расспрашиваете, что ему непонятно.</p>
+            <span class="outcome">Итог: 2–3 причины с доказательствами</span>
+          </div>
+        </li>
+        <li class="step">
+          <span class="snum">2</span>
+          <div class="step-body">
+            <h3>Соберите свой лендинг Ventorme</h3>
+            <p>Он должен устранять причины, которые вы нашли. Инструменты любые: конструктор, код, ИИ. Как это сделать, смотрите в разделе <a href="#site">«Как сделать сайт»</a>.</p>
+            <span class="outcome">Итог: работающая страница по публичной ссылке</span>
+          </div>
+        </li>
+        <li class="step">
+          <span class="snum">3</span>
+          <div class="step-body">
+            <h3>Поставьте ссылку своей команды на кнопку</h3>
+            <p>Главная кнопка лендинга ведёт на регистрацию в Ventorme по ссылке с номером вашей команды. Подробно в разделе <a href="#link">«Ссылка команды»</a>.</p>
+            <span class="outcome">Итог: регистрации засчитываются вам</span>
+          </div>
+        </li>
+        <li class="step">
+          <span class="snum">4</span>
+          <div class="step-body">
+            <h3>Приведите людей</h3>
+            <p>Зовите сверстников: школьные чаты, соцсети, знакомые. Засчитываются те, кто зарегистрировался по вашей ссылке и прошёл онбординг. Чего делать нельзя, написано в правилах.</p>
+            <span class="outcome">Итог: живые регистрации</span>
+          </div>
+        </li>
+        <li class="step">
+          <span class="snum">5</span>
+          <div class="step-body">
+            <h3>Соберите презентацию</h3>
+            <p>Причины, цифры из таблиц с их номерами, наблюдения с кастдевов и то, как ваш лендинг решает найденные проблемы. Формат PDF.</p>
+            <span class="outcome">Итог: разбор, который можно проверить</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="link" aria-labelledby="link-h">
+    <div class="sec-head">
+      <span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+      <h2 id="link-h">Ссылка команды</h2>
+    </div>
+    <div class="linkbox">
+      <span class="lbl-s">Шаблон ссылки. Вместо <b>017</b> подставьте номер своей команды из списка, который организаторы опубликуют вместе с кейсом:</span>
+      <div class="url">ventorme.ai/register?utm_source=hacknext&amp;utm_campaign=team-<mark>017</mark></div>
+    </div>
+    <div class="form-grid">
+      <figure class="mock">
+        <div class="phone" role="img" aria-label="Пример: лендинг команды на телефоне, кнопка «Зарегистрироваться» ведёт на ссылку с номером команды">
+          <div class="phone-bar"><span></span></div>
+          <div class="mock-body">
+            <div class="mock-brand">Ventorme</div>
+            <div class="mock-h">Поступи туда, куда хочешь</div>
+            <div class="mock-p">Ваш лендинг: текст, который устраняет найденные причины</div>
+            <div class="mock-line"></div>
+            <div class="mock-line short"></div>
+            <div class="fake-btn">Зарегистрироваться</div>
+            <div class="mock-url">кнопка ведёт на … utm_campaign=<b>team-017</b></div>
+          </div>
+        </div>
+        <figcaption>Оформление ваше. Главное, куда ведёт кнопка.</figcaption>
+      </figure>
+      <ul class="checks">
+        <li><span class="li-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Номер только свой.</strong> Если ошибиться в номере, регистрации уйдут другой команде.</span></li>
+        <li><span class="li-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Проверьте ссылку до того, как зовёте людей.</strong> Откройте лендинг с телефона, нажмите кнопку и посмотрите, что в адресной строке стоит <code>team-</code> и ваш номер.</span></li>
+        <li><span class="li-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Что засчитывается.</strong> Человек зарегистрировался по вашей ссылке и прошёл онбординг. Вход через Google тоже считается.</span></li>
+        <li><span class="li-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Считаем мы сами.</strong> Ventorme видит, сколько регистраций пришло по каждой ссылке. Файлы с контактами и формы собирать не нужно.</span></li>
+        <li><span class="li-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>На лендинге видно, что это Ventorme.</strong> Человек должен понимать, куда он регистрируется.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="site" aria-labelledby="site-h">
+    <div class="sec-head">
+      <span class="chip blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/><path d="M7 6.5h.01"/><path d="M10 6.5h.01"/></svg></span>
+      <h2 id="site-h">Как сделать сайт</h2>
+    </div>
+    <p class="text">Подойдёт любой способ, лишь бы сайт открывался по публичной ссылке у любого человека, с телефона и с компьютера. Выберите вариант по силам команды.</p>
+    <div class="ways">
+      <div class="way">
+        <h3>Конструктор без кода</h3>
+        <span class="who">Tilda, Google Sites и похожие. Быстрее всего, если никто в команде не пишет код.</span>
+        <ol>
+          <li>Зарегистрируйтесь и создайте сайт, начните с пустой страницы или шаблона.</li>
+          <li>Соберите блоки: первый экран, преимущества, кнопка регистрации.</li>
+          <li>В настройках кнопки вставьте <strong>ссылку своей команды</strong>.</li>
+          <li>Нажмите «Опубликовать» и скопируйте адрес сайта.</li>
+        </ol>
+      </div>
+      <div class="way">
+        <h3>Код с помощью ИИ</h3>
+        <span class="who">Для тех, кто готов разобраться с HTML. ИИ поможет написать страницу.</span>
+        <ol>
+          <li>Опишите ИИ, что должно быть на странице, и попросите один файл <code>index.html</code>.</li>
+          <li>Проверьте страницу у себя в браузере, поправьте тексты.</li>
+          <li>Кнопке задайте <code>href</code> = <strong>ссылка вашей команды</strong>.</li>
+          <li>Выложите сайт бесплатно: Netlify Drop (перетащить папку с файлом), GitHub Pages или Vercel.</li>
+        </ol>
+      </div>
+      <div class="way">
+        <h3>Свой стек</h3>
+        <span class="who">Если в команде есть разработчик. Любой фреймворк и хостинг.</span>
+        <ol>
+          <li>Сайт должен открываться по публичному адресу, не на <code>localhost</code>.</li>
+          <li>Проверьте вёрстку на телефоне: 80% посетителей Ventorme заходят с телефона.</li>
+          <li>Не делайте свою регистрацию: кнопка ведёт на <strong>ссылку команды</strong>.</li>
+          <li>Сайт должен работать до конца хакатона.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card">
+      <ul class="checks">
+        <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Открывается по ссылке</strong> у человека, который не заходил в ваш аккаунт. Проверьте в режиме инкогнито.</span></li>
+        <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Удобно с телефона:</strong> текст читается без увеличения, кнопку видно без долгой прокрутки.</span></li>
+        <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Кнопка ведёт на ссылку команды</strong> с правильным номером.</span></li>
+        <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Понятно, что это Ventorme,</strong> и что человек получит после регистрации.</span></li>
+        <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><strong>Яндекс Метрику можно поставить для себя,</strong> чтобы видеть, как люди ведут себя на сайте. На оценку она не влияет.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="deliver" aria-labelledby="deliver-h">
+    <div class="sec-head">
+      <span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span>
+      <h2 id="deliver-h">Что сдаёте</h2>
+    </div>
+    <div class="grid2-tiles">
+      <div class="tile">
+        <span class="chip violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v4"/><path d="M8 21h8"/></svg></span>
+        <h3>Презентация</h3>
+        <p>PDF. Причины, цифры из таблиц с номером таблицы, наблюдения с кастдевов, как вы проверяли догадки и как лендинг решает проблемы.</p>
+      </div>
+      <div class="tile">
+        <span class="chip blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/><path d="M7 6.5h.01"/><path d="M10 6.5h.01"/></svg></span>
+        <h3>Лендинг</h3>
+        <p>Публичная ссылка на работающую страницу. Кнопка регистрации ведёт на ссылку вашей команды.</p>
+      </div>
+    </div>
+    <div class="note">
+      <span class="chip orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><rect x="5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="5" width="3" height="12" rx="1"/><rect x="16" y="8" width="3" height="9" rx="1"/></svg></span>
+      <p>Регистрации отдельно сдавать не нужно: Ventorme посчитает их по ссылке команды. Проект отправляет капитан до 14 октября, 23:59. Куда отправлять, напишем капитанам на почту.</p>
+    </div>
+  </section>
+
+  <section class="block" id="score" aria-labelledby="score-h">
+    <div class="sec-head">
+      <span class="chip violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><rect x="5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="5" width="3" height="12" rx="1"/><rect x="16" y="8" width="3" height="9" rx="1"/></svg></span>
+      <h2 id="score-h">Как оцениваем</h2>
+    </div>
+    <div class="card">
+      <div class="bar" role="img" aria-label="Вес критериев: разбор 40%, результат 35%, лендинг 25%">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="crit-grid">
+        <div class="crit">
+          <div class="crit-top"><h3>Разбор</h3><span class="pct">40%</span></div>
+          <p>Правильно ли прочитаны цифры, отличаете ли вы причину от совпадения, есть ли живые наблюдения.</p>
+        </div>
+        <div class="crit">
+          <div class="crit-top"><h3>Результат</h3><span class="pct">35%</span></div>
+          <p>Сколько людей зарегистрировались в Ventorme по ссылке вашей команды и прошли онбординг.</p>
+        </div>
+        <div class="crit">
+          <div class="crit-top"><h3>Лендинг</h3><span class="pct">25%</span></div>
+          <p>Устраняет ли он найденные причины и удобно ли им пользоваться с телефона.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="rules" aria-labelledby="rules-h">
+    <div class="sec-head">
+      <span class="chip red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <h2 id="rules-h">Правила</h2>
+    </div>
+    <div class="grid2">
+      <div class="rule-card">
+        <h3>Можно</h3>
+        <ul class="checks">
+          <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Пользоваться ИИ для кода, текстов и анализа.</span></li>
+          <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Любые конструкторы сайтов и хостинги.</span></li>
+          <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Звать людей в школьных чатах, соцсетях и лично.</span></li>
+          <li><span class="li-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Ставить Яндекс Метрику для себя.</span></li>
+        </ul>
+      </div>
+      <div class="rule-card">
+        <h3>Нельзя</h3>
+        <ul class="checks">
+          <li><span class="li-icon no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg></span><span>Платная реклама.</span></li>
+          <li><span class="li-icon no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg></span><span>Боты и накрутка визитов.</span></li>
+          <li><span class="li-icon no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg></span><span>Фейковые аккаунты и повторная регистрация одного человека.</span></li>
+          <li><span class="li-icon no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg></span><span>Покупать регистрации или использовать чужую ссылку.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="text">Если найдём накрутку, команда будет дисквалифицирована.</p>
+  </section>
+
+  <section class="block" id="data" aria-labelledby="data-h">
+    <div class="sec-head">
+      <span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l9-4.5 9 4.5-9 4.5z"/><path d="M3 7.5v9l9 4.5 9-4.5v-9"/><path d="M12 12v9"/></svg></span>
+      <h2 id="data-h">Данные главной ventorme.ai</h2>
+    </div>
+    <p class="text">Кто приходит на главную страницу Ventorme и что там делает. Новые посетители с 17 августа по 20 сентября 2026 года, время Алматы. В таблицах только число людей в группах, личных данных нет. Любую таблицу можно скопировать в Google Таблицы или Excel.</p>
+    <div class="kpis">
+      <div class="kpi"><span class="v">1 277</span><span class="l">новых посетителей главной</span></div>
+      <div class="kpi hl"><span class="v">244</span><span class="l">из них зарегистрировались</span></div>
+      <div class="kpi"><span class="v">11</span><span class="l">таблиц в пакете</span></div>
+    </div>
+    <div class="dcard">
+      <h3>Как читать</h3>
+      <dl class="defs">
+<div><dt>Новый посетитель</dt><dd>Устройство, которое впервые открыло сайт в этот период и сразу попало на главную страницу. Уже зарегистрированные пользователи и сотрудники Ventorme не считаются.</dd></div>
+<div><dt>Регистрация</dt><dd>Посетитель создал аккаунт с того же устройства в течение 3 дней после первого визита. Тестовые аккаунты и одноразовые почты не считаются.</dd></div>
+<div><dt>Конверсия в регистрацию</dt><dd>Регистрации, делённые на новых посетителей.</dd></div>
+<div><dt>Устройство</dt><dd>Определяется по браузеру: телефон, компьютер или планшет.</dd></div>
+<div><dt>Источник</dt><dd>Откуда пришёл посетитель, по метке в ссылке или по сайту, с которого он перешёл. Мессенджеры часто не передают источник, такие переходы попадают в «Прямой заход».</dd></div>
+<div><dt>Прокрутка</dt><dd>Какую часть длины главной страницы посетитель пролистал.</dd></div>
+<div><dt>Длина визита</dt><dd>Время от открытия сайта до последнего действия в этом визите.</dd></div>
+<div><dt>Язык сайта</dt><dd>На каком языке была открыта страница.</dd></div>
+      </dl>
+      <h3>Что учесть</h3>
+      <ul class="caveats">
+<li>Один человек, который заходил с телефона и с компьютера, посчитан как два посетителя.</li>
+<li>Когда в группе меньше 30 человек, проценты сильно прыгают от одного-двух человек.</li>
+<li>Если две цифры меняются вместе, это ещё не доказывает, что одна вызывает другую. Прежде чем назвать причину, подумайте, чем ещё можно объяснить разницу.</li>
+<li>В разборе ссылайтесь на таблицы по номеру: Т1, Т2 и так далее.</li>
+    </ul>
+      </ul>
+    </div>
+    <nav class="toc" aria-label="Таблицы">
+<a class="tchip" href="#t1"><b>Т1</b> Действия на главной</a>
+<a class="tchip" href="#t2"><b>Т2</b> Устройства</a>
+<a class="tchip" href="#t3"><b>Т3</b> Источники</a>
+<a class="tchip" href="#t4"><b>Т4</b> Источник и устройство</a>
+<a class="tchip" href="#t5"><b>Т5</b> Недели</a>
+<a class="tchip" href="#t6"><b>Т6</b> Прокрутка</a>
+<a class="tchip" href="#t7"><b>Т7</b> Длина визита</a>
+<a class="tchip" href="#t8"><b>Т8</b> Мини-квиз</a>
+<a class="tchip" href="#t9"><b>Т9</b> Нажатия</a>
+<a class="tchip" href="#t10"><b>Т10</b> Язык сайта</a>
+<a class="tchip" href="#t11"><b>Т11</b> Способ регистрации</a>
+    </nav>
+<section class="tcard" id="t1" aria-labelledby="t1-h">
+<div class="thead-line">
+<span class="tbadge">Т1</span>
+<h2 id="t1-h">Что делают новые посетители главной</h2>
+<button type="button" class="copy" data-card="t1" aria-label="Скопировать таблицу Т1">Скопировать</button>
+</div>
+<p class="tnote">Строки не складываются в воронку: один человек может попасть в несколько строк.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Что сделали</th><th scope="col" class="num">Посетителей</th><th scope="col" class="num">Доля от всех новых посетителей</th></tr></thead><tbody>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Все новые посетители главной">Все новые посетители главной</th><td class="num" data-copy="1277">1 277</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Ушли меньше чем за 10 секунд, не открыв других страниц">Ушли меньше чем за 10 секунд, не открыв других страниц</th><td class="num" data-copy="352">352</td><td class="num" data-copy="27,6%"><span class="pc"><span class="v">27,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:27.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Ни разу не прокрутили главную">Ни разу не прокрутили главную</th><td class="num" data-copy="511">511</td><td class="num" data-copy="40,0%"><span class="pc"><span class="v">40,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:40.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Прокрутили хотя бы четверть главной">Прокрутили хотя бы четверть главной</th><td class="num" data-copy="370">370</td><td class="num" data-copy="29,0%"><span class="pc"><span class="v">29,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:29.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Нажали хотя бы на один элемент главной">Нажали хотя бы на один элемент главной</th><td class="num" data-copy="723">723</td><td class="num" data-copy="56,6%"><span class="pc"><span class="v">56,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:56.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Начали мини-квиз на главной">Начали мини-квиз на главной</th><td class="num" data-copy="184">184</td><td class="num" data-copy="14,4%"><span class="pc"><span class="v">14,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:14.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Открыли страницу регистрации или входа">Открыли страницу регистрации или входа</th><td class="num" data-copy="322">322</td><td class="num" data-copy="25,2%"><span class="pc"><span class="v">25,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:25.2%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Зарегистрировались в течение 3 дней">Зарегистрировались в течение 3 дней</th><td class="num" data-copy="244">244</td><td class="num" data-copy="19,1%"><span class="pc"><span class="v">19,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.1%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t2" aria-labelledby="t2-h">
+<div class="thead-line">
+<span class="tbadge">Т2</span>
+<h2 id="t2-h">Новые посетители по устройствам</h2>
+<button type="button" class="copy" data-card="t2" aria-label="Скопировать таблицу Т2">Скопировать</button>
+</div>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Устройство</th><th scope="col" class="num">Новые посетители</th><th scope="col" class="num">Зарегистрировались</th><th scope="col" class="num">Конверсия в регистрацию</th><th scope="col" class="num">Доля среди всех новых посетителей</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Телефон">Телефон</th><td class="num" data-copy="1028">1 028</td><td class="num" data-copy="160">160</td><td class="num" data-copy="15,6%"><span class="pc"><span class="v">15,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:15.6%"></span></span></span></td><td class="num" data-copy="80,5%"><span class="pc"><span class="v">80,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:80.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Компьютер">Компьютер</th><td class="num" data-copy="244">244</td><td class="num" data-copy="80">80</td><td class="num" data-copy="32,8%"><span class="pc"><span class="v">32,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:32.8%"></span></span></span></td><td class="num" data-copy="19,1%"><span class="pc"><span class="v">19,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.1%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Планшет">Планшет</th><td class="num" data-copy="5">5</td><td class="num" data-copy="4">4</td><td class="num" data-copy="80,0%"><span class="pc"><span class="v">80,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:80.0%"></span></span></span></td><td class="num" data-copy="0,4%"><span class="pc"><span class="v">0,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.4%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1277">1 277</td><td class="num" data-copy="244">244</td><td class="num" data-copy="19,1%"><span class="pc"><span class="v">19,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.1%"></span></span></span></td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t3" aria-labelledby="t3-h">
+<div class="thead-line">
+<span class="tbadge">Т3</span>
+<h2 id="t3-h">Новые посетители по источникам</h2>
+<button type="button" class="copy" data-card="t3" aria-label="Скопировать таблицу Т3">Скопировать</button>
+</div>
+<p class="tnote">Instagram: переходы из Instagram, по метке в ссылке или по адресу, с которого пришёл посетитель.</p>
+<p class="tnote">Прямой заход: адрес набрали вручную, открыли из закладки или из мессенджера, который не передаёт источник.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Источник</th><th scope="col" class="num">Новые посетители</th><th scope="col" class="num">Зарегистрировались</th><th scope="col" class="num">Конверсия в регистрацию</th><th scope="col" class="num">Доля среди всех новых посетителей</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Instagram">Instagram</th><td class="num" data-copy="670">670</td><td class="num" data-copy="74">74</td><td class="num" data-copy="11,0%"><span class="pc"><span class="v">11,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:11.0%"></span></span></span></td><td class="num" data-copy="52,5%"><span class="pc"><span class="v">52,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:52.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Прямой заход">Прямой заход</th><td class="num" data-copy="369">369</td><td class="num" data-copy="87">87</td><td class="num" data-copy="23,6%"><span class="pc"><span class="v">23,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:23.6%"></span></span></span></td><td class="num" data-copy="28,9%"><span class="pc"><span class="v">28,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:28.9%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Google">Google</th><td class="num" data-copy="158">158</td><td class="num" data-copy="71">71</td><td class="num" data-copy="44,9%"><span class="pc"><span class="v">44,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:44.9%"></span></span></span></td><td class="num" data-copy="12,4%"><span class="pc"><span class="v">12,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:12.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Facebook">Facebook</th><td class="num" data-copy="48">48</td><td class="num" data-copy="0">0</td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td><td class="num" data-copy="3,8%"><span class="pc"><span class="v">3,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:3.8%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Яндекс">Яндекс</th><td class="num" data-copy="17">17</td><td class="num" data-copy="8">8</td><td class="num" data-copy="47,1%"><span class="pc"><span class="v">47,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:47.1%"></span></span></span></td><td class="num" data-copy="1,3%"><span class="pc"><span class="v">1,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.3%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Другие сайты">Другие сайты</th><td class="num" data-copy="15">15</td><td class="num" data-copy="4">4</td><td class="num" data-copy="26,7%"><span class="pc"><span class="v">26,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:26.7%"></span></span></span></td><td class="num" data-copy="1,2%"><span class="pc"><span class="v">1,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.2%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1277">1 277</td><td class="num" data-copy="244">244</td><td class="num" data-copy="19,1%"><span class="pc"><span class="v">19,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.1%"></span></span></span></td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t4" aria-labelledby="t4-h">
+<div class="thead-line">
+<span class="tbadge">Т4</span>
+<h2 id="t4-h">Источник и устройство вместе</h2>
+<button type="button" class="copy" data-card="t4" aria-label="Скопировать таблицу Т4">Скопировать</button>
+</div>
+<p class="tnote">Планшеты (5 посетителей) в эту таблицу не входят, они есть в Т2.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Источник</th><th scope="col" class="num">Телефон: посетители</th><th scope="col" class="num">Телефон: регистрации</th><th scope="col" class="num">Телефон: конверсия</th><th scope="col" class="num">Компьютер: посетители</th><th scope="col" class="num">Компьютер: регистрации</th><th scope="col" class="num">Компьютер: конверсия</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Instagram">Instagram</th><td class="num" data-copy="658">658</td><td class="num" data-copy="70">70</td><td class="num" data-copy="10,6%"><span class="pc"><span class="v">10,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:10.6%"></span></span></span></td><td class="num" data-copy="12">12</td><td class="num" data-copy="4">4</td><td class="num" data-copy="33,3%"><span class="pc"><span class="v">33,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:33.3%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Прямой заход">Прямой заход</th><td class="num" data-copy="223">223</td><td class="num" data-copy="52">52</td><td class="num" data-copy="23,3%"><span class="pc"><span class="v">23,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:23.3%"></span></span></span></td><td class="num" data-copy="145">145</td><td class="num" data-copy="34">34</td><td class="num" data-copy="23,4%"><span class="pc"><span class="v">23,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:23.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Google">Google</th><td class="num" data-copy="87">87</td><td class="num" data-copy="32">32</td><td class="num" data-copy="36,8%"><span class="pc"><span class="v">36,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:36.8%"></span></span></span></td><td class="num" data-copy="67">67</td><td class="num" data-copy="36">36</td><td class="num" data-copy="53,7%"><span class="pc"><span class="v">53,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:53.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Facebook">Facebook</th><td class="num" data-copy="41">41</td><td class="num" data-copy="0">0</td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td><td class="num" data-copy="7">7</td><td class="num" data-copy="0">0</td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Яндекс">Яндекс</th><td class="num" data-copy="9">9</td><td class="num" data-copy="6">6</td><td class="num" data-copy="66,7%"><span class="pc"><span class="v">66,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:66.7%"></span></span></span></td><td class="num" data-copy="8">8</td><td class="num" data-copy="2">2</td><td class="num" data-copy="25,0%"><span class="pc"><span class="v">25,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:25.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Другие сайты">Другие сайты</th><td class="num" data-copy="10">10</td><td class="num" data-copy="0">0</td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td><td class="num" data-copy="5">5</td><td class="num" data-copy="4">4</td><td class="num" data-copy="80,0%"><span class="pc"><span class="v">80,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:80.0%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1028">1 028</td><td class="num" data-copy="160">160</td><td class="num" data-copy="15,6%"><span class="pc"><span class="v">15,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:15.6%"></span></span></span></td><td class="num" data-copy="244">244</td><td class="num" data-copy="80">80</td><td class="num" data-copy="32,8%"><span class="pc"><span class="v">32,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:32.8%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t5" aria-labelledby="t5-h">
+<div class="thead-line">
+<span class="tbadge">Т5</span>
+<h2 id="t5-h">Новые посетители по неделям</h2>
+<button type="button" class="copy" data-card="t5" aria-label="Скопировать таблицу Т5">Скопировать</button>
+</div>
+<p class="tnote">Неделя считается с понедельника по воскресенье.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Неделя первого визита</th><th scope="col" class="num">Новые посетители</th><th scope="col" class="num">Зарегистрировались</th><th scope="col" class="num">Конверсия в регистрацию</th><th scope="col" class="num">С телефона</th><th scope="col" class="num">Доля с телефона</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="17-23 августа">17-23 августа</th><td class="num" data-copy="183">183</td><td class="num" data-copy="63">63</td><td class="num" data-copy="34,4%"><span class="pc"><span class="v">34,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:34.4%"></span></span></span></td><td class="num" data-copy="130">130</td><td class="num" data-copy="71,0%"><span class="pc"><span class="v">71,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:71.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="24-30 августа">24-30 августа</th><td class="num" data-copy="380">380</td><td class="num" data-copy="26">26</td><td class="num" data-copy="6,8%"><span class="pc"><span class="v">6,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:6.8%"></span></span></span></td><td class="num" data-copy="338">338</td><td class="num" data-copy="88,9%"><span class="pc"><span class="v">88,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:88.9%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="31 августа - 6 сентября">31 августа - 6 сентября</th><td class="num" data-copy="171">171</td><td class="num" data-copy="24">24</td><td class="num" data-copy="14,0%"><span class="pc"><span class="v">14,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:14.0%"></span></span></span></td><td class="num" data-copy="118">118</td><td class="num" data-copy="69,0%"><span class="pc"><span class="v">69,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:69.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="7-13 сентября">7-13 сентября</th><td class="num" data-copy="227">227</td><td class="num" data-copy="60">60</td><td class="num" data-copy="26,4%"><span class="pc"><span class="v">26,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:26.4%"></span></span></span></td><td class="num" data-copy="177">177</td><td class="num" data-copy="78,0%"><span class="pc"><span class="v">78,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:78.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="14-20 сентября">14-20 сентября</th><td class="num" data-copy="316">316</td><td class="num" data-copy="71">71</td><td class="num" data-copy="22,5%"><span class="pc"><span class="v">22,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:22.5%"></span></span></span></td><td class="num" data-copy="265">265</td><td class="num" data-copy="83,9%"><span class="pc"><span class="v">83,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:83.9%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1277">1 277</td><td class="num" data-copy="244">244</td><td class="num" data-copy="19,1%"><span class="pc"><span class="v">19,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.1%"></span></span></span></td><td class="num" data-copy="1028">1 028</td><td class="num" data-copy="80,5%"><span class="pc"><span class="v">80,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:80.5%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t6" aria-labelledby="t6-h">
+<div class="thead-line">
+<span class="tbadge">Т6</span>
+<h2 id="t6-h">Как глубоко прокручивают главную</h2>
+<button type="button" class="copy" data-card="t6" aria-label="Скопировать таблицу Т6">Скопировать</button>
+</div>
+<p class="tnote">Считается самая дальняя точка, до которой посетитель долистал главную за первый визит.</p>
+<p class="tnote">Планшеты (5 посетителей) в эту таблицу не входят.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Прокрутили главную</th><th scope="col" class="num">Телефон: посетители</th><th scope="col" class="num">Телефон: регистрации</th><th scope="col" class="num">Телефон: доля посетителей</th><th scope="col" class="num">Телефон: конверсия</th><th scope="col" class="num">Компьютер: посетители</th><th scope="col" class="num">Компьютер: регистрации</th><th scope="col" class="num">Компьютер: доля посетителей</th><th scope="col" class="num">Компьютер: конверсия</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Не прокручивали, видели только первый экран">Не прокручивали, видели только первый экран</th><td class="num" data-copy="385">385</td><td class="num" data-copy="14">14</td><td class="num" data-copy="37,5%"><span class="pc"><span class="v">37,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:37.5%"></span></span></span></td><td class="num" data-copy="3,6%"><span class="pc"><span class="v">3,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:3.6%"></span></span></span></td><td class="num" data-copy="125">125</td><td class="num" data-copy="35">35</td><td class="num" data-copy="51,2%"><span class="pc"><span class="v">51,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:51.2%"></span></span></span></td><td class="num" data-copy="28,0%"><span class="pc"><span class="v">28,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:28.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="1-24% страницы">1-24% страницы</th><td class="num" data-copy="363">363</td><td class="num" data-copy="107">107</td><td class="num" data-copy="35,3%"><span class="pc"><span class="v">35,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:35.3%"></span></span></span></td><td class="num" data-copy="29,5%"><span class="pc"><span class="v">29,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:29.5%"></span></span></span></td><td class="num" data-copy="31">31</td><td class="num" data-copy="18">18</td><td class="num" data-copy="12,7%"><span class="pc"><span class="v">12,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:12.7%"></span></span></span></td><td class="num" data-copy="58,1%"><span class="pc"><span class="v">58,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:58.1%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="25-49% страницы">25-49% страницы</th><td class="num" data-copy="97">97</td><td class="num" data-copy="16">16</td><td class="num" data-copy="9,4%"><span class="pc"><span class="v">9,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:9.4%"></span></span></span></td><td class="num" data-copy="16,5%"><span class="pc"><span class="v">16,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:16.5%"></span></span></span></td><td class="num" data-copy="19">19</td><td class="num" data-copy="8">8</td><td class="num" data-copy="7,8%"><span class="pc"><span class="v">7,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:7.8%"></span></span></span></td><td class="num" data-copy="42,1%"><span class="pc"><span class="v">42,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:42.1%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="50-74% страницы">50-74% страницы</th><td class="num" data-copy="77">77</td><td class="num" data-copy="10">10</td><td class="num" data-copy="7,5%"><span class="pc"><span class="v">7,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:7.5%"></span></span></span></td><td class="num" data-copy="13,0%"><span class="pc"><span class="v">13,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:13.0%"></span></span></span></td><td class="num" data-copy="16">16</td><td class="num" data-copy="6">6</td><td class="num" data-copy="6,6%"><span class="pc"><span class="v">6,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:6.6%"></span></span></span></td><td class="num" data-copy="37,5%"><span class="pc"><span class="v">37,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:37.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="75-99% страницы">75-99% страницы</th><td class="num" data-copy="50">50</td><td class="num" data-copy="6">6</td><td class="num" data-copy="4,9%"><span class="pc"><span class="v">4,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:4.9%"></span></span></span></td><td class="num" data-copy="12,0%"><span class="pc"><span class="v">12,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:12.0%"></span></span></span></td><td class="num" data-copy="16">16</td><td class="num" data-copy="1">1</td><td class="num" data-copy="6,6%"><span class="pc"><span class="v">6,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:6.6%"></span></span></span></td><td class="num" data-copy="6,2%"><span class="pc"><span class="v">6,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:6.2%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="До конца страницы">До конца страницы</th><td class="num" data-copy="56">56</td><td class="num" data-copy="7">7</td><td class="num" data-copy="5,4%"><span class="pc"><span class="v">5,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:5.4%"></span></span></span></td><td class="num" data-copy="12,5%"><span class="pc"><span class="v">12,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:12.5%"></span></span></span></td><td class="num" data-copy="37">37</td><td class="num" data-copy="12">12</td><td class="num" data-copy="15,2%"><span class="pc"><span class="v">15,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:15.2%"></span></span></span></td><td class="num" data-copy="32,4%"><span class="pc"><span class="v">32,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:32.4%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1028">1 028</td><td class="num" data-copy="160">160</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td><td class="num" data-copy="15,6%"><span class="pc"><span class="v">15,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:15.6%"></span></span></span></td><td class="num" data-copy="244">244</td><td class="num" data-copy="80">80</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td><td class="num" data-copy="32,8%"><span class="pc"><span class="v">32,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:32.8%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t7" aria-labelledby="t7-h">
+<div class="thead-line">
+<span class="tbadge">Т7</span>
+<h2 id="t7-h">Сколько длился первый визит</h2>
+<button type="button" class="copy" data-card="t7" aria-label="Скопировать таблицу Т7">Скопировать</button>
+</div>
+<p class="tnote">Длина визита: от открытия сайта до последнего действия. Если человек открыл сайт и ничего не делал, визит короткий.</p>
+<p class="tnote">Планшеты (5 посетителей) в эту таблицу не входят.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Длина первого визита</th><th scope="col" class="num">Телефон: посетители</th><th scope="col" class="num">Телефон: регистрации</th><th scope="col" class="num">Телефон: доля посетителей</th><th scope="col" class="num">Телефон: конверсия</th><th scope="col" class="num">Компьютер: посетители</th><th scope="col" class="num">Компьютер: регистрации</th><th scope="col" class="num">Компьютер: доля посетителей</th><th scope="col" class="num">Компьютер: конверсия</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Меньше 10 секунд">Меньше 10 секунд</th><td class="num" data-copy="308">308</td><td class="num" data-copy="7">7</td><td class="num" data-copy="30,0%"><span class="pc"><span class="v">30,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:30.0%"></span></span></span></td><td class="num" data-copy="2,3%"><span class="pc"><span class="v">2,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.3%"></span></span></span></td><td class="num" data-copy="67">67</td><td class="num" data-copy="0">0</td><td class="num" data-copy="27,5%"><span class="pc"><span class="v">27,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:27.5%"></span></span></span></td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="10-29 секунд">10-29 секунд</th><td class="num" data-copy="145">145</td><td class="num" data-copy="4">4</td><td class="num" data-copy="14,1%"><span class="pc"><span class="v">14,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:14.1%"></span></span></span></td><td class="num" data-copy="2,8%"><span class="pc"><span class="v">2,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.8%"></span></span></span></td><td class="num" data-copy="20">20</td><td class="num" data-copy="1">1</td><td class="num" data-copy="8,2%"><span class="pc"><span class="v">8,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:8.2%"></span></span></span></td><td class="num" data-copy="5,0%"><span class="pc"><span class="v">5,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:5.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="30-59 секунд">30-59 секунд</th><td class="num" data-copy="141">141</td><td class="num" data-copy="4">4</td><td class="num" data-copy="13,7%"><span class="pc"><span class="v">13,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:13.7%"></span></span></span></td><td class="num" data-copy="2,8%"><span class="pc"><span class="v">2,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.8%"></span></span></span></td><td class="num" data-copy="6">6</td><td class="num" data-copy="0">0</td><td class="num" data-copy="2,5%"><span class="pc"><span class="v">2,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.5%"></span></span></span></td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="1-3 минуты">1-3 минуты</th><td class="num" data-copy="153">153</td><td class="num" data-copy="15">15</td><td class="num" data-copy="14,9%"><span class="pc"><span class="v">14,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:14.9%"></span></span></span></td><td class="num" data-copy="9,8%"><span class="pc"><span class="v">9,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:9.8%"></span></span></span></td><td class="num" data-copy="18">18</td><td class="num" data-copy="6">6</td><td class="num" data-copy="7,4%"><span class="pc"><span class="v">7,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:7.4%"></span></span></span></td><td class="num" data-copy="33,3%"><span class="pc"><span class="v">33,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:33.3%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="3-10 минут">3-10 минут</th><td class="num" data-copy="142">142</td><td class="num" data-copy="74">74</td><td class="num" data-copy="13,8%"><span class="pc"><span class="v">13,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:13.8%"></span></span></span></td><td class="num" data-copy="52,1%"><span class="pc"><span class="v">52,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:52.1%"></span></span></span></td><td class="num" data-copy="28">28</td><td class="num" data-copy="13">13</td><td class="num" data-copy="11,5%"><span class="pc"><span class="v">11,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:11.5%"></span></span></span></td><td class="num" data-copy="46,4%"><span class="pc"><span class="v">46,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:46.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="10 минут и больше">10 минут и больше</th><td class="num" data-copy="139">139</td><td class="num" data-copy="56">56</td><td class="num" data-copy="13,5%"><span class="pc"><span class="v">13,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:13.5%"></span></span></span></td><td class="num" data-copy="40,3%"><span class="pc"><span class="v">40,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:40.3%"></span></span></span></td><td class="num" data-copy="105">105</td><td class="num" data-copy="60">60</td><td class="num" data-copy="43,0%"><span class="pc"><span class="v">43,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:43.0%"></span></span></span></td><td class="num" data-copy="57,1%"><span class="pc"><span class="v">57,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:57.1%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1028">1 028</td><td class="num" data-copy="160">160</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td><td class="num" data-copy="15,6%"><span class="pc"><span class="v">15,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:15.6%"></span></span></span></td><td class="num" data-copy="244">244</td><td class="num" data-copy="80">80</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td><td class="num" data-copy="32,8%"><span class="pc"><span class="v">32,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:32.8%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t8" aria-labelledby="t8-h">
+<div class="thead-line">
+<span class="tbadge">Т8</span>
+<h2 id="t8-h">Мини-квиз на главной</h2>
+<button type="button" class="copy" data-card="t8" aria-label="Скопировать таблицу Т8">Скопировать</button>
+</div>
+<p class="tnote">На главной есть мини-квиз: несколько вопросов о профессии, в конце кнопка регистрации, чтобы открыть результат.</p>
+<p class="tnote">В столбце «Все устройства» учтены и планшеты.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Шаг</th><th scope="col" class="num">Телефон</th><th scope="col" class="num">Компьютер</th><th scope="col" class="num">Все устройства</th><th scope="col" class="num">Доля от всех новых посетителей</th></tr></thead><tbody>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Все новые посетители главной">Все новые посетители главной</th><td class="num" data-copy="1028">1 028</td><td class="num" data-copy="244">244</td><td class="num" data-copy="1277">1 277</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Начали отвечать">Начали отвечать</th><td class="num" data-copy="165">165</td><td class="num" data-copy="17">17</td><td class="num" data-copy="184">184</td><td class="num" data-copy="14,4%"><span class="pc"><span class="v">14,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:14.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Дошли до конца">Дошли до конца</th><td class="num" data-copy="156">156</td><td class="num" data-copy="17">17</td><td class="num" data-copy="175">175</td><td class="num" data-copy="13,7%"><span class="pc"><span class="v">13,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:13.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Нажали кнопку регистрации в конце квиза">Нажали кнопку регистрации в конце квиза</th><td class="num" data-copy="138">138</td><td class="num" data-copy="16">16</td><td class="num" data-copy="156">156</td><td class="num" data-copy="12,2%"><span class="pc"><span class="v">12,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:12.2%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Зарегистрировались, из тех кто начал квиз">Зарегистрировались, из тех кто начал квиз</th><td class="num" data-copy="110">110</td><td class="num" data-copy="12">12</td><td class="num" data-copy="124">124</td><td class="num" data-copy="9,7%"><span class="pc"><span class="v">9,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:9.7%"></span></span></span></td></tr>
+</tbody></table></div>
+<h3 class="seg">Регистрируются ли чаще те, кто начал квиз</h3>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Группа</th><th scope="col" class="num">Телефон: посетители</th><th scope="col" class="num">Телефон: регистрации</th><th scope="col" class="num">Телефон: конверсия</th><th scope="col" class="num">Компьютер: посетители</th><th scope="col" class="num">Компьютер: регистрации</th><th scope="col" class="num">Компьютер: конверсия</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Начали квиз">Начали квиз</th><td class="num" data-copy="165">165</td><td class="num" data-copy="110">110</td><td class="num" data-copy="66,7%"><span class="pc"><span class="v">66,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:66.7%"></span></span></span></td><td class="num" data-copy="17">17</td><td class="num" data-copy="12">12</td><td class="num" data-copy="70,6%"><span class="pc"><span class="v">70,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:70.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Не начинали квиз">Не начинали квиз</th><td class="num" data-copy="863">863</td><td class="num" data-copy="50">50</td><td class="num" data-copy="5,8%"><span class="pc"><span class="v">5,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:5.8%"></span></span></span></td><td class="num" data-copy="227">227</td><td class="num" data-copy="68">68</td><td class="num" data-copy="30,0%"><span class="pc"><span class="v">30,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:30.0%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t9" aria-labelledby="t9-h">
+<div class="thead-line">
+<span class="tbadge">Т9</span>
+<h2 id="t9-h">На что нажимают на главной</h2>
+<button type="button" class="copy" data-card="t9" aria-label="Скопировать таблицу Т9">Скопировать</button>
+</div>
+<p class="tnote">Считаются посетители, а не нажатия: пять нажатий одного человека дают одного посетителя.</p>
+<p class="tnote">Подписи тех же кнопок на английском и казахском сложены с русскими. Показаны элементы, на которые нажали хотя бы 5 новых посетителей.</p>
+<p class="tnote">Кнопок с подписью «Начать тест» на главной несколько, нажатия на них сложены в одну строку.</p>
+<p class="tnote">В столбце «Все устройства» учтены и планшеты.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Элемент: текст на кнопке или ссылке</th><th scope="col" class="num">Телефон: посетителей</th><th scope="col" class="num">Компьютер: посетителей</th><th scope="col" class="num">Все устройства</th><th scope="col" class="num">Доля от всех новых посетителей</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Принять (баннер про cookie)">Принять (баннер про cookie)</th><td class="num" data-copy="497">497</td><td class="num" data-copy="84">84</td><td class="num" data-copy="584">584</td><td class="num" data-copy="45,7%"><span class="pc"><span class="v">45,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:45.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Начать тест (несколько кнопок с этой подписью)">Начать тест (несколько кнопок с этой подписью)</th><td class="num" data-copy="251">251</td><td class="num" data-copy="22">22</td><td class="num" data-copy="275">275</td><td class="num" data-copy="21,5%"><span class="pc"><span class="v">21,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:21.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Элементы без текста: картинки, иконки, пустые места">Элементы без текста: картинки, иконки, пустые места</th><td class="num" data-copy="211">211</td><td class="num" data-copy="34">34</td><td class="num" data-copy="248">248</td><td class="num" data-copy="19,4%"><span class="pc"><span class="v">19,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Ответы внутри мини-квиза (любой вариант)">Ответы внутри мини-квиза (любой вариант)</th><td class="num" data-copy="117">117</td><td class="num" data-copy="17">17</td><td class="num" data-copy="136">136</td><td class="num" data-copy="10,6%"><span class="pc"><span class="v">10,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:10.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Создать аккаунт и открыть результат (конец мини-квиза)">Создать аккаунт и открыть результат (конец мини-квиза)</th><td class="num" data-copy="101">101</td><td class="num" data-copy="16">16</td><td class="num" data-copy="119">119</td><td class="num" data-copy="9,3%"><span class="pc"><span class="v">9,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:9.3%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Родителям">Родителям</th><td class="num" data-copy="33">33</td><td class="num" data-copy="3">3</td><td class="num" data-copy="36">36</td><td class="num" data-copy="2,8%"><span class="pc"><span class="v">2,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.8%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Регистрация">Регистрация</th><td class="num" data-copy="8">8</td><td class="num" data-copy="27">27</td><td class="num" data-copy="35">35</td><td class="num" data-copy="2,7%"><span class="pc"><span class="v">2,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Войти">Войти</th><td class="num" data-copy="10">10</td><td class="num" data-copy="24">24</td><td class="num" data-copy="34">34</td><td class="num" data-copy="2,7%"><span class="pc"><span class="v">2,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="12 месяцев">12 месяцев</th><td class="num" data-copy="22">22</td><td class="num" data-copy="9">9</td><td class="num" data-copy="31">31</td><td class="num" data-copy="2,4%"><span class="pc"><span class="v">2,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Тарифы">Тарифы</th><td class="num" data-copy="15">15</td><td class="num" data-copy="15">15</td><td class="num" data-copy="30">30</td><td class="num" data-copy="2,3%"><span class="pc"><span class="v">2,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:2.3%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Попробовать бесплатно">Попробовать бесплатно</th><td class="num" data-copy="5">5</td><td class="num" data-copy="16">16</td><td class="num" data-copy="22">22</td><td class="num" data-copy="1,7%"><span class="pc"><span class="v">1,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="1 месяц">1 месяц</th><td class="num" data-copy="13">13</td><td class="num" data-copy="6">6</td><td class="num" data-copy="19">19</td><td class="num" data-copy="1,5%"><span class="pc"><span class="v">1,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Вход">Вход</th><td class="num" data-copy="2">2</td><td class="num" data-copy="16">16</td><td class="num" data-copy="19">19</td><td class="num" data-copy="1,5%"><span class="pc"><span class="v">1,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Начать бесплатно">Начать бесплатно</th><td class="num" data-copy="12">12</td><td class="num" data-copy="7">7</td><td class="num" data-copy="19">19</td><td class="num" data-copy="1,5%"><span class="pc"><span class="v">1,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Политика cookie">Политика cookie</th><td class="num" data-copy="17">17</td><td class="num" data-copy="2">2</td><td class="num" data-copy="19">19</td><td class="num" data-copy="1,5%"><span class="pc"><span class="v">1,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Пройти тест">Пройти тест</th><td class="num" data-copy="16">16</td><td class="num" data-copy="3">3</td><td class="num" data-copy="19">19</td><td class="num" data-copy="1,5%"><span class="pc"><span class="v">1,5%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.5%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="О нас">О нас</th><td class="num" data-copy="7">7</td><td class="num" data-copy="8">8</td><td class="num" data-copy="15">15</td><td class="num" data-copy="1,2%"><span class="pc"><span class="v">1,2%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.2%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Родители могут видеть прогресс?">Родители могут видеть прогресс?</th><td class="num" data-copy="8">8</td><td class="num" data-copy="6">6</td><td class="num" data-copy="14">14</td><td class="num" data-copy="1,1%"><span class="pc"><span class="v">1,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.1%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Безопасны ли мои данные?">Безопасны ли мои данные?</th><td class="num" data-copy="8">8</td><td class="num" data-copy="5">5</td><td class="num" data-copy="13">13</td><td class="num" data-copy="1,0%"><span class="pc"><span class="v">1,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Студентам">Студентам</th><td class="num" data-copy="13">13</td><td class="num" data-copy="0">0</td><td class="num" data-copy="13">13</td><td class="num" data-copy="1,0%"><span class="pc"><span class="v">1,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Как платформа подбирает университеты?">Как платформа подбирает университеты?</th><td class="num" data-copy="8">8</td><td class="num" data-copy="4">4</td><td class="num" data-copy="12">12</td><td class="num" data-copy="0,9%"><span class="pc"><span class="v">0,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.9%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Что я получу после регистрации?">Что я получу после регистрации?</th><td class="num" data-copy="8">8</td><td class="num" data-copy="4">4</td><td class="num" data-copy="12">12</td><td class="num" data-copy="0,9%"><span class="pc"><span class="v">0,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.9%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Можно ли поступить, если у меня не идеальные оценки?">Можно ли поступить, если у меня не идеальные оценки?</th><td class="num" data-copy="6">6</td><td class="num" data-copy="5">5</td><td class="num" data-copy="11">11</td><td class="num" data-copy="0,9%"><span class="pc"><span class="v">0,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.9%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Возможности">Возможности</th><td class="num" data-copy="2">2</td><td class="num" data-copy="8">8</td><td class="num" data-copy="10">10</td><td class="num" data-copy="0,8%"><span class="pc"><span class="v">0,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.8%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Переключатель языка">Переключатель языка</th><td class="num" data-copy="0">0</td><td class="num" data-copy="10">10</td><td class="num" data-copy="10">10</td><td class="num" data-copy="0,8%"><span class="pc"><span class="v">0,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.8%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Родителям Контроль прогресса ребёнка">Родителям Контроль прогресса ребёнка</th><td class="num" data-copy="0">0</td><td class="num" data-copy="9">9</td><td class="num" data-copy="9">9</td><td class="num" data-copy="0,7%"><span class="pc"><span class="v">0,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.7%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Выбрать Plus">Выбрать Plus</th><td class="num" data-copy="6">6</td><td class="num" data-copy="2">2</td><td class="num" data-copy="8">8</td><td class="num" data-copy="0,6%"><span class="pc"><span class="v">0,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Для кого">Для кого</th><td class="num" data-copy="0">0</td><td class="num" data-copy="8">8</td><td class="num" data-copy="8">8</td><td class="num" data-copy="0,6%"><span class="pc"><span class="v">0,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Школам">Школам</th><td class="num" data-copy="4">4</td><td class="num" data-copy="4">4</td><td class="num" data-copy="8">8</td><td class="num" data-copy="0,6%"><span class="pc"><span class="v">0,6%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.6%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Консультантам">Консультантам</th><td class="num" data-copy="5">5</td><td class="num" data-copy="0">0</td><td class="num" data-copy="5">5</td><td class="num" data-copy="0,4%"><span class="pc"><span class="v">0,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.4%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Университетам">Университетам</th><td class="num" data-copy="5">5</td><td class="num" data-copy="0">0</td><td class="num" data-copy="5">5</td><td class="num" data-copy="0,4%"><span class="pc"><span class="v">0,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.4%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t10" aria-labelledby="t10-h">
+<div class="thead-line">
+<span class="tbadge">Т10</span>
+<h2 id="t10-h">Язык сайта при первом визите</h2>
+<button type="button" class="copy" data-card="t10" aria-label="Скопировать таблицу Т10">Скопировать</button>
+</div>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Язык сайта</th><th scope="col" class="num">Новые посетители</th><th scope="col" class="num">Зарегистрировались</th><th scope="col" class="num">Конверсия в регистрацию</th><th scope="col" class="num">Доля среди всех новых посетителей</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Русский">Русский</th><td class="num" data-copy="996">996</td><td class="num" data-copy="183">183</td><td class="num" data-copy="18,4%"><span class="pc"><span class="v">18,4%</span><span class="track" aria-hidden="true"><span class="fill" style="width:18.4%"></span></span></span></td><td class="num" data-copy="78,0%"><span class="pc"><span class="v">78,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:78.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Английский">Английский</th><td class="num" data-copy="267">267</td><td class="num" data-copy="57">57</td><td class="num" data-copy="21,3%"><span class="pc"><span class="v">21,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:21.3%"></span></span></span></td><td class="num" data-copy="20,9%"><span class="pc"><span class="v">20,9%</span><span class="track" aria-hidden="true"><span class="fill" style="width:20.9%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Казахский">Казахский</th><td class="num" data-copy="13">13</td><td class="num" data-copy="4">4</td><td class="num" data-copy="30,8%"><span class="pc"><span class="v">30,8%</span><span class="track" aria-hidden="true"><span class="fill" style="width:30.8%"></span></span></span></td><td class="num" data-copy="1,0%"><span class="pc"><span class="v">1,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:1.0%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Другие">Другие</th><td class="num" data-copy="1">1</td><td class="num" data-copy="0">0</td><td class="num" data-copy="0,0%"><span class="pc"><span class="v">0,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.0%"></span></span></span></td><td class="num" data-copy="0,1%"><span class="pc"><span class="v">0,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:0.1%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="1277">1 277</td><td class="num" data-copy="244">244</td><td class="num" data-copy="19,1%"><span class="pc"><span class="v">19,1%</span><span class="track" aria-hidden="true"><span class="fill" style="width:19.1%"></span></span></span></td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+<section class="tcard" id="t11" aria-labelledby="t11-h">
+<div class="thead-line">
+<span class="tbadge">Т11</span>
+<h2 id="t11-h">Как регистрируются</h2>
+<button type="button" class="copy" data-card="t11" aria-label="Скопировать таблицу Т11">Скопировать</button>
+</div>
+<p class="tnote">Только те новые посетители, которые зарегистрировались.</p>
+<p class="tnote">В столбце «Все устройства» учтены и планшеты.</p>
+<div class="tscroll"><table>
+<thead><tr><th scope="col" class="lbl">Способ регистрации</th><th scope="col" class="num">Телефон</th><th scope="col" class="num">Компьютер</th><th scope="col" class="num">Все устройства</th><th scope="col" class="num">Доля</th></tr></thead><tbody>
+<tr><th scope="row" class="lbl" data-copy="Через Google">Через Google</th><td class="num" data-copy="94">94</td><td class="num" data-copy="40">40</td><td class="num" data-copy="135">135</td><td class="num" data-copy="55,3%"><span class="pc"><span class="v">55,3%</span><span class="track" aria-hidden="true"><span class="fill" style="width:55.3%"></span></span></span></td></tr>
+<tr><th scope="row" class="lbl" data-copy="Через почту и пароль">Через почту и пароль</th><td class="num" data-copy="66">66</td><td class="num" data-copy="40">40</td><td class="num" data-copy="109">109</td><td class="num" data-copy="44,7%"><span class="pc"><span class="v">44,7%</span><span class="track" aria-hidden="true"><span class="fill" style="width:44.7%"></span></span></span></td></tr>
+<tr class="strong"><th scope="row" class="lbl" data-copy="Всего">Всего</th><td class="num" data-copy="160">160</td><td class="num" data-copy="80">80</td><td class="num" data-copy="244">244</td><td class="num" data-copy="100,0%"><span class="pc"><span class="v">100,0%</span><span class="track" aria-hidden="true"><span class="fill" style="width:100.0%"></span></span></span></td></tr>
+</tbody></table></div>
+</section>
+    <p class="src">Источник: собственный трекер посещений ventorme.ai, выгрузка 25 сентября 2026 года.</p>
+    <div class="give-card">
+      <h3>Сам продукт</h3>
+      <p>Зарегистрируйтесь на ventorme.ai как обычный новичок и пройдите путь сами. Так проще увидеть то, что видят ушедшие.</p>
+      <a class="btn btn-outline" href="https://ventorme.ai" target="_blank" rel="noopener">Открыть ventorme.ai</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="brand">HACKNEXT × Ventorme</p>
+    <p>Дедлайн 1 тура: 14 октября, 23:59. Лучшие команды проходят в офлайн-финал 18 октября, его задание получат финалисты. Вопросы по кейсу: Telegram <a href="https://t.me/Maksatkh" target="_blank" rel="noopener">@Maksatkh</a>, <a href="https://t.me/dangomayo" target="_blank" rel="noopener">@dangomayo</a>.</p>
+  </footer>
+</main>
+
+<script>
+  (function () {
+    function tableText(card) {
+      var parts = [];
+      var title = card.querySelector("h2");
+      var badge = card.querySelector(".tbadge");
+      parts.push((badge ? badge.textContent + ". " : "") + (title ? title.textContent : ""));
+      card.querySelectorAll(".seg, table").forEach(function (el) {
+        if (el.classList.contains("seg")) {
+          parts.push("");
+          parts.push(el.textContent);
+          return;
+        }
+        el.querySelectorAll("tr").forEach(function (tr) {
+          var cells = [];
+          tr.querySelectorAll("th, td").forEach(function (cell) {
+            var v = cell.getAttribute("data-copy");
+            cells.push(v === null ? cell.textContent.trim() : v);
+          });
+          parts.push(cells.join("\t"));
+        });
+      });
+      return parts.join("\n");
+    }
+
+    function markDone(btn, text) {
+      btn.textContent = text;
+      btn.classList.add("done");
+      setTimeout(function () {
+        btn.textContent = "Скопировать";
+        btn.classList.remove("done");
+      }, 2200);
+    }
+
+    function selectCard(card) {
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.selectNodeContents(card.querySelector(".tscroll") || card);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    document.querySelectorAll(".copy").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var card = document.getElementById(btn.getAttribute("data-card"));
+        if (!card) return;
+        var text = tableText(card);
+        try {
+          navigator.clipboard.writeText(text).then(function () {
+            markDone(btn, "Скопировано");
+          }, function () {
+            selectCard(card);
+            markDone(btn, "Выделено, нажмите Ctrl+C");
+          });
+        } catch (e) {
+          selectCard(card);
+          markDone(btn, "Выделено, нажмите Ctrl+C");
+        }
+      });
+    });
+  })();
+</script>
+</body>
+</html>
+

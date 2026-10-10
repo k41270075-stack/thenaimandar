@@ -1,0 +1,13 @@
+# Записи кастдевов — личные данные, в git не грузим
+02_custdev/recordings/
+*.mp4
+*.mov
+
+# Служебное
+.DS_Store
+Thumbs.db
+desktop.ini
+node_modules/
+.vercel/
+.netlify/
+~$*
