@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тест встроенного браузера — HackNext 2026</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { padding-bottom: 24px; }
+  .sticky { display: none; }
+  pre {
+    background: var(--card); border-radius: 10px; padding: 12px;
+    font-size: 12.5px; white-space: pre-wrap; word-break: break-all; margin: 0;
+  }
+  .verdict { font-size: 17px; font-weight: 700; margin: 14px 0; }
+  .verdict.bad { color: #b3261e; }
+  .verdict.good { color: var(--ok); }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  td { padding: 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--muted); width: 42%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand"><span class="brand-mark">V</span> Тест браузера</div>
+    <nav class="lang"><a href="./">← На лендинг</a></nav>
+  </div>
+
+  <h1 style="font-size:24px">Проверка: ломается ли вход через&nbsp;Google</h1>
+
+  <p class="lead">
+    Техническая страница команды. Открой её <b>с телефона из Instagram</b>
+    (отправь себе ссылку в директ) и пройди три шага ниже. Эту же ссылку
+    можно дать любому человеку, включая жюри: проверка занимает 10 секунд
+    и воспроизводится на любом телефоне.
+  </p>
+
+  <p class="verdict" data-verdict>Определяем браузер…</p>
+
+  <section style="border-top:0;padding-top:0">
+    <h2>Шаг 1. Что видит страница</h2>
+    <table>
+      <tr><td>Платформа</td><td data-os>—</td></tr>
+      <tr><td>Встроенный браузер</td><td data-app>—</td></tr>
+      <tr><td>Ссылка команды</td><td data-team>—</td></tr>
+    </table>
+    <p class="note" style="text-align:left;margin-top:10px">User-Agent целиком:</p>
+    <pre data-ua>—</pre>
+    <div class="btn-row">
+      <button type="button" class="btn btn-ghost" data-copy-diag
+        data-copied="Скопировано — вставь в 02_custdev/log.md">Скопировать для журнала</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Шаг 2. Попробовать вход через Google</h2>
+    <p class="lead" style="font-size:15px">
+      Кнопка открывает настоящую страницу регистрации Ventorme по ссылке нашей
+      команды. Там выбери «Войти через Google» и смотри, что произойдёт.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="#" data-open>Открыть регистрацию Ventorme</a>
+    </div>
+    <p class="note" style="text-align:left">
+      Что считается подтверждением гипотезы И: ошибка
+      <code>403 disallowed_useragent</code>, «Эта версия браузера не
+      поддерживается», бесконечная загрузка или возврат на сайт без входа.
+      <b>Сними видео экрана</b> — оно идёт в презентацию.
+    </p>
+  </section>
+
+  <section>
+    <h2>Шаг 3. Записать результат</h2>
+    <p class="lead" style="font-size:15px">Нажми то, что получилось:</p>
+    <div class="chips">
+      <button type="button" class="chip" data-result="ok">Вход сработал</button>
+      <button type="button" class="chip" data-result="blocked">Ошибка Google</button>
+      <button type="button" class="chip" data-result="stuck">Зависло / вернуло назад</button>
+      <button type="button" class="chip" data-result="other">Другое</button>
+    </div>
+    <p class="answer" data-saved hidden></p>
+    <p class="note" style="text-align:left">
+      Результат по каждому телефону вписываем в
+      <code>01_analysis/causes.md</code>, раздел «Гипотеза И»: модель телефона,
+      iOS или Android, из какого приложения открывали, что увидели.
+    </p>
+  </section>
+
+  <footer>
+    <p>Страница команды HackNext 2026 для кейса Ventorme. Официальный сайт —
+    <a href="https://ventorme.ai" rel="noopener">ventorme.ai</a>.</p>
+  </footer>
+
+</div>
+
+<script src="config.js"></script>
+<script>
+/* Своя маленькая логика: страница должна работать, даже если app.js не
+   прогрузился во встроенном браузере. */
+(function () {
+  "use strict";
+  var C = window.VENTORME_CONFIG || {};
+  var ua = navigator.userAgent || "";
+  var os = /Android/i.test(ua) ? "Android"
+    : /iPhone|iPad|iPod/i.test(ua) ? "iOS (iPhone/iPad)"
+    : "компьютер или другое";
+  var app = /Instagram/i.test(ua) ? "Instagram"
+    : /FBAN|FBAV|FB_IAB|FBIOS/i.test(ua) ? "Facebook"
+    : "";
+  var reg = C.REGISTER_BASE + "?utm_source=hacknext&utm_campaign=" +
+            encodeURIComponent(C.TEAM);
+
+  function set(sel, text) {
+    var el = document.querySelector(sel);
+    if (el) el.textContent = text;
+  }
+
+  set("[data-os]", os);
+  set("[data-app]", app ? app + " (встроенный)" : "нет, обычный браузер");
+  set("[data-team]", C.TEAM);
+  set("[data-ua]", ua);
+
+  var v = document.querySelector("[data-verdict]");
+  if (app) {
+    v.className = "verdict bad";
+    v.textContent = "Ты внутри " + app + ". Именно здесь Google блокирует вход — проверяем.";
+  } else {
+    v.className = "verdict good";
+    v.textContent = "Обычный браузер. Это контрольный замер: здесь вход через Google должен работать.";
+  }
+
+  var open = document.querySelector("[data-open]");
+  if (open) open.href = reg;
+
+  function diag(result) {
+    return [
+      "дата: " + new Date().toISOString(),
+      "платформа: " + os,
+      "встроенный браузер: " + (app || "нет"),
+      "результат: " + (result || "не записан"),
+      "team: " + C.TEAM,
+      "UA: " + ua
+    ].join("\n");
+  }
+
+  function send(result) {
+    if (!C.LOG_URL) return;
+    try {
+      var body = JSON.stringify({
+        goal: "inapp_test", result: result, os: os, inapp: app,
+        team: C.TEAM, ua: ua, t: Date.now()
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(C.LOG_URL, new Blob([body], { type: "text/plain" }));
+      } else {
+        fetch(C.LOG_URL, { method: "POST", body: body, mode: "no-cors", keepalive: true });
+      }
+    } catch (e) {}
+  }
+
+  function copy(text, btn) {
+    var done = btn.getAttribute("data-copied") || "Скопировано";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { btn.textContent = done; },
+        function () { prompt(done, text); }
+      );
+    } else {
+      prompt(done, text);
+    }
+  }
+
+  var cd = document.querySelector("[data-copy-diag]");
+  if (cd) cd.addEventListener("click", function () { copy(diag(""), cd); });
+
+  var saved = document.querySelector("[data-saved]");
+  document.querySelectorAll("[data-result]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var r = b.getAttribute("data-result");
+      document.querySelectorAll("[data-result]").forEach(function (x) {
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      send(r);
+      saved.hidden = false;
+      saved.textContent = "Записано: «" + b.textContent + "». Теперь скопируй " +
+        "строку кнопкой выше и вставь её в causes.md, раздел «Гипотеза И».";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(diag(r)).catch(function () {});
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

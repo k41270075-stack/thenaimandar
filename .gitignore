@@ -11,3 +11,7 @@ node_modules/
 .vercel/
 .netlify/
 ~$*
+
+# Скриншоты лендинга генерируются автопроверкой
+03_landing/screenshots/
+package-lock.json

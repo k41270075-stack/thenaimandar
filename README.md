@@ -58,6 +58,8 @@
 | [02_custdev/guide.md](02_custdev/guide.md) | Как проводить кастдев: кого звать, сценарий, вопросы |
 | [02_custdev/log.md](02_custdev/log.md) | Журнал кастдевов: заполняем после каждого разговора |
 | [03_landing/spec.md](03_landing/spec.md) | Каким должен быть наш лендинг, блок за блоком |
+| [03_landing/site/](03_landing/site/) | **Код лендинга** (готов, нужен номер команды): русская и казахская версии, страница теста встроенного браузера |
+| [03_landing/check-landing.js](03_landing/check-landing.js) | Автопроверка лендинга в настоящем браузере: `node 03_landing/check-landing.js` |
 | [04_growth/distribution.md](04_growth/distribution.md) | Как привести людей честно: каналы, тексты на рус/каз, школы |
 | [05_presentation/outline.md](05_presentation/outline.md) | Структура презентации по слайдам |
 | [06_final/strategy.md](06_final/strategy.md) | Как выделиться в финале среди 15 команд |
