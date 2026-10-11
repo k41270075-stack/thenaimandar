@@ -1,0 +1,301 @@
+/* Лендинг Ventorme (команда HackNext).
+   Mobile-first: верстаем под 360px, потом расширяем.
+   Без внешних шрифтов и библиотек - страница должна открываться за 2-3
+   секунды на мобильном интернете и внутри встроенного браузера Instagram. */
+
+:root {
+  --bg: #ffffff;
+  --fg: #14181f;
+  --muted: #5b6472;
+  --line: #e4e8ee;
+  --card: #f6f8fa;
+  --accent: #1f6feb;
+  --accent-press: #1559c7;
+  --warn-bg: #fff6e5;
+  --warn-line: #f0c36b;
+  --ok: #1a7f4b;
+  --sticky-h: 72px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: 0 0 var(--sticky-h);
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+
+/* ---------------------------------------------------------- шапка */
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 4px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.2px;
+}
+
+.brand-mark {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 800;
+}
+
+/* Переключатель языка - заметный, в отличие от главной Ventorme,
+   где на телефоне на него не нажал никто (Т9). */
+.lang {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+}
+.lang a {
+  padding: 7px 13px;
+  text-decoration: none;
+  color: var(--muted);
+  min-height: 34px;
+  display: grid; place-items: center;
+}
+.lang a[aria-current="true"] { background: var(--accent); color: #fff; }
+
+/* ------------------------------------------------- первый экран */
+
+h1 {
+  font-size: clamp(25px, 7.4vw, 36px);
+  line-height: 1.17;
+  letter-spacing: -0.5px;
+  margin: 14px 0 10px;
+}
+h1 em { font-style: normal; color: var(--accent); }
+
+.lead { font-size: 17px; color: var(--muted); margin: 0 0 16px; }
+
+/* Мини-вопрос прямо на первом экране: единственное действие, которое на
+   главной Ventorme хоть как-то работает (Т8), но стоит не там, где его видят. */
+.quiz { margin: 0 0 14px; }
+.quiz-q { font-weight: 650; font-size: 15px; margin: 0 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.chip {
+  appearance: none;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 0 15px;
+  min-height: 44px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip:active { background: var(--card); }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: #eaf1fd; color: var(--accent-press); }
+
+.answer {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  background: var(--card);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  font-size: 15px;
+}
+.answer[hidden] { display: none; }
+
+/* -------------------------------------------------------- кнопки */
+
+.btn {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+  padding: 15px 18px;
+  border: 0; border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit; font-size: 17px; font-weight: 700;
+  text-align: center; text-decoration: none;
+  cursor: pointer;
+}
+.btn:active { background: var(--accent-press); }
+.btn-ghost {
+  background: #fff;
+  color: var(--accent-press);
+  border: 1.5px solid var(--line);
+  font-size: 16px;
+  min-height: 48px;
+}
+.btn-row { display: grid; gap: 10px; margin: 16px 0 8px; }
+.note { font-size: 13.5px; color: var(--muted); margin: 8px 0 0; text-align: center; }
+
+/* Закреплённая кнопка: на главной Ventorme кнопку регистрации с телефона
+   нажали 0,8% против 11,1% с компьютера (Т9). Здесь она видна всегда. */
+.sticky {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 40;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-top: 1px solid var(--line);
+}
+.sticky .btn { max-width: 688px; margin: 0 auto; }
+
+/* Пока видна основная кнопка, закреплённую не показываем: две одинаковые
+   кнопки в одном экране выглядят как ошибка вёрстки. Как только основная
+   уходит вверх - закреплённая появляется и дальше видна всегда.
+   Если JavaScript не сработал, кнопка просто остаётся видимой. */
+.sticky.is-hidden {
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}
+.sticky { transition: transform .18s ease-out, opacity .18s ease-out; }
+@media (prefers-reduced-motion: reduce) { .sticky { transition: none; } }
+
+/* ------------------------------------- подсказка про встроенный браузер */
+
+.inapp {
+  margin: 14px 0;
+  padding: 13px 14px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-line);
+  border-radius: 12px;
+  font-size: 15px;
+}
+.inapp[hidden] { display: none; }
+.inapp b { display: block; margin-bottom: 4px; }
+.inapp ol { margin: 8px 0 0; padding-left: 20px; }
+.inapp li { margin-bottom: 3px; }
+.inapp .btn { margin-top: 10px; }
+
+/* ------------------------------------------------------- секции */
+
+section { padding: 26px 0; border-top: 1px solid var(--line); }
+h2 { font-size: 21px; line-height: 1.25; margin: 0 0 14px; letter-spacing: -0.3px; }
+
+.cards { display: grid; gap: 10px; }
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px;
+}
+.card h3 { margin: 0 0 4px; font-size: 16px; }
+.card p { margin: 0; font-size: 14.5px; color: var(--muted); }
+
+/* Три шага до конца онбординга: на главной Ventorme до формы доходят 322
+   человека, а заканчивают 244 (Т1) - человек не знает, что его ждёт. */
+.steps { counter-reset: s; margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.steps li {
+  counter-increment: s;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 11px;
+  align-items: start;
+  font-size: 15px;
+}
+.steps li::before {
+  content: counter(s);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: grid; place-items: center;
+  font-size: 14px; font-weight: 700;
+}
+
+.faq details {
+  border-bottom: 1px solid var(--line);
+  padding: 13px 0;
+}
+.faq summary {
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 15.5px;
+  list-style: none;
+  display: flex; justify-content: space-between; gap: 10px;
+  min-height: 24px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--accent); font-weight: 700; }
+.faq details[open] summary::after { content: "–"; }
+.faq p { margin: 9px 0 0; font-size: 15px; color: var(--muted); }
+
+.parents { background: var(--card); border-radius: 14px; padding: 16px; }
+.parents p { margin: 0 0 12px; font-size: 15px; }
+
+footer {
+  padding: 22px 0 28px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+footer a { color: var(--muted); }
+
+/* Полоска cookie появляется только если включена Метрика. Маленькая и снизу,
+   чтобы не повторять ошибку главной, где "Принять" - самый нажимаемый
+   элемент сайта: 48,3% посетителей с телефона (Т9). */
+.cookie {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: var(--sticky-h);
+  z-index: 39;
+  background: #14181f;
+  color: #fff;
+  font-size: 13px;
+  padding: 9px 16px;
+  display: flex; align-items: center; gap: 12px; justify-content: center;
+}
+.cookie[hidden] { display: none; }
+.cookie button {
+  background: none; border: 1px solid #5b6472; color: #fff;
+  border-radius: 8px; padding: 5px 12px; font: inherit; cursor: pointer;
+  min-height: 32px;
+}
+
+/* Ничего, кроме кнопок и ссылок, не должно выглядеть нажимаемым: на главной
+   на картинки и пустые места нажали 20,5% посетителей с телефона (Т9). */
+img, .card, .answer { pointer-events: none; }
+.card a, .answer a { pointer-events: auto; }
+
+/* Узкие и короткие экраны (iPhone SE, старые Android): поджимаем отступы,
+   чтобы главная кнопка гарантированно помещалась в первый экран с запасом. */
+@media (max-width: 374px), (max-height: 600px) {
+  h1 { margin: 10px 0 8px; }
+  .lead { font-size: 16px; margin-bottom: 12px; }
+  .quiz { margin-bottom: 10px; }
+  .btn-row { margin: 12px 0 6px; }
+  .chip { min-height: 42px; padding: 0 13px; }
+  .btn { min-height: 50px; padding: 13px 16px; }
+}
+
+@media (min-width: 640px) {
+  :root { --sticky-h: 0px; }
+  body { padding-bottom: 0; }
+  .sticky { display: none; }   /* на компьютере кнопка и так видна */
+  .cookie { bottom: 0; }
+  .cards { grid-template-columns: 1fr 1fr; }
+  .btn { max-width: 340px; }
+  .btn-row { grid-template-columns: auto auto; justify-content: start; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .answer { animation: fade .18s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; } }
+}
