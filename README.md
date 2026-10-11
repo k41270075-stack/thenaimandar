@@ -61,6 +61,7 @@
 | [03_landing/site/](03_landing/site/) | **Код лендинга** (готов, нужен номер команды): русская и казахская версии, страница теста встроенного браузера |
 | [03_landing/check-landing.js](03_landing/check-landing.js) | Автопроверка лендинга в настоящем браузере: `node 03_landing/check-landing.js` |
 | [04_growth/distribution.md](04_growth/distribution.md) | Как привести людей честно: каналы, тексты на рус/каз, школы |
+| [04_growth/log.md](04_growth/log.md) | **Журнал привлечения:** заполняем каждый день, из него берётся слайд «Результат» |
 | [05_presentation/outline.md](05_presentation/outline.md) | Структура презентации по слайдам |
 | [06_final/strategy.md](06_final/strategy.md) | Как выделиться в финале среди 15 команд |
 | [case/](case/) | Оригиналы: кейс (HTML, открыть в браузере) и Положение |
