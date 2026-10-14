@@ -403,6 +403,102 @@ h1 em { font-style: normal; color: var(--accent); }
 .sticky.is-hidden { transform: translateY(115%); opacity: 0; pointer-events: none; }
 @supports not (backdrop-filter: blur(1px)) { .sticky { background: var(--canvas); } }
 
+/* ----------------------------------------- трёхмерная карусель профессий
+
+   Настоящий 3D на CSS-перспективе: восемь карточек расставлены по кольцу
+   поворотом вокруг оси Y и выносом по Z, кольцо непрерывно вращается.
+   Ни одной библиотеки, ни WebGL, ни единого внешнего запроса.
+
+   Стоит отдельным блоком сразу под первым экраном, а не внутри него: в
+   первом экране живёт кнопка, и двигать её вниз ради украшения нельзя.   */
+
+.showcase {
+  padding: 10px 0 34px;
+  text-align: center;
+}
+
+.ring-stage {
+  position: relative;
+  height: 190px;
+  perspective: 900px;
+  perspective-origin: 50% 42%;
+  margin-bottom: 14px;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 150px; height: 56px;
+  transform-style: preserve-3d;
+  transform: rotateX(-10deg);
+  animation: ring-spin 30s linear infinite;
+}
+@keyframes ring-spin {
+  from { transform: rotateX(-10deg) rotateY(0deg); }
+  to   { transform: rotateX(-10deg) rotateY(-360deg); }
+}
+
+.ring span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-chip);
+  background: var(--surface-1);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -10px rgba(17, 20, 15, .25);
+  transform: rotateY(var(--a)) translateZ(182px);
+
+  /* Изнанка скрыта: иначе дальние карточки видно зеркально, и это читается
+     как сломанная вёрстка, а не как объём. Видна всегда передняя половина. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.ring span:nth-child(odd) {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  .ring span { box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .6); }
+  .ring span:nth-child(odd) { color: var(--ink); }
+}
+
+.showcase p {
+  margin: 0 auto;
+  max-width: 34ch;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+  color: var(--ink-subtle);
+}
+
+/* Кольцо замирает, если человек просил меньше анимаций, и если вкладка не
+   на экране его всё равно не рисуют. */
+@media (prefers-reduced-motion: reduce) {
+  .ring { animation: none; }
+}
+
+/* ----------------------------------- появление панели при открытии
+
+   Единственная анимация, которая играет сразу при загрузке, в том числе на
+   телефоне: панель с вопросом прилетает поворотом по оси X. Видно в первую
+   же секунду, без прокрутки и без мыши. */
+.js .panel { animation: panel-in .85s var(--ease) both; }
+@keyframes panel-in {
+  from { opacity: 0; transform: perspective(1000px) rotateX(12deg) translateY(22px); }
+  to   { opacity: 1; transform: perspective(1000px) rotateX(0deg) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .panel { animation: none; }
+}
+
 /* --------------------------------- подсказка про встроенный браузер */
 
 .inapp {
@@ -702,6 +798,11 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
   .steps li:last-child::after { display: none; }
 
   .band { padding: 64px 0; }
+
+  .showcase { padding: 4px 0 48px; }
+  .ring-stage { height: 230px; }
+  .ring { width: 180px; height: 62px; }
+  .ring span { font-size: 16px; transform: rotateY(var(--a)) translateZ(220px); }
 }
 
 @media (min-width: 980px) {
@@ -724,6 +825,9 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
    в первый экран вместе с мини-вопросом. */
 @media (max-width: 374px), (max-height: 600px) {
   :root { --gutter: 16px; }
+  .ring-stage { height: 165px; }
+  .ring { width: 128px; }
+  .ring span { font-size: 13.5px; transform: rotateY(var(--a)) translateZ(155px); }
   .top { padding: 10px 0 2px; }
   .lang a { min-height: 40px; min-width: 42px; }
   .hero { padding: 4px 0 0; }
