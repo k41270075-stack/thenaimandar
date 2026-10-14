@@ -5,180 +5,226 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ventorme — мамандық пен ЖОО таңдау | HackNext 2026</title>
 <meta name="description" content="Мамандыққа арналған тегін мини-тест, ЖОО мен грант таңдау, IELTS пен SAT дайындығы. Тіркелу тегін.">
+<meta name="theme-color" content="#FCFCFB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E110F" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="../styles.css">
+<script>document.documentElement.className += " js";</script>
+<!-- Класс js ставится здесь, до отрисовки: секции прячутся только там,
+     где скрипт точно работает, и нет мигания контента. -->
 <!-- ВНИМАНИЕ: казахский текст должен вычитать носитель языка в команде
-     (03_landing/spec.md, раздел "Язык"). До вычитки страницу не публикуем. -->
+     (03_landing/spec.md, раздел «Язык»). До вычитки страницу не публикуем. -->
 </head>
 <body>
 
 <div class="wrap">
 
-  <div class="top">
-    <div class="brand"><span class="brand-mark">V</span> Ventorme</div>
+  <header class="top">
+    <span class="brand"><span class="brand-mark">V</span> Ventorme</span>
     <nav class="lang" aria-label="Тіл">
       <a href="../" hreflang="ru">RU</a>
       <a href="./" aria-current="true" hreflang="kk">ҚАЗ</a>
     </nav>
-  </div>
+  </header>
+</div>
+
+<!-- Основное содержимое в <main>: без этого ориентира экранный
+     диктор не может перепрыгнуть шапку. -->
+<main>
+
+<div class="wrap">
 
   <div class="inapp" data-team-warning hidden>
-    <b>⚠️ Не заполнен номер команды</b>
+    <b>Не заполнен номер команды</b>
     Открой <code>site/config.js</code> и впиши свой номер в поле TEAM.
   </div>
 
-  <h1>Саған <em>қандай мамандық сай келетінін</em> және қайда оқуға түсуге болатынын біл</h1>
+  <div class="hero">
 
-  <p class="lead">
-    Ventorme — оқуға түсу жоспарын құратын AI-платформа: мамандыққа арналған
-    мини-тест, ЖОО мен грант таңдау, IELTS пен SAT дайындығы. Тіркелу тегін.
-  </p>
-
-  <div class="quiz">
-    <p class="quiz-q">Сен нешінші сыныптасың?</p>
-    <div class="chips">
-      <button type="button" class="chip" aria-pressed="false" data-value="8-9"
-        data-answer="8–9 сынып үшін: кәсіби бағдар тесті қандай пәндерді таңдау керектігін көрсетеді — сонда 11 сыныпта шешімді екінші рет өзгертпейсің.">8–9</button>
-      <button type="button" class="chip" aria-pressed="false" data-value="10"
-        data-answer="10 сынып үшін: бағытты таңдап, емтихандарға асықпай дайындалуға тағы бір жыл бар.">10</button>
-      <button type="button" class="chip" aria-pressed="false" data-value="11"
-        data-answer="11 сынып үшін: 2 минуттық тегін мини-тест саған сай мамандықтарды, ЖОО мен гранттарды көрсетеді — құжат тапсыруға дейін үлгересің.">11</button>
-      <button type="button" class="chip" aria-pressed="false" data-value="grad"
-        data-answer="Түлектер үшін: ЖОО таңдау, эссе жазуға көмек және шетелге ойлансаң — IELTS пен SAT дайындығы.">Мектепті бітірдім</button>
-    </div>
-    <p class="answer" data-answer-out hidden></p>
-  </div>
-
-  <div class="btn-row">
-    <a class="btn" href="#" data-cta="hero"
-       data-cta-label-inapp="Пошта арқылы тіркелу">Тегін тіркелу</a>
-  </div>
-  <p class="note">Тіркелу ventorme.ai ресми сайтында өтеді. Бұл екі минуттық іс.</p>
-
-  <div class="inapp" data-inapp hidden>
-    <b>Сен бұл бетті қолданба ішінде аштың</b>
-    Мұнда Google арқылы кіру көбіне істемейді — Google оны бұғаттайды.
-    Екі жол бар:
-
-    <div data-inapp-os="android" hidden>
-      <a class="btn" href="#" data-escape>Chrome-да ашу</a>
-      <p class="note">Немесе жай ғана пошта арқылы тіркел — ол мұнда да істейді.</p>
+    <div class="hero-copy reveal">
+      <h1>Саған <em>қандай мамандық сай келетінін</em> және қайда оқуға түсуге болатынын біл</h1>
+      <p class="lead">
+        Ventorme — оқуға түсу жоспарын құратын AI-платформа: мамандыққа
+        арналған мини-тест, ЖОО мен грант таңдау, IELTS пен SAT дайындығы.
+        Тіркелу тегін.
+      </p>
     </div>
 
-    <div data-inapp-os="ios" hidden>
-      <ol>
-        <li><b>Пошта арқылы</b> тіркел — ол мұнда да істейді.</li>
-        <li>Немесе бұрыштағы <b>⋯</b> басып, «Браузерде ашу» таңда.</li>
-      </ol>
-      <button type="button" class="btn btn-ghost" data-copy
-        data-copied="Сілтеме көшірілді — оны Safari-ге қой">Safari үшін сілтемені көшіру</button>
+    <div class="hero-act reveal reveal-delay">
+      <div class="panel">
+        <div class="panel-core">
+      <div class="quiz">
+        <p class="quiz-q">Сен нешінші сыныптасың?</p>
+        <div class="chips">
+          <button type="button" class="chip" aria-pressed="false" data-value="8-9"
+            data-answer="8–9 сынып үшін: кәсіби бағдар тесті қандай пәндерді таңдау керектігін көрсетеді, сонда 11 сыныпта шешімді екінші рет өзгертпейсің.">8–9</button>
+          <button type="button" class="chip" aria-pressed="false" data-value="10"
+            data-answer="10 сынып үшін: бағытты таңдап, емтихандарға асықпай дайындалуға тағы бір жыл бар.">10</button>
+          <button type="button" class="chip" aria-pressed="false" data-value="11"
+            data-answer="11 сынып үшін: 2 минуттық тегін мини-тест саған сай мамандықтарды, ЖОО мен гранттарды көрсетеді — құжат тапсыруға дейін үлгересің.">11</button>
+          <button type="button" class="chip" aria-pressed="false" data-value="grad"
+            data-answer="Түлектер үшін: ЖОО таңдау, эссе жазуға көмек және шетелге ойлансаң — IELTS пен SAT дайындығы.">Мектепті бітірдім</button>
+        </div>
+        <p class="answer" data-answer-out hidden></p>
+      </div>
+      <div class="btn-row">
+
+        <a class="btn" href="#" data-cta="hero"
+           data-cta-label-inapp="Пошта арқылы тіркелу"><span class="btn-label">Тегін тіркелу</span><span class="btn-arrow" aria-hidden="true"></span></a>
+      </div>
+        <p class="under-btn">Тіркелу ventorme.ai ресми сайтында өтеді.</p>
+        </div>
+      </div>
+
+      <div class="inapp" data-inapp hidden>
+        <b>Сен бұл бетті қолданба ішінде аштың</b>
+        Мұнда Google арқылы кіру көбіне істемейді: Google оны бұғаттайды.
+        Екі жол бар.
+
+        <div data-inapp-os="android" hidden>
+          <a class="btn" href="#" data-escape><span class="btn-label">Chrome-да ашу</span><span class="btn-arrow" aria-hidden="true"></span></a>
+          <p class="under-btn">Немесе пошта арқылы тіркел, ол мұнда да істейді.</p>
+        </div>
+
+        <div data-inapp-os="ios" hidden>
+          <ol>
+            <li><b>Пошта арқылы</b> тіркел, ол мұнда да істейді.</li>
+            <li>Немесе бұрыштағы <b>⋯</b> басып, «Браузерде ашу» таңда.</li>
+          </ol>
+          <button type="button" class="btn btn-ghost" data-copy
+            data-copied="Сілтеме көшірілді"><span class="btn-label">Сілтемені көшіру</span><span class="btn-arrow" aria-hidden="true"></span></button>
+        </div>
+      </div>
+
+      <p class="under-btn" data-debug hidden style="word-break:break-all;text-align:left"></p>
     </div>
+
   </div>
 
-  <p class="note" data-debug hidden style="word-break:break-all;text-align:left"></p>
 
-  <section>
+  <!-- Трёхмерная карусель. Восемь карточек расставлены по кольцу поворотом
+       вокруг Y и выносом по Z, кольцо вращается. Чистый CSS: ни библиотек,
+       ни WebGL, ни внешних запросов. Стоит под первым экраном, потому что
+       в первом экране живёт кнопка и двигать её вниз нельзя. -->
+  <div class="showcase">
+    <div class="ring-stage" aria-hidden="true">
+      <div class="ring">
+      <span style="--a: 0deg">Инженер</span>
+      <span style="--a: 45deg">Дәрігер</span>
+      <span style="--a: 90deg">Бағдарламашы</span>
+      <span style="--a: 135deg">Дизайнер</span>
+      <span style="--a: 180deg">Заңгер</span>
+      <span style="--a: 225deg">Экономист</span>
+      <span style="--a: 270deg">Сәулетші</span>
+      <span style="--a: 315deg">Мұғалім</span>
+      </div>
+    </div>
+    <p>Мини-тест бағытты қызығушылығыңа қарай таңдайды, кездейсоқ емес.</p>
+  </div>
+
+  <section class="reveal">
     <h2>Тіркелгеннен кейін не аласың</h2>
-    <div class="cards">
-      <!-- ventorme.ai-мен 12.10.2026 салыстырылды: «Тарифтер» (Free / Plus) және FAQ. -->
-      <div class="card">
+    <p class="sub">Бұның бәрі Ventorme-де бар. Аккаунт біреу, телефоннан кіресің.</p>
+
+    <!-- ventorme.ai-мен 12.10.2026 салыстырылды: «Тарифтер» (Free / Plus) және FAQ. -->
+    <div class="bento reveal-stagger">
+      <article class="tile tile-lead">
         <h3>Мамандыққа мини-тест · тегін</h3>
         <p>8 сұрақ, 2 минут: саған қандай мамандықтар, ЖОО және гранттар сай келеді.</p>
-      </div>
-      <div class="card">
+      </article>
+      <article class="tile">
         <h3>IELTS пен SAT деңгейі · тегін</h3>
         <p>Қазір қай деңгейде екеніңді және қанша көтеру керегін білесің.</p>
-      </div>
-      <div class="card">
+      </article>
+      <article class="tile">
         <h3>Портфолио · тегін</h3>
         <p>Жетістіктеріңді бір жерге жинап, күшті өтінімге не жетіспейтінін көресің.</p>
-      </div>
-      <div class="card">
+      </article>
+      <article class="tile">
         <h3>ЖОО мен грант таңдау · Plus</h3>
         <p>1000+ университет пен 5000+ грант базасы, балың мен бюджетіңе қарай таңдау.</p>
-      </div>
-      <div class="card">
+      </article>
+      <article class="tile">
         <h3>Жоспар және дайындық · Plus</h3>
-        <p>Дедлайндары бар қадамдық жоспар, IELTS пен SAT жаттығулары мен сынақтары, эссеге көмек.</p>
-      </div>
-      <div class="card">
-        <h3>AI-ментор</h3>
-        <p>Мамандық, емтихан және құжаттар туралы өз сөзіңмен сұрауға болады.</p>
-      </div>
+        <p>Дедлайндары бар қадамдық жоспар, IELTS пен SAT жаттығулары мен сынақтары, эссеге көмек, AI-ментор.</p>
+      </article>
     </div>
   </section>
 
-  <section>
+  <section class="reveal">
     <h2>Бұл қалай істейді</h2>
-    <ol class="steps">
+    <p class="sub">Үш қадам, бәрі телефонда.</p>
+    <ol class="steps reveal-stagger">
       <li>Аккаунт жасайсың: пошта немесе Google арқылы.</li>
-      <li>Қысқа онбординг өтесің: платформа саған нені ұсынуды білуі үшін бірнеше қадам.</li>
+      <li>Қысқа онбординг өтесің, платформа саған нені ұсынуды білуі үшін.</li>
       <li>Тегін мини-тесттен өтіп, саған қандай мамандықтар мен ЖОО сай келетінін көресің.</li>
     </ol>
-    <div class="btn-row">
-      <a class="btn" href="#" data-cta="steps"
-         data-cta-label-inapp="Пошта арқылы тіркелу">Бастау</a>
-    </div>
   </section>
 
-  <section class="faq">
+  <section class="faq reveal">
     <h2>Жиі қойылатын сұрақтар</h2>
-    <details>
-      <summary>Бұл тегін бе?</summary>
-      <p>Тіркелу тегін. Бірден тегін қолжетімді: мамандыққа
-      мини-тест, IELTS пен SAT деңгейін анықтау және портфолио. Толық
-      AI-кәсіби бағдар тесті, балың мен бюджетіңе қарай ЖОО таңдау, түсу
-      жоспары және емтиханға дайындық Plus жазылымына кіреді. Бағалары
-      ventorme.ai сайтындағы «Тарифтер» бөлімінде.</p>
-    </details>
-    <details>
-      <summary>Бағаларым мінсіз болмаса, жарай ма?</summary>
-      <p>Жарайды. Мини-тест баға туралы емес, қызығушылық туралы. Ал ЖОО-ны
-      платформа нақты профиліңе қарай таңдайды: қазірдің өзінде мүмкіндігі
-      жоғары жерлерді және күштірек нұсқалар үшін нені көтеру керегін көрсетеді.</p>
-    </details>
-    <details>
-      <summary>Деректерім қауіпсіз бе?</summary>
-      <p>Бұл бет сенің деректеріңді жинамайды: тіркелу ventorme.ai сайтында
-      өтеді. Платформа деректермен не істейтіні оның сайттағы саясатында
-      жазылған.</p>
-    </details>
-    <details>
-      <summary>Платформа университеттерді қалай таңдайды?</summary>
-      <p>Профиліңді (бағалар, IELTS немесе SAT, белсенділік және бюджет)
-      бағдарламалардың талаптарымен салыстырады. Бұл деректерге негізделген
-      бағалау, түсуге кепілдік емес.</p>
-    </details>
-    <details>
-      <summary>Қай сынып үшін?</summary>
-      <p>8-ден 11 сыныпқа дейін және түлектер үшін ең пайдалы. Ерте бастасаң,
-      пәндерді қажетті мамандыққа бейімдеуге уақыт көп болады.</p>
-    </details>
-  </section>
-
-  <section>
-    <h2>Ата-аналарға</h2>
-    <div class="parents">
-      <p>Тіркелуді оқушының өзі, өз телефонынан және өз поштасымен жасауы
-      керек: тест нәтижесі мен ЖОО таңдауы оның аккаунтына байланады. Ең
-      қарапайым жолы — оған сілтеме жіберу.</p>
-      <button type="button" class="btn btn-ghost" data-share
-        data-share-text="Қарап көрші: мамандыққа 2 минуттық тегін мини-тест — саған сай мамандықтарды, ЖОО мен гранттарды көрсетеді.">Балаңа сілтеме жіберу</button>
+    <div class="faq-list reveal-stagger">
+      <details>
+        <summary>Бұл тегін бе?</summary>
+        <p>Тіркелу тегін. Бірден тегін қолжетімді: мамандыққа
+        мини-тест, IELTS пен SAT деңгейін анықтау және портфолио. Толық
+        AI-кәсіби бағдар тесті, балың мен бюджетіңе қарай ЖОО таңдау, түсу
+        жоспары және емтиханға дайындық Plus жазылымына кіреді. Бағалары
+        ventorme.ai сайтындағы «Тарифтер» бөлімінде.</p>
+      </details>
+      <details>
+        <summary>Бағаларым мінсіз болмаса, жарай ма?</summary>
+        <p>Жарайды. Мини-тест баға туралы емес, қызығушылық туралы. Ал ЖОО-ны
+        платформа нақты профиліңе қарай таңдайды: қазірдің өзінде мүмкіндігі
+        жоғары жерлерді және күштірек нұсқалар үшін нені көтеру керегін көрсетеді.</p>
+      </details>
+      <details>
+        <summary>Деректерім қауіпсіз бе?</summary>
+        <p>Бұл бет сенің деректеріңді жинамайды: тіркелу ventorme.ai сайтында
+        өтеді. Платформа деректермен не істейтіні оның сайттағы саясатында
+        жазылған.</p>
+      </details>
+      <details>
+        <summary>Платформа университеттерді қалай таңдайды?</summary>
+        <p>Профиліңді (бағалар, IELTS немесе SAT, белсенділік және бюджет)
+        бағдарламалардың талаптарымен салыстырады. Бұл деректерге негізделген
+        бағалау, түсуге кепілдік емес.</p>
+      </details>
+      <details>
+        <summary>Қай сынып үшін?</summary>
+        <p>8-ден 11 сыныпқа дейін және түлектер үшін ең пайдалы. Ерте бастасаң,
+        пәндерді қажетті мамандыққа бейімдеуге уақыт көп болады.</p>
+      </details>
     </div>
   </section>
 
+</div>
+
+<section class="band reveal">
+  <div class="wrap">
+    <h2>Ата-аналарға</h2>
+    <p>Тіркелуді оқушының өзі, өз телефонынан және өз поштасымен жасауы керек:
+    тест нәтижесі мен ЖОО таңдауы оның аккаунтына байланады. Ең қарапайым жолы
+    — оған сілтеме жіберу.</p>
+    <button type="button" class="btn btn-ghost" data-share
+      data-share-text="Қарап көрші: мамандыққа 2 минуттық тегін мини-тест — саған сай мамандықтарды, ЖОО мен гранттарды көрсетеді."><span class="btn-label">Балаңа сілтеме жіберу</span><span class="btn-arrow" aria-hidden="true"></span></button>
+  </div>
+</section>
+
+</main>
+
+<div class="wrap">
   <footer>
     <p>Бұл бетті <b>HackNext 2026</b> командасы Ventorme кейсі бойынша жасады.
     Платформаның ресми сайты —
-    <a href="https://ventorme.ai" rel="noopener">ventorme.ai</a>, тіркелу де
-    сол жерде өтеді.</p>
+    <a href="https://ventorme.ai" rel="noopener">ventorme.ai</a>, тіркелу де сол
+    жерде өтеді.</p>
   </footer>
-
 </div>
 
 <div class="sticky">
   <a class="btn" href="#" data-cta="sticky"
-     data-cta-label-inapp="Пошта арқылы тіркелу">Тегін тіркелу</a>
+     data-cta-label-inapp="Пошта арқылы тіркелу"><span class="btn-label">Тегін тіркелу</span><span class="btn-arrow" aria-hidden="true"></span></a>
 </div>
 
 <div class="cookie" data-cookie hidden>

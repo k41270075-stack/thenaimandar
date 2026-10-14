@@ -39,6 +39,29 @@ const PAGES = [
 ];
 
 let failed = 0;
+
+/** Дожидается, пока и прокрутка, и сам элемент перестанут двигаться,
+    и возвращает геометрию элемента. Без этого замер попадает в середину
+    анимации и проверка врёт. */
+async function settle(page, selector, timeout = 3000) {
+  const locator = page.locator(selector);
+  let prev = null;
+  let prevScroll = null;
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const box = await locator.boundingBox();
+    const scroll = await page.evaluate(() => window.scrollY);
+    const stillBox = box && prev &&
+      Math.abs(box.y - prev.y) < 0.5 && Math.abs(box.height - prev.height) < 0.5;
+    const stillScroll = prevScroll !== null && Math.abs(scroll - prevScroll) < 0.5;
+    if (stillBox && stillScroll) return box;
+    prev = box;
+    prevScroll = scroll;
+    await page.waitForTimeout(100);
+  }
+  return prev || (await locator.boundingBox());
+}
+
 function ok(cond, msg) {
   console.log((cond ? "  ок    " : "  ПЛОХО ") + msg);
   if (!cond) failed++;
@@ -102,6 +125,22 @@ function ok(cond, msg) {
         ok(hero.y + hero.height <= size.h, `кнопка целиком в первом экране (низ ${Math.round(hero.y + hero.height)} из ${size.h})`);
         ok(hero.height >= 48, `высота кнопки ${Math.round(hero.height)}px (нужно от 48)`);
 
+        // Подпись кнопки обязана помещаться в одну строку: перенос в CTA
+        // выглядит как сломанная вёрстка.
+        const wrapped = await page.evaluate(() => {
+          const bad = [];
+          document.querySelectorAll(".btn .btn-label").forEach((el) => {
+            const box = el.getBoundingClientRect();
+            if (box.height === 0) return;              // кнопка сейчас скрыта
+            const lh = parseFloat(getComputedStyle(el).lineHeight);
+            if (!isFinite(lh)) return;
+            if (box.height > lh * 1.6) bad.push(el.textContent.trim());
+          });
+          return bad;
+        });
+        ok(wrapped.length === 0, "подписи кнопок в одну строку" +
+           (wrapped.length ? ": переносятся «" + wrapped.join("», «") + "»" : ""));
+
         // Мини-вопрос виден без прокрутки.
         const chips = await page.locator(".chips").boundingBox();
         ok(chips.y + chips.height < size.h, "мини-вопрос виден без прокрутки");
@@ -119,10 +158,12 @@ function ok(cond, msg) {
         ok(over <= 0, "нет горизонтальной прокрутки");
 
         // Закреплённая кнопка появляется после прокрутки и видна.
+        // Ждём, пока она перестанет двигаться: иначе замер попадает в середину
+        // анимации появления и проверка врёт.
         await page.evaluate(() => window.scrollTo(0, 1200));
-        await page.waitForTimeout(300);
-        const sticky = await page.locator(".sticky .btn").boundingBox();
-        ok(sticky.y + sticky.height <= size.h + 1, "после прокрутки закреплённая кнопка видна");
+        const sticky = await settle(page, ".sticky .btn");
+        ok(sticky.y + sticky.height <= size.h + 1,
+           `после прокрутки закреплённая кнопка видна (низ ${Math.round(sticky.y + sticky.height)} из ${size.h})`);
 
         // Подсказка про встроенный браузер - только там, где она нужна.
         await page.evaluate(() => window.scrollTo(0, 0));

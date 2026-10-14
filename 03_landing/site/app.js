@@ -112,7 +112,7 @@
     // Внутри Instagram/Facebook первой кнопкой делаем регистрацию по почте:
     // она работает везде, в отличие от входа через Google.
     document.querySelectorAll("[data-cta-label-inapp]").forEach(function (el) {
-      el.textContent = el.getAttribute("data-cta-label-inapp");
+      setLabel(el, el.getAttribute("data-cta-label-inapp"));
     });
 
     var escape = document.querySelector("[data-escape]");
@@ -127,7 +127,7 @@
         var done = copy.getAttribute("data-copied") || "Скопировано";
         var text = regUrl();
         var finish = function () {
-          copy.textContent = done;
+          setLabel(copy, done);
           track("copy_link");
         };
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -227,6 +227,77 @@
     });
   }
 
+  /* ------------------------------------------------- вспомогательное */
+
+  /* У кнопок текст лежит в отдельном span, рядом с ним — круг со стрелкой.
+     Если писать в textContent самой кнопки, стрелка затрётся. */
+  function setLabel(el, text) {
+    var label = el.querySelector(".btn-label");
+    if (label) label.textContent = text;
+    else el.textContent = text;
+  }
+
+  /* Появление секций на прокрутке. Только transform и opacity, через
+     IntersectionObserver: обработчиков скролла нет принципиально, они
+     дёргают кадры во встроенном браузере Instagram. */
+  function setupReveal() {
+    var items = document.querySelectorAll(".reveal, .reveal-stagger");
+    if (!items.length) return;
+
+    var reduced = window.matchMedia &&
+                  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !("IntersectionObserver" in window)) {
+      items.forEach(function (el) { el.classList.add("is-in"); });
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+
+    items.forEach(function (el) { io.observe(el); });
+  }
+
+  /* --------------------------------------------- 3D-наклон панели */
+
+  /* Панель с мини-вопросом поворачивается вслед за курсором. Включаем только
+     при настоящей мыши: на тач-экране наклон либо не нужен, либо дёргается.
+     Значения кладём в CSS-переменные, трансформ считает браузер. */
+  function setupTilt() {
+    var panel = document.querySelector(".panel");
+    if (!panel || !window.matchMedia) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var MAX = 6;          // градусов, дальше выглядит как аттракцион
+    var frame = null;
+
+    function apply(e) {
+      frame = null;
+      var box = panel.getBoundingClientRect();
+      var x = (e.clientX - box.left) / box.width - 0.5;
+      var y = (e.clientY - box.top) / box.height - 0.5;
+      panel.style.setProperty("--ry", (x * MAX * 2).toFixed(2) + "deg");
+      panel.style.setProperty("--rx", (-y * MAX * 2).toFixed(2) + "deg");
+    }
+
+    panel.addEventListener("pointermove", function (e) {
+      panel.classList.add("is-tilting");
+      if (frame === null) frame = requestAnimationFrame(function () { apply(e); });
+    });
+
+    panel.addEventListener("pointerleave", function () {
+      panel.classList.remove("is-tilting");
+      if (frame !== null) { cancelAnimationFrame(frame); frame = null; }
+      panel.style.setProperty("--rx", "0deg");
+      panel.style.setProperty("--ry", "0deg");
+    });
+  }
+
   /* ------------------------------------- показ закреплённой кнопки */
 
   function setupSticky() {
@@ -243,6 +314,8 @@
 
   function init() {
     setupCta();
+    setupReveal();
+    setupTilt();
     setupSticky();
     setupInApp();
     setupQuiz();
