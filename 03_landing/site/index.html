@@ -9,6 +9,9 @@
 <meta name="theme-color" content="#0E110F" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="styles.css">
+<script>document.documentElement.className += " js";</script>
+<!-- Класс js ставится здесь, до отрисовки: секции прячутся только там,
+     где скрипт точно работает, и нет мигания контента. -->
 </head>
 <body>
 
@@ -21,6 +24,13 @@
       <a href="kz/" hreflang="kk">ҚАЗ</a>
     </nav>
   </header>
+</div>
+
+<!-- Основное содержимое в <main>: без этого ориентира экранный
+     диктор не может перепрыгнуть шапку. -->
+<main>
+
+<div class="wrap">
 
   <!-- Видно, только если в config.js не заполнен номер команды. -->
   <div class="inapp" data-team-warning hidden>
@@ -43,6 +53,8 @@
       <!-- Мини-вопрос. На главной Ventorme квиз даёт половину всех регистраций
            (Т8), но начинают его только 14,4%: он стоит не там, где его видят.
            Здесь он первое, с чем человек встречается. -->
+      <div class="panel">
+        <div class="panel-core">
       <div class="quiz">
         <p class="quiz-q">Ты в каком классе?</p>
         <div class="chips">
@@ -57,12 +69,14 @@
         </div>
         <p class="answer" data-answer-out hidden></p>
       </div>
+      <div class="btn-row">
 
-      <p class="btn-row">
         <a class="btn" href="#" data-cta="hero"
-           data-cta-label-inapp="Зарегистрироваться по почте">Зарегистрироваться бесплатно</a>
-      </p>
-      <p class="under-btn">Регистрация проходит на официальном сайте ventorme.ai.</p>
+           data-cta-label-inapp="Регистрация по почте"><span class="btn-label">Зарегистрироваться</span><span class="btn-arrow" aria-hidden="true"></span></a>
+      </div>
+        <p class="under-btn">Регистрация проходит на официальном сайте ventorme.ai.</p>
+        </div>
+      </div>
 
       <!-- Подсказка для встроенного браузера Instagram и Facebook. Скрипт
            показывает её только там, где она нужна: Google блокирует вход через
@@ -74,7 +88,7 @@
         Два выхода.
 
         <div data-inapp-os="android" hidden>
-          <a class="btn" href="#" data-escape>Открыть в Chrome</a>
+          <a class="btn" href="#" data-escape><span class="btn-label">Открыть в Chrome</span><span class="btn-arrow" aria-hidden="true"></span></a>
           <p class="under-btn">Или зарегистрируйся по почте, это работает и здесь.</p>
         </div>
 
@@ -84,7 +98,7 @@
             <li>Либо нажми <b>⋯</b> в углу и выбери «Открыть в браузере».</li>
           </ol>
           <button type="button" class="btn btn-ghost" data-copy
-            data-copied="Ссылка скопирована, вставь её в Safari">Скопировать ссылку для Safari</button>
+            data-copied="Ссылка скопирована"><span class="btn-label">Скопировать ссылку</span><span class="btn-arrow" aria-hidden="true"></span></button>
         </div>
       </div>
 
@@ -93,7 +107,7 @@
 
   </div>
 
-  <section>
+  <section class="reveal">
     <h2>Что ты получишь после регистрации</h2>
     <p class="sub">Всё это уже есть в Ventorme. Аккаунт один, заходишь с телефона.</p>
 
@@ -127,7 +141,7 @@
        шаг 2 на конкретику: сколько шагов, что именно спрашивают, сколько
        минут занимает. Конкретика работает лучше общих слов, но врать за
        Ventorme нельзя. -->
-  <section>
+  <section class="reveal">
     <h2>Как это работает</h2>
     <p class="sub">Три шага, и всё на телефоне.</p>
     <ol class="steps">
@@ -137,7 +151,7 @@
     </ol>
   </section>
 
-  <section class="faq">
+  <section class="faq reveal">
     <h2>Частые вопросы</h2>
     <!-- Вопросы не придуманы: это ровно то, на что люди нажимали на главной
          Ventorme (Т9). -->
@@ -182,16 +196,18 @@
 <!-- Единственный цветной блок на странице. На «Родителям» нажали 36 человек
      (Т9), но родитель не регистрируется сам: ему нужно, чтобы зарегистрировался
      ребёнок. Поэтому здесь не кнопка регистрации, а кнопка «отправить». -->
-<section class="band">
+<section class="band reveal">
   <div class="wrap">
     <h2>Родителям</h2>
     <p>Регистрироваться должен сам школьник, со своего телефона и своей почтой:
     результаты профтеста и подбор привязываются к его аккаунту. Проще всего
     отправить ему ссылку.</p>
     <button type="button" class="btn btn-ghost" data-share
-      data-share-text="Посмотри: профтест и подбор вузов с калькулятором гранта по ЕНТ. Регистрация бесплатная.">Отправить ссылку ребёнку</button>
+      data-share-text="Посмотри: профтест и подбор вузов с калькулятором гранта по ЕНТ. Регистрация бесплатная."><span class="btn-label">Отправить ссылку ребёнку</span><span class="btn-arrow" aria-hidden="true"></span></button>
   </div>
 </section>
+
+</main>
 
 <div class="wrap">
   <footer>
@@ -204,7 +220,7 @@
 
 <div class="sticky">
   <a class="btn" href="#" data-cta="sticky"
-     data-cta-label-inapp="Зарегистрироваться по почте">Зарегистрироваться бесплатно</a>
+     data-cta-label-inapp="Регистрация по почте"><span class="btn-label">Зарегистрироваться</span><span class="btn-arrow" aria-hidden="true"></span></a>
 </div>
 
 <!-- Полоска про cookie появляется, только если включена Метрика. -->

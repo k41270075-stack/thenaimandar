@@ -125,6 +125,22 @@ function ok(cond, msg) {
         ok(hero.y + hero.height <= size.h, `кнопка целиком в первом экране (низ ${Math.round(hero.y + hero.height)} из ${size.h})`);
         ok(hero.height >= 48, `высота кнопки ${Math.round(hero.height)}px (нужно от 48)`);
 
+        // Подпись кнопки обязана помещаться в одну строку: перенос в CTA
+        // выглядит как сломанная вёрстка.
+        const wrapped = await page.evaluate(() => {
+          const bad = [];
+          document.querySelectorAll(".btn .btn-label").forEach((el) => {
+            const box = el.getBoundingClientRect();
+            if (box.height === 0) return;              // кнопка сейчас скрыта
+            const lh = parseFloat(getComputedStyle(el).lineHeight);
+            if (!isFinite(lh)) return;
+            if (box.height > lh * 1.6) bad.push(el.textContent.trim());
+          });
+          return bad;
+        });
+        ok(wrapped.length === 0, "подписи кнопок в одну строку" +
+           (wrapped.length ? ": переносятся «" + wrapped.join("», «") + "»" : ""));
+
         // Мини-вопрос виден без прокрутки.
         const chips = await page.locator(".chips").boundingBox();
         ok(chips.y + chips.height < size.h, "мини-вопрос виден без прокрутки");

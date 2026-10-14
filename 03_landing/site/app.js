@@ -112,7 +112,7 @@
     // Внутри Instagram/Facebook первой кнопкой делаем регистрацию по почте:
     // она работает везде, в отличие от входа через Google.
     document.querySelectorAll("[data-cta-label-inapp]").forEach(function (el) {
-      el.textContent = el.getAttribute("data-cta-label-inapp");
+      setLabel(el, el.getAttribute("data-cta-label-inapp"));
     });
 
     var escape = document.querySelector("[data-escape]");
@@ -127,7 +127,7 @@
         var done = copy.getAttribute("data-copied") || "Скопировано";
         var text = regUrl();
         var finish = function () {
-          copy.textContent = done;
+          setLabel(copy, done);
           track("copy_link");
         };
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -227,6 +227,41 @@
     });
   }
 
+  /* ------------------------------------------------- вспомогательное */
+
+  /* У кнопок текст лежит в отдельном span, рядом с ним — круг со стрелкой.
+     Если писать в textContent самой кнопки, стрелка затрётся. */
+  function setLabel(el, text) {
+    var label = el.querySelector(".btn-label");
+    if (label) label.textContent = text;
+    else el.textContent = text;
+  }
+
+  /* Появление секций на прокрутке. Только transform и opacity, через
+     IntersectionObserver: обработчиков скролла нет принципиально, они
+     дёргают кадры во встроенном браузере Instagram. */
+  function setupReveal() {
+    var items = document.querySelectorAll(".reveal");
+    if (!items.length) return;
+
+    var reduced = window.matchMedia &&
+                  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !("IntersectionObserver" in window)) {
+      items.forEach(function (el) { el.classList.add("is-in"); });
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+
+    items.forEach(function (el) { io.observe(el); });
+  }
+
   /* ------------------------------------- показ закреплённой кнопки */
 
   function setupSticky() {
@@ -243,6 +278,7 @@
 
   function init() {
     setupCta();
+    setupReveal();
     setupSticky();
     setupInApp();
     setupQuiz();
