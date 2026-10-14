@@ -1157,7 +1157,7 @@ section > h2 { position: relative; }
 /* Пока плашка открыта, нижняя закреплённая кнопка не нужна. */
 .sheet-open .sticky { transform: translateY(115%); opacity: 0; pointer-events: none; }
 @media (min-width: 700px) {
-  .gsheet { left: auto; right: 24px; bottom: 24px; width: 400px; margin: 0; }
+  .gsheet { left: 0; right: 0; bottom: 24px; width: 440px; margin: 0 auto; }
 }
 @media (prefers-reduced-motion: reduce) { .gsheet { transition: none; } }
 
