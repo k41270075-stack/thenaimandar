@@ -241,7 +241,7 @@
      IntersectionObserver: обработчиков скролла нет принципиально, они
      дёргают кадры во встроенном браузере Instagram. */
   function setupReveal() {
-    var items = document.querySelectorAll(".reveal");
+    var items = document.querySelectorAll(".reveal, .reveal-stagger");
     if (!items.length) return;
 
     var reduced = window.matchMedia &&
