@@ -227,6 +227,62 @@
     });
   }
 
+
+  /* ------------------------------------- плашка быстрой регистрации */
+
+  function setupSheet() {
+    var sheet = document.querySelector("[data-gsheet]");
+    if (!sheet) return;
+    try { if (sessionStorage.getItem("v-sheet") === "closed") return; } catch (e) {}
+
+    if (state.inApp) {
+      sheet.classList.add("is-inapp");
+      var sub = sheet.querySelector("[data-gsheet-sub]");
+      if (sub && sub.getAttribute("data-sub-inapp")) sub.textContent = sub.getAttribute("data-sub-inapp");
+    }
+
+    var shown = false;
+    function show() {
+      if (shown) return;
+      shown = true;
+      sheet.hidden = false;
+      document.documentElement.classList.add("sheet-open");
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { sheet.classList.add("is-open"); });
+      });
+      trackOnce("sheet_view");
+    }
+
+    sheet.querySelector("[data-gsheet-close]").addEventListener("click", function () {
+      sheet.classList.remove("is-open");
+      document.documentElement.classList.remove("sheet-open");
+      setTimeout(function () { sheet.hidden = true; }, 450);
+      try { sessionStorage.setItem("v-sheet", "closed"); } catch (e) {}
+      track("sheet_close");
+    });
+
+    // Телефон: показываем на первом же движении вниз. Компьютер: через секунду.
+    var touch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if (touch || window.innerWidth < 700) {
+      // Палец поехал по экрану или страница сдвинулась — показываем сразу.
+      var onMove = function () {
+        if (shown) return;
+        if (this === "touch" || (window.scrollY || window.pageYOffset) > 24) {
+          window.removeEventListener("scroll", onScroll);
+          window.removeEventListener("touchmove", onTouch);
+          show();
+        }
+      };
+      var onScroll = function () { onMove.call("scroll"); };
+      var onTouch = function () { onMove.call("touch"); };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("touchmove", onTouch, { passive: true });
+      if ((window.scrollY || window.pageYOffset) > 24) show();   // страницу открыли уже прокрученной
+    } else {
+      setTimeout(show, 1200);
+    }
+  }
+
   /* ------------------------------------------------- вспомогательное */
 
   /* У кнопок текст лежит в отдельном span, рядом с ним — круг со стрелкой.
@@ -325,6 +381,7 @@
     setupTilt();
     setupSticky();
     setupInApp();
+    setupSheet();
     setupQuiz();
     setupShare();
     setupMetrika();

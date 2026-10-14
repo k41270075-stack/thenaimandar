@@ -163,4 +163,135 @@ function init(THREE) {
     document.documentElement.classList.add("has-3d");
   });
   loop();
+
+  initStars(THREE, starGeo, dark);
+}
+
+/* ---------------------------------------------------- фон из 3D-звёзд
+   Отдельный холст на весь экран, позади всего содержимого: мелкие искры
+   на разной глубине и десяток объёмных звёзд-знаков. При прокрутке фон
+   сдвигается медленнее страницы (параллакс), на компьютере — за курсором.
+   Один вызов отрисовки на искры, плотность пикселей занижена, на телефоне
+   рисуем каждый второй кадр: фон не должен сажать батарею. */
+function initStars(THREE, starGeo, dark) {
+  const canvas = document.createElement("canvas");
+  canvas.className = "stars-bg";
+  canvas.setAttribute("aria-hidden", "true");
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: "low-power" });
+  } catch (e) { return; }
+  document.body.prepend(canvas);
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1 : 1.25));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
+  camera.position.z = 12;
+
+  // Текстура искры: четырёхлучевая звёздочка с мягким свечением, рисуется
+  // на маленьком canvas один раз — без картинок и запросов.
+  const tc = document.createElement("canvas");
+  tc.width = tc.height = 64;
+  const g = tc.getContext("2d");
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, "rgba(255,255,255,1)");
+  grd.addColorStop(0.25, "rgba(255,255,255,.55)");
+  grd.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = grd;
+  g.beginPath();
+  for (let i = 0; i <= 64; i++) {
+    const t = (i / 64) * Math.PI * 2;
+    const x = 32 + 30 * Math.pow(Math.cos(t), 3), y = 32 + 30 * Math.pow(Math.sin(t), 3);
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.fill();
+  g.globalCompositeOperation = "lighter";
+  g.fillStyle = "rgba(255,255,255,.9)";
+  g.beginPath(); g.arc(32, 32, 3.5, 0, Math.PI * 2); g.fill();
+  const tex = new THREE.CanvasTexture(tc);
+
+  const COUNT = coarse ? 380 : 700;
+  const pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3);
+  const palette = dark
+    ? [new THREE.Color(0xF2F3F8), new THREE.Color(0x8C94FF), new THREE.Color(0xC6F432)]
+    : [new THREE.Color(0x3B47FF), new THREE.Color(0x8C94FF), new THREE.Color(0x9BC21F)];
+  for (let i = 0; i < COUNT; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 44;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 70 - 14;   // ниже — на всю длину страницы
+    pos[i * 3 + 2] = -Math.random() * 30;
+    const c = palette[Math.random() < 0.12 ? 2 : (Math.random() < 0.55 ? 0 : 1)];
+    col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  const dust = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.42, map: tex, vertexColors: true, transparent: true,
+    opacity: dark ? 0.9 : 0.55, depthWrite: false, sizeAttenuation: true
+  }));
+  scene.add(dust);
+
+  // Объёмные звёзды-знаки на разной глубине.
+  const mats = [
+    new THREE.MeshStandardMaterial({ color: 0x3B47FF, metalness: 0.3, roughness: 0.3, transparent: true, opacity: dark ? 0.85 : 0.5 }),
+    new THREE.MeshStandardMaterial({ color: 0x8C94FF, metalness: 0.3, roughness: 0.35, transparent: true, opacity: dark ? 0.8 : 0.45 }),
+    new THREE.MeshStandardMaterial({ color: 0xC6F432, metalness: 0.2, roughness: 0.4, transparent: true, opacity: dark ? 0.8 : 0.55 })
+  ];
+  const stars3d = [];
+  const N3 = coarse ? 7 : 12;
+  for (let i = 0; i < N3; i++) {
+    const m = new THREE.Mesh(starGeo, mats[i % 3]);
+    m.position.set((Math.random() - 0.5) * 26, 6 - i * (60 / N3) + Math.random() * 3, -4 - Math.random() * 14);
+    m.scale.setScalar(0.25 + Math.random() * 0.35);
+    m.userData = { sx: 0.2 + Math.random() * 0.5, sy: 0.3 + Math.random() * 0.6, ph: Math.random() * 6 };
+    scene.add(m);
+    stars3d.push(m);
+  }
+  scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+  const key = new THREE.DirectionalLight(0xffffff, 1.4);
+  key.position.set(4, 6, 8);
+  scene.add(key);
+
+  function resize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize, { passive: true });
+  resize();
+
+  let mx = 0, my = 0, cx = 0, cy = 0;
+  if (!coarse) {
+    window.addEventListener("pointermove", (e) => {
+      mx = (e.clientX / window.innerWidth - 0.5);
+      my = (e.clientY / window.innerHeight - 0.5);
+    }, { passive: true });
+  }
+
+  const clock = new THREE.Clock();
+  let raf = 0, frame = 0;
+  function loop() {
+    cancelAnimationFrame(raf);
+    if (document.hidden) return;
+    raf = requestAnimationFrame(loop);
+    if (coarse && (frame++ & 1)) return;   // телефон: 30 кадров в секунду
+    const t = clock.getElapsedTime();
+    const scroll = window.scrollY || window.pageYOffset || 0;
+    cx += (mx - cx) * 0.04; cy += (my - cy) * 0.04;
+    camera.position.x = cx * 1.6;
+    camera.position.y = -scroll * 0.012 - cy * 1.2;   // параллакс: фон едет медленнее
+    camera.lookAt(camera.position.x * 0.5, camera.position.y, 0);
+    dust.rotation.z = t * 0.01;
+    for (const m of stars3d) {
+      const u = m.userData;
+      m.rotation.x = t * u.sx + u.ph;
+      m.rotation.y = t * u.sy + u.ph;
+    }
+    renderer.render(scene, camera);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) loop(); });
+  requestAnimationFrame(() => canvas.classList.add("is-on"));
+  loop();
 }

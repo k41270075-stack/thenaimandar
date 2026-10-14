@@ -1095,3 +1095,80 @@ section > h2 { position: relative; }
 .hero-3d.is-on { opacity: .9; }
 .has-3d .hero-mark { display: none; }
 @media (max-width: 699px) { .hero-3d.is-on { opacity: .6; } }
+
+/* --------------------------------------- плашка «Регистрация через Google» */
+.gsheet {
+  position: fixed;
+  left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 65;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 22px;
+  background: var(--surface-1);
+  box-shadow: 0 -2px 6px rgba(11, 13, 36, .04), 0 18px 50px -12px rgba(11, 13, 36, .35);
+  transform: translateY(140%);
+  opacity: 0;
+  transition: transform .55s var(--ease), opacity .4s var(--ease);
+}
+.gsheet[hidden] { display: none; }
+.gsheet.is-open { transform: none; opacity: 1; }
+.gsheet::before {               /* «ручка» сверху, как у нижних шторок iOS */
+  content: "";
+  position: absolute; top: 6px; left: 50%;
+  width: 38px; height: 4px; margin-left: -19px;
+  border-radius: 4px;
+  background: var(--hairline-str);
+}
+.gsheet-title { margin: 6px 44px 2px 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.gsheet-sub { margin: 0 0 12px; font-size: 14.5px; line-height: 1.4; color: var(--ink-muted); }
+.gsheet-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 40px; height: 40px;
+  border: 0; border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  font-size: 24px; line-height: 1;
+  cursor: pointer;
+}
+.gsheet-close:hover { color: var(--ink); }
+.gbtn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 54px;
+  padding: 12px 18px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-pill);
+  background: #FFFFFF;
+  color: #1F1F1F;
+  font-size: 16.5px; font-weight: 650;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(11, 13, 36, .08);
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.gbtn:hover { box-shadow: 0 6px 16px -6px rgba(59, 71, 255, .45); }
+.gbtn:active { transform: scale(.98); }
+.g-icon { flex: none; }
+/* Во встроенном браузере Instagram вход через Google ломается — там кнопка
+   ведёт на регистрацию по почте и красится в цвет бренда, без значка Google. */
+.gsheet.is-inapp .g-icon { display: none; }
+.gsheet.is-inapp .gbtn { background: var(--accent); border-color: var(--accent); color: #fff; }
+@media (prefers-color-scheme: dark) { .gsheet.is-inapp .gbtn { color: #0A0B14; } }
+/* Пока плашка открыта, нижняя закреплённая кнопка не нужна. */
+.sheet-open .sticky { transform: translateY(115%); opacity: 0; pointer-events: none; }
+@media (min-width: 700px) {
+  .gsheet { left: auto; right: 24px; bottom: 24px; width: 400px; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .gsheet { transition: none; } }
+
+/* Фон из 3D-звёзд на всю страницу (three-hero.js). Под всем содержимым. */
+.stars-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.6s var(--ease);
+}
+.stars-bg.is-on { opacity: 1; }
