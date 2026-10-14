@@ -268,12 +268,19 @@
      при настоящей мыши: на тач-экране наклон либо не нужен, либо дёргается.
      Значения кладём в CSS-переменные, трансформ считает браузер. */
   function setupTilt() {
-    var panel = document.querySelector(".panel");
-    if (!panel || !window.matchMedia) return;
+    if (!window.matchMedia) return;
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    var MAX = 6;          // градусов, дальше выглядит как аттракцион
+    var panel = document.querySelector(".panel");
+    if (panel) tilt(panel, 6);   // градусов, дальше выглядит как аттракцион
+    // Плитки «Что ты получишь» наклоняются слабее: их много и они мельче.
+    Array.prototype.forEach.call(document.querySelectorAll(".tile"), function (t) {
+      tilt(t, 4);
+    });
+  }
+
+  function tilt(panel, MAX) {
     var frame = null;
 
     function apply(e) {
