@@ -479,11 +479,44 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
   border-radius: var(--r); background: none; color: inherit; font: inherit; cursor: pointer;
 }
 
-/* -------------------------------------------------------------- движение */
+/* -------------------------------------------------------------- движение
 
+   Поставленная последовательность, а не набор эффектов. При открытии:
+   заголовок выезжает по словам из-под маски, за ним лид, за ним блок
+   действия. На прокрутке: заголовок секции, затем линии строк прочерчиваются
+   слева направо, затем сами строки.
+
+   Всё держится на transform и opacity, запускается через IntersectionObserver.
+   Обработчиков скролла нет принципиально: они дёргают кадры во встроенном
+   браузере Instagram, откуда идёт 52,5% трафика (Т3). */
+
+/* ---- заголовок по словам из-под маски ---- */
+/* Маска чуть выше строки и компенсирована отрицательным полем: иначе
+   overflow: hidden срезает хвосты у букв у, р, д, ц, щ. */
+.w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: .14em;
+  margin-bottom: -.14em;
+}
+.w > i { display: inline-block; font-style: inherit; will-change: transform; }
+.js h1.split-words .w > i {
+  transform: translateY(105%);
+  opacity: 0;
+}
+.js h1.split-words.is-in .w > i {
+  transform: none;
+  opacity: 1;
+  transition: transform .85s var(--ease), opacity .5s linear;
+  transition-delay: calc(var(--i) * 55ms);
+}
+
+/* ---- общее проявление ---- */
 .js .reveal { opacity: 0; transform: translateY(16px); }
 .js .reveal.is-in { opacity: 1; transform: none; transition: opacity .7s var(--ease), transform .7s var(--ease); }
-.js .reveal-delay { transition-delay: .1s; }
+.js .reveal-delay { transition-delay: .18s; }
+.js .reveal-delay-2 { transition-delay: .34s; }
 
 .js .reveal-stagger > * { opacity: 0; transform: translateY(12px); }
 .js .reveal-stagger.is-in > * { opacity: 1; transform: none; transition: opacity .55s var(--ease), transform .55s var(--ease); }
@@ -494,16 +527,78 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
 .js .reveal-stagger.is-in > *:nth-child(5) { transition-delay: .28s; }
 .js .reveal-stagger.is-in > *:nth-child(6) { transition-delay: .34s; }
 
-.js .panel { animation: panel-in .8s var(--ease) both; }
+/* ---- линии строк прочерчиваются ---- */
+.index li { border-top: 0; position: relative; }
+.index li::after {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: var(--rule-soft);
+  transform: scaleX(0); transform-origin: left center;
+}
+.index li:first-child::after { display: none; }
+.js .reveal-stagger.is-in .index li::after,
+.js .index.reveal-stagger.is-in li::after {
+  transform: scaleX(1);
+  transition: transform .8s var(--ease);
+}
+.js .index.reveal-stagger.is-in li:nth-child(2)::after { transition-delay: .08s; }
+.js .index.reveal-stagger.is-in li:nth-child(3)::after { transition-delay: .14s; }
+.js .index.reveal-stagger.is-in li:nth-child(4)::after { transition-delay: .20s; }
+.js .index.reveal-stagger.is-in li:nth-child(5)::after { transition-delay: .26s; }
+.index li:first-child { border-top: 0; }
+/* без скрипта линии просто на месте */
+html:not(.js) .index li::after { transform: scaleX(1); }
+
+/* ---- номера строк подкручиваются вместе со строкой ---- */
+.js .index.reveal-stagger > li::before { opacity: 0; transform: translateX(-6px); }
+.js .index.reveal-stagger.is-in > li::before {
+  opacity: 1; transform: none;
+  transition: opacity .5s var(--ease), transform .6s var(--ease);
+  transition-delay: inherit;
+}
+
+/* ---- блок действия при открытии ---- */
+.js .panel { animation: panel-in .9s var(--ease) both; animation-delay: .25s; }
 @keyframes panel-in {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+/* жирная линия сверху у блока действия прочерчивается */
+.panel { position: relative; border-top-color: transparent; }
+.panel::before {
+  content: "";
+  position: absolute; top: -2px; left: 0; right: 0; height: 2px;
+  background: var(--ink);
+  transform: scaleX(0); transform-origin: left center;
+}
+.js .panel::before { animation: rule-draw .9s var(--ease) .3s both; }
+html:not(.js) .panel::before { transform: scaleX(1); }
+@keyframes rule-draw { to { transform: scaleX(1); } }
+
+/* ---- ответ на вопрос въезжает ---- */
+.answer { animation: answer-in .45s var(--ease) both; }
+@keyframes answer-in {
+  from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: none; }
 }
 
+/* ---- раскрытие вопроса ---- */
+.faq details[open] > p { animation: faq-in .4s var(--ease) both; }
+@keyframes faq-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- карточки кольца слегка дышат ---- */
+.ring span { transition: border-color .3s var(--ease), color .3s var(--ease); }
+
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: .01ms !important; animation-duration: .01ms !important;
-      transition-delay: 0s !important; }
+      transition-delay: 0s !important; animation-delay: 0s !important; }
   .js .reveal, .js .reveal-stagger > * { opacity: 1; transform: none; }
+  .js h1.split-words .w > i { opacity: 1; transform: none; }
+  .js .index.reveal-stagger > li::before { opacity: 1; transform: none; }
+  .index li::after, .panel::before { transform: scaleX(1); }
   .ring { animation: none; }
   .js .panel { animation: none; }
 }
@@ -538,6 +633,8 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
 
   /* Заголовок секции слева, содержимое справа: лестница, а не центр. */
   .split { display: grid; grid-template-columns: minmax(0, 23ch) minmax(0, 1fr); gap: 64px; align-items: start; }
+  /* Заголовок секции прилипает, пока мимо него идёт содержимое. */
+  .split-head { position: sticky; top: 32px; }
   .split-head h2 { margin-bottom: 0; }
   .split-head .sub { margin: 16px 0 0; }
 
@@ -566,14 +663,15 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
 @media (max-width: 374px), (max-height: 600px) {
   :root { --gutter: 16px; }
   .top { padding: 10px 0; }
-  .hero { padding: 10px 0 0; }
-  h1 { font-size: clamp(25px, 8.2vw, 30px); line-height: 1; margin-bottom: 10px; }
-  .lead { font-size: 16px; line-height: 1.35; margin-bottom: 12px; }
-  .panel { padding-top: 12px; }
+  .top { padding: 8px 0; }
+  .hero { padding: 6px 0 0; }
+  h1 { font-size: clamp(24px, 7.8vw, 29px); line-height: .99; margin-bottom: 9px; }
+  .lead { font-size: 16px; line-height: 1.33; margin-bottom: 9px; }
+  .panel { padding-top: 10px; }
   .quiz-q { margin-bottom: 8px; font-size: 12px; }
   .chips { gap: 6px; }
   .chip { min-height: 44px; padding: 0 12px; font-size: 15px; }
-  .btn-row { margin: 12px 0 6px; }
+  .btn-row { margin: 9px 0 5px; }
   .btn { min-height: 50px; padding: 12px 14px 12px 20px; font-size: 16px; }
   .btn-arrow { width: 25px; height: 25px; }
   section { padding: 40px 0; }

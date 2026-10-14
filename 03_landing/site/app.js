@@ -262,6 +262,50 @@
     items.forEach(function (el) { io.observe(el); });
   }
 
+  /* ------------------------------------ заголовок по словам */
+
+  /* Разбиваем заголовок на слова и прячем каждое под свою маску, чтобы при
+     открытии они выезжали по очереди. Делаем это скриптом, а не руками в
+     разметке: иначе текст нельзя будет просто отредактировать, а его править
+     будут в последний день. Структура тегов сохраняется, выделенная часть
+     остаётся выделенной. */
+  function setupHeadline() {
+    var h1 = document.querySelector("h1");
+    if (!h1) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var n = 0;
+
+    function walk(node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      kids.forEach(function (child) {
+        if (child.nodeType === 1) { walk(child); return; }
+        if (child.nodeType !== 3) return;
+        var parts = child.textContent.split(/(\s+)/);
+        var frag = document.createDocumentFragment();
+        parts.forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          var mask = document.createElement("span");
+          mask.className = "w";
+          var inner = document.createElement("i");
+          inner.textContent = part;
+          mask.style.setProperty("--i", n++);
+          mask.appendChild(inner);
+          frag.appendChild(mask);
+        });
+        node.replaceChild(frag, child);
+      });
+    }
+
+    walk(h1);
+    h1.classList.add("split-words");
+    // следующий кадр, иначе браузер не заметит смену состояния
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { h1.classList.add("is-in"); });
+    });
+  }
+
   /* --------------------------------------------- 3D-наклон панели */
 
   /* Панель с мини-вопросом поворачивается вслед за курсором. Включаем только
@@ -314,6 +358,7 @@
 
   function init() {
     setupCta();
+    setupHeadline();
     setupReveal();
     setupTilt();
     setupSticky();
