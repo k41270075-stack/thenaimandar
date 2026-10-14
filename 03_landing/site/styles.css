@@ -94,6 +94,10 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html { -webkit-text-size-adjust: 100%; }
+/* Декоративные слои (сияние, знак, кольца) могут выходить за край при
+   повороте. Обрезаем по ширине, чтобы на телефоне не было бокового скролла. */
+html, body { overflow-x: hidden; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
 
 body {
   margin: 0;
@@ -934,4 +938,143 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .hero-mark img, .btn::after, .js .steps.is-in li::before { animation: none !important; }
   .tile, .tile:hover, .js .reveal-stagger.is-in > .tile { transform: none; }
+}
+
+/* ================================================= живой фон и эффекты
+   Всё на transform и opacity, без обработчиков скролла. На слабых
+   телефонах это по-прежнему один-два слоя, а не WebGL. */
+
+/* Северное сияние за первым экраном: два мягких пятна бренда плавают. */
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  pointer-events: none;
+  left: 30%; top: -10%;
+  width: 70%; height: 120%;
+  background:
+    radial-gradient(40% 40% at 30% 40%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+    radial-gradient(35% 35% at 70% 60%, rgba(198, 244, 50, .18), transparent 70%);
+  filter: blur(20px);
+  animation: aurora 16s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate3d(-6%, 4%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(4%, -3%, 0) rotate(-6deg) scale(.96); }
+}
+
+/* Выделенная часть заголовка переливается фирменным градиентом. */
+h1 em {
+  background: linear-gradient(100deg, var(--accent) 0%, #7B5CFF 35%, var(--accent) 60%, #2B36E0 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ink-flow 7s ease-in-out infinite alternate;
+}
+@keyframes ink-flow {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+/* Полоса прогресса чтения сверху. Только там, где браузер умеет
+   анимацию по скроллу (Chrome); в остальных её просто нет. */
+@supports (animation-timeline: scroll()) {
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    z-index: 70;
+    background: linear-gradient(90deg, var(--accent), #C6F432);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    animation: read-progress linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes read-progress { to { transform: scaleX(1); } }
+}
+
+/* Выбранный класс в мини-вопросе «подпрыгивает». */
+.chip[aria-pressed="true"] { animation: chip-pop .45s var(--ease); }
+@keyframes chip-pop {
+  0%   { transform: scale(.9); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Ответ под мини-вопросом выезжает с поворотом, а не появляется скачком. */
+.answer:not([hidden]) { animation: answer-in .5s var(--ease) both; transform-origin: 50% 0; }
+@keyframes answer-in {
+  from { opacity: 0; transform: perspective(600px) rotateX(-25deg) translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Линия между шагами прорисовывается, когда блок появился. */
+.js .steps li::after { transform-origin: 50% 0; transform: scaleY(0); transition: transform .9s var(--ease) .3s; }
+.js .steps.is-in li::after { transform: scaleY(1); }
+
+/* У плиток при наведении загорается кромка цвета бренда. */
+.tile { position: relative; }
+.tile::before {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent), rgba(198, 244, 50, .9), var(--accent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s var(--ease);
+  pointer-events: none;
+}
+.tile:hover::before { opacity: 1; }
+
+/* Заголовки секций: короткий акцентный штрих вырастает при появлении. */
+section > h2 { position: relative; }
+.js section.reveal > h2::after {
+  content: "";
+  display: block;
+  width: 56px; height: 4px;
+  margin-top: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), #C6F432);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .8s var(--ease) .25s;
+}
+.js section.reveal.is-in > h2::after { transform: scaleX(1); }
+.band h2::after { background: #C6F432 !important; }
+
+/* Блок «Родителям»: по тёмному фону медленно плывут кольца. */
+.band { position: relative; overflow: hidden; }
+.band::before, .band::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  border: 1.5px solid rgba(198, 244, 50, .35);
+}
+.band::before { width: 360px; height: 360px; right: -120px; top: -140px; animation: ring-drift 18s ease-in-out infinite alternate; }
+.band::after  { width: 220px; height: 220px; right: 80px; bottom: -120px; border-color: rgba(140, 148, 255, .45); animation: ring-drift 14s ease-in-out infinite alternate-reverse; }
+.band .wrap { position: relative; z-index: 1; }
+@keyframes ring-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to   { transform: translate3d(-30px, 24px, 0) rotate(40deg); }
+}
+
+/* Закреплённая кнопка на телефоне мягко «дышит» свечением. */
+.sticky .btn { animation: glow 3.2s ease-in-out infinite; }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 6px 18px -8px rgba(59, 71, 255, .45); }
+  50%      { box-shadow: 0 10px 30px -6px rgba(59, 71, 255, .75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::after, h1 em, .chip[aria-pressed="true"], .answer:not([hidden]),
+  .band::before, .band::after, .sticky .btn { animation: none !important; }
+  .js .steps li::after, .js section.reveal > h2::after { transform: none; }
+  body::before { display: none; }
 }
