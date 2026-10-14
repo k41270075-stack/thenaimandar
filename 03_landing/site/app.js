@@ -141,75 +141,23 @@
     trackOnce("inapp_view", { app: state.app });
   }
 
-  /* ------------------------------------------------- квиз на три шага
-
-     На главной Ventorme квиз даёт половину всех регистраций (Т8), но
-     начинают его только 14,4%: он спрятан. Здесь он первое, что человек
-     видит, и это не один декоративный вопрос, а настоящие три шага с
-     прогрессом и личным результатом в конце.
-
-     Важно: кнопка регистрации видна на каждом шаге. Квиз ничего не
-     загораживает — человек может зарегистрироваться, не доходя до конца. */
+  /* ----------------------------------------------------- мини-вопрос */
 
   function setupQuiz() {
-    var quiz = document.querySelector("[data-quiz]");
-    if (!quiz) return;
+    var chips = document.querySelectorAll("[data-answer]");
+    var out = document.querySelector("[data-answer-out]");
+    if (!chips.length || !out) return;
 
-    var steps = Array.prototype.slice.call(quiz.querySelectorAll(".quiz-step"));
-    var out = quiz.querySelector("[data-answer-out]");
-    var bar = quiz.querySelector("[data-bar]");
-    var counter = quiz.querySelector("[data-step]");
-    var back = quiz.querySelector("[data-back]");
-    var tpl = quiz.getAttribute("data-tpl") || "{0} {1} {2}";
-    if (!steps.length || !out) return;
-
-    var picked = [];
-    var at = 0;
-
-    function show(i) {
-      at = i;
-      steps.forEach(function (s, n) { s.hidden = n !== i; });
-      if (counter) counter.textContent = Math.min(i + 1, steps.length);
-      if (bar) bar.style.width = ((i) / steps.length * 100) + "%";
-      if (back) back.hidden = i === 0;
-    }
-
-    function finish() {
-      var text = tpl;
-      picked.forEach(function (p, i) { text = text.replace("{" + i + "}", p.phrase); });
-      out.textContent = text;
-      out.hidden = false;
-      steps.forEach(function (s) { s.hidden = true; });
-      if (bar) bar.style.width = "100%";
-      if (counter) counter.textContent = steps.length;
-      if (back) back.hidden = false;
-      try { sessionStorage.setItem("vq", picked.map(function (p) { return p.value; }).join("|")); } catch (e) {}
-      track("quiz_done", { answers: picked.map(function (p) { return p.value; }).join("|") });
-    }
-
-    steps.forEach(function (step, i) {
-      step.querySelectorAll(".chip").forEach(function (chip) {
-        chip.addEventListener("click", function () {
-          step.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
-          chip.setAttribute("aria-pressed", "true");
-          picked[i] = { value: chip.getAttribute("data-value") || "",
-                        phrase: chip.getAttribute("data-p") || "" };
-          picked.length = i + 1;
-          trackOnce("quiz_step_" + (i + 1));
-          if (i + 1 < steps.length) show(i + 1);
-          else finish();
-        });
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+        chip.setAttribute("aria-pressed", "true");
+        out.textContent = chip.getAttribute("data-answer");
+        out.hidden = false;
+        try { sessionStorage.setItem("vq", chip.getAttribute("data-value") || ""); } catch (e) {}
+        trackOnce("quiz_answer", { answer: chip.getAttribute("data-value") || "" });
       });
     });
-
-    if (back) {
-      back.addEventListener("click", function () {
-        out.hidden = true;
-        show(Math.max(0, (out.hidden && at >= steps.length ? steps.length : at) - 1));
-      });
-    }
-
-    show(0);
   }
 
   /* ------------------------------------------------------ кнопки CTA */

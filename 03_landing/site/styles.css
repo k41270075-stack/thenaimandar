@@ -80,14 +80,6 @@
   --warn-line: #E8C372;
   --warn-ink:  #4A3608;
 
-  /* Тёмный блок действия: он единственный контрастный объект на светлой
-     странице, поэтому у него собственные токены. */
-  --panel-bg:     #111410;
-  --panel-ink:    #F2F4F0;
-  --panel-muted:  rgba(242, 244, 240, .62);
-  --panel-rule:   rgba(242, 244, 240, .20);
-  --panel-accent: #35C98C;
-
   /* Форма: всё прямоугольное со скруглением 6px. Единственное исключение —
      главная кнопка, она пилюля, потому что это цель для пальца. */
   --r: 6px;
@@ -118,12 +110,6 @@
     --warn-bg:   #241D0C;
     --warn-line: #5C4718;
     --warn-ink:  #F0DCA8;
-
-    --panel-bg:     #181D16;
-    --panel-ink:    #F2F4F0;
-    --panel-muted:  rgba(242, 244, 240, .62);
-    --panel-rule:   rgba(242, 244, 240, .18);
-    --panel-accent: #35C98C;
   }
 }
 
@@ -217,94 +203,45 @@ h1 em { font-style: normal; color: var(--accent); }
   text-wrap: pretty;
 }
 
-/* Блок действия — единственный тёмный объект на светлой странице. Так он
-   читается первым и тянет взгляд к кнопке: именно её не находят на телефоне
-   (0,8% против 11,1%, Т9). */
+/* Блок действия: не парящая карточка, а форма с жирной линией сверху. */
 .panel {
-  padding: 0;
-  border-top: 0;
-  border-radius: 10px;
-  background: var(--panel-bg);
-  color: var(--panel-ink);
+  padding: 22px 0 0;
+  border-top: 2px solid var(--ink);
 }
-.panel-core { padding: 20px; }
-
-/* Шкала прогресса: видно, что шагов всего три и сколько осталось. */
-.quiz-top {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 18px;
-}
-.bar {
-  flex: 1; height: 3px; border-radius: 2px;
-  background: var(--panel-rule); overflow: hidden;
-}
-.bar > span {
-  display: block; height: 100%; width: 0;
-  background: var(--panel-accent);
-  transition: width .45s var(--ease);
-}
-.quiz-count { flex: none; font-size: 12px; font-weight: 600; color: var(--panel-muted); }
-.quiz-count b { color: var(--panel-ink); font-weight: 700; }
-
-.quiz-step { animation: step-in .35s var(--ease) both; }
-@keyframes step-in {
-  from { opacity: 0; transform: translateX(10px); }
-  to   { opacity: 1; transform: none; }
-}
-
-.quiz-back {
-  margin: 14px 0 0; padding: 6px 0;
-  border: 0; background: none;
-  color: var(--panel-muted);
-  font: inherit; font-size: 14px; cursor: pointer;
-  min-height: 44px;
-}
-.quiz-back:hover { color: var(--panel-ink); }
-.quiz-back[hidden] { display: none; }
+.panel-core { padding: 0; }
 
 .quiz-q {
   margin: 0 0 14px;
-  font-size: 17px; font-weight: 650;
-  letter-spacing: -0.02em;
-  color: var(--panel-ink);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-subtle);
 }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
-/* Длинные варианты идут колонкой во всю ширину: так их удобнее нажимать
-   пальцем и не остаётся рваных строк. */
-.chips-col { flex-direction: column; }
-.chips-col .chip { width: 100%; justify-content: flex-start; text-align: left; }
 
-/* Кнопки вариантов живут внутри тёмного блока, поэтому цвета у них свои.
-   Раньше здесь оставался цвет светлой темы и на тёмном фоне получался
-   контраст 1,03 — текст был не виден вообще. */
 .chip {
   appearance: none;
-  display: inline-flex; align-items: center;
   min-height: 46px; min-width: 46px;
-  padding: 10px 16px;
-  border: 1px solid var(--panel-rule);
+  padding: 0 16px;
+  border: 1px solid var(--rule);
   border-radius: var(--r);
   background: transparent;
-  color: var(--panel-ink);
+  color: var(--ink);
   font: inherit; font-size: 16px; font-weight: 600;
-  line-height: 1.3;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: border-color .18s var(--ease), background-color .18s var(--ease),
               color .18s var(--ease);
 }
-.chip:hover { border-color: var(--panel-ink); }
-.chip[aria-pressed="true"] {
-  background: var(--panel-accent); border-color: var(--panel-accent); color: #0E100D;
-}
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
 .answer {
-  margin: 4px 0 0;
-  padding: 0 0 0 14px;
-  border-left: 2px solid var(--panel-accent);
-  font-size: 16.5px; line-height: 1.45;
-  color: var(--panel-ink);
+  margin: 18px 0 0;
+  padding: 0 0 0 16px;
+  border-left: 2px solid var(--accent);
+  font-size: 17px; line-height: 1.45;
+  color: var(--ink);
   text-wrap: pretty;
 }
 .answer[hidden] { display: none; }
@@ -354,11 +291,7 @@ h1 em { font-style: normal; color: var(--accent); }
 .btn-ghost:hover { background: transparent; border-color: var(--ink); }
 .btn-ghost .btn-arrow { background: color-mix(in srgb, currentColor 12%, transparent); }
 
-.btn-row { margin: 20px 0 10px; }
-.panel .btn { background: var(--panel-accent); color: #0E100D; }
-.panel .btn:hover { background: #2AB179; }
-.panel .btn-arrow { background: rgba(14, 16, 13, .18); }
-.panel .under-btn { color: var(--panel-muted); }
+.btn-row { margin: 22px 0 10px; }
 
 .under-btn {
   margin: 0;
@@ -630,6 +563,18 @@ html:not(.js) .index li::after { transform: scaleX(1); }
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: none; }
 }
+/* жирная линия сверху у блока действия прочерчивается */
+.panel { position: relative; border-top-color: transparent; }
+.panel::before {
+  content: "";
+  position: absolute; top: -2px; left: 0; right: 0; height: 2px;
+  background: var(--ink);
+  transform: scaleX(0); transform-origin: left center;
+}
+.js .panel::before { animation: rule-draw .9s var(--ease) .3s both; }
+html:not(.js) .panel::before { transform: scaleX(1); }
+@keyframes rule-draw { to { transform: scaleX(1); } }
+
 /* ---- ответ на вопрос въезжает ---- */
 .answer { animation: answer-in .45s var(--ease) both; }
 @keyframes answer-in {
@@ -653,8 +598,7 @@ html:not(.js) .index li::after { transform: scaleX(1); }
   .js .reveal, .js .reveal-stagger > * { opacity: 1; transform: none; }
   .js h1.split-words .w > i { opacity: 1; transform: none; }
   .js .index.reveal-stagger > li::before { opacity: 1; transform: none; }
-  .index li::after { transform: scaleX(1); }
-  .quiz-step { animation: none; }
+  .index li::after, .panel::before { transform: scaleX(1); }
   .ring { animation: none; }
   .js .panel { animation: none; }
 }
