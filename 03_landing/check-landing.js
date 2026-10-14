@@ -39,6 +39,29 @@ const PAGES = [
 ];
 
 let failed = 0;
+
+/** Дожидается, пока и прокрутка, и сам элемент перестанут двигаться,
+    и возвращает геометрию элемента. Без этого замер попадает в середину
+    анимации и проверка врёт. */
+async function settle(page, selector, timeout = 3000) {
+  const locator = page.locator(selector);
+  let prev = null;
+  let prevScroll = null;
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const box = await locator.boundingBox();
+    const scroll = await page.evaluate(() => window.scrollY);
+    const stillBox = box && prev &&
+      Math.abs(box.y - prev.y) < 0.5 && Math.abs(box.height - prev.height) < 0.5;
+    const stillScroll = prevScroll !== null && Math.abs(scroll - prevScroll) < 0.5;
+    if (stillBox && stillScroll) return box;
+    prev = box;
+    prevScroll = scroll;
+    await page.waitForTimeout(100);
+  }
+  return prev || (await locator.boundingBox());
+}
+
 function ok(cond, msg) {
   console.log((cond ? "  ок    " : "  ПЛОХО ") + msg);
   if (!cond) failed++;
@@ -119,10 +142,12 @@ function ok(cond, msg) {
         ok(over <= 0, "нет горизонтальной прокрутки");
 
         // Закреплённая кнопка появляется после прокрутки и видна.
+        // Ждём, пока она перестанет двигаться: иначе замер попадает в середину
+        // анимации появления и проверка врёт.
         await page.evaluate(() => window.scrollTo(0, 1200));
-        await page.waitForTimeout(300);
-        const sticky = await page.locator(".sticky .btn").boundingBox();
-        ok(sticky.y + sticky.height <= size.h + 1, "после прокрутки закреплённая кнопка видна");
+        const sticky = await settle(page, ".sticky .btn");
+        ok(sticky.y + sticky.height <= size.h + 1,
+           `после прокрутки закреплённая кнопка видна (низ ${Math.round(sticky.y + sticky.height)} из ${size.h})`);
 
         // Подсказка про встроенный браузер - только там, где она нужна.
         await page.evaluate(() => window.scrollTo(0, 0));
