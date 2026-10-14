@@ -230,7 +230,25 @@ h1 em { font-style: normal; color: var(--accent); }
   border-radius: var(--r-panel);
   background: var(--surface-2);
   box-shadow: var(--lift);
+
+  /* Настоящий 3D: панель поворачивается вслед за курсором. Включается
+     скриптом только там, где есть мышь, и только если человек не просил
+     меньше анимаций. На телефоне не работает вообще — там это и не нужно,
+     и стоило бы кадров. Трансформ один, слоёв не добавляет. */
+  transform: perspective(1000px)
+             rotateX(var(--rx, 0deg))
+             rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+  will-change: auto;
 }
+.panel.is-tilting {
+  transition: transform .12s linear, box-shadow .5s var(--ease);
+  will-change: transform;
+}
+/* Ядро приподнято над обоймой: при наклоне видно, что это два слоя,
+   а не нарисованная рамка. */
+.panel-core { transform: translateZ(14px); }
 .panel-core {
   padding: 20px;
   border-radius: var(--r-card);
@@ -626,6 +644,8 @@ footer a { color: var(--accent); text-underline-offset: 3px; }
   * { transition-duration: .01ms !important; animation-duration: .01ms !important;
       transition-delay: 0s !important; }
   .js .reveal, .js .reveal-stagger > * { opacity: 1; transform: none; }
+  .panel { transform: none; }
+  .panel-core { transform: none; }
 }
 
 /* Ничего, кроме кнопок и ссылок, не должно выглядеть нажимаемым: на главной

@@ -262,6 +262,42 @@
     items.forEach(function (el) { io.observe(el); });
   }
 
+  /* --------------------------------------------- 3D-наклон панели */
+
+  /* Панель с мини-вопросом поворачивается вслед за курсором. Включаем только
+     при настоящей мыши: на тач-экране наклон либо не нужен, либо дёргается.
+     Значения кладём в CSS-переменные, трансформ считает браузер. */
+  function setupTilt() {
+    var panel = document.querySelector(".panel");
+    if (!panel || !window.matchMedia) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var MAX = 6;          // градусов, дальше выглядит как аттракцион
+    var frame = null;
+
+    function apply(e) {
+      frame = null;
+      var box = panel.getBoundingClientRect();
+      var x = (e.clientX - box.left) / box.width - 0.5;
+      var y = (e.clientY - box.top) / box.height - 0.5;
+      panel.style.setProperty("--ry", (x * MAX * 2).toFixed(2) + "deg");
+      panel.style.setProperty("--rx", (-y * MAX * 2).toFixed(2) + "deg");
+    }
+
+    panel.addEventListener("pointermove", function (e) {
+      panel.classList.add("is-tilting");
+      if (frame === null) frame = requestAnimationFrame(function () { apply(e); });
+    });
+
+    panel.addEventListener("pointerleave", function () {
+      panel.classList.remove("is-tilting");
+      if (frame !== null) { cancelAnimationFrame(frame); frame = null; }
+      panel.style.setProperty("--rx", "0deg");
+      panel.style.setProperty("--ry", "0deg");
+    });
+  }
+
   /* ------------------------------------- показ закреплённой кнопки */
 
   function setupSticky() {
@@ -279,6 +315,7 @@
   function init() {
     setupCta();
     setupReveal();
+    setupTilt();
     setupSticky();
     setupInApp();
     setupQuiz();
