@@ -42,11 +42,10 @@
   <div class="hero">
 
     <div class="hero-copy">
-      <h1><em>Саған қандай мамандық сай келетінін</em> және қайда оқуға түсуге болатынын біл</h1>
+      <h1><em>Кім болу</em> және қайда оқуға түсу</h1>
       <p class="lead reveal reveal-delay">
-        Ventorme — Қазақстан мектеп оқушылары үшін платформа: кәсіби бағдар
-        тесті, ЖОО таңдау және ҰБТ балы бойынша грант калькуляторы.
-        Тіркелу тегін.
+        Үш сұраққа жауап бер — неден бастау керегін көресің. Әрі қарай Ventorme
+        ЖОО таңдап, ҰБТ бойынша грант мүмкіндігін есептейді. Тіркелу тегін.
       </p>
     </div>
 
@@ -56,19 +55,43 @@
            Здесь он первое, с чем человек встречается. -->
       <div class="panel">
         <div class="panel-core">
-          <div class="quiz">
-            <p class="quiz-q">Сен нешінші сыныптасың?</p>
-            <div class="chips">
-              <button type="button" class="chip" aria-pressed="false" data-value="8-9"
-                data-answer="8–9 сынып үшін: кәсіби бағдар тесті қандай пәндерді таңдау керектігін көрсетеді, сонда 11 сыныпта шешімді екінші рет өзгертпейсің.">8–9</button>
-              <button type="button" class="chip" aria-pressed="false" data-value="10"
-                data-answer="10 сынып үшін: қажетті пәндерді күшейтуге және грант мүмкіндігін алдын ала есептеуге тағы бір жыл бар.">10</button>
-              <button type="button" class="chip" aria-pressed="false" data-value="11"
-                data-answer="11 сынып үшін: ҰБТ балы бойынша грант калькуляторы және балыңа сай ЖОО таңдау — бүгін де көруге болады.">11</button>
-              <button type="button" class="chip" aria-pressed="false" data-value="grad"
-                data-answer="Түлектер үшін: ЖОО таңдау, эссе жазуға көмек және шетелге ойлансаң — IELTS пен SAT дайындығы.">Мектепті бітірдім</button>
+          <div class="quiz" data-quiz data-tpl="{0} Жауаптарыңа қарағанда саған {1} жақынырақ. {2}">
+            <div class="quiz-top">
+              <div class="bar" aria-hidden="true"><span data-bar></span></div>
+              <span class="quiz-count"><b data-step>1</b> / 3</span>
             </div>
+
+            <div class="quiz-step" data-step-i="0">
+              <p class="quiz-q">Сен нешінші сыныптасың?</p>
+              <div class="chips">
+                <button type="button" class="chip" aria-pressed="false" data-value="8-9" data-p="ҰБТ-ға уақыт бар, бұл жақсы: пәндерді бағытқа қарай алдын ала таңдауға болады.">8–9</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="10" data-p="Қажетті пәндерді күшейтуге бір жыл қалды.">10</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="11" data-p="Уақыт аз, сондықтан тезірек нәтиже беретін нәрседен бастаған жөн.">11</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="grad" data-p="Мектеп артта, демек бірден оқуға түсуге қараймыз.">Мектепті бітірдім</button>
+              </div>
+            </div>
+
+            <div class="quiz-step" data-step-i="1" hidden>
+              <p class="quiz-q">Саған не қызықтырақ?</p>
+              <div class="chips chips-col">
+                <button type="button" class="chip" aria-pressed="false" data-value="tech" data-p="техникалық бағыттар">Техника, есептеу, бәрі қалай жұмыс істейді</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="people" data-p="медицина және көмектесу мамандықтары">Адамдар, денсаулық, көмектесу</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="create" data-p="шығармашылық бағыттар">Ойлап табу, сурет салу, түсіру</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="biz" data-p="экономика мен құқық">Бизнес, құқық, ақша</button>
+              </div>
+            </div>
+
+            <div class="quiz-step" data-step-i="2" hidden>
+              <p class="quiz-q">Қазір не маңыздырақ?</p>
+              <div class="chips chips-col">
+                <button type="button" class="chip" aria-pressed="false" data-value="prof" data-p="Кәсіби бағдар тестінен баста: ол осы саладағы нақты бағытты анықтайды.">Кім болатынымды түсіну</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="grant" data-p="ҰБТ бойынша грант калькуляторынан баста: ол балың неге жететінін көрсетеді.">Грантқа түсу</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="abroad" data-p="Шетелдегі ЖОО таңдау мен эссе көмегінен баста.">Шетелге оқуға кету</button>
+              </div>
+            </div>
+
             <p class="answer" data-answer-out hidden></p>
+            <button type="button" class="quiz-back" data-back hidden>Артқа</button>
           </div>
 
           <div class="btn-row">

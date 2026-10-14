@@ -142,7 +142,7 @@ function ok(cond, msg) {
            (wrapped.length ? ": переносятся «" + wrapped.join("», «") + "»" : ""));
 
         // Мини-вопрос виден без прокрутки.
-        const chips = await page.locator(".chips").boundingBox();
+        const chips = await page.locator(".quiz-step:not([hidden]) .chips").first().boundingBox();
         ok(chips.y + chips.height < size.h, "мини-вопрос виден без прокрутки");
 
         // Текст читается без увеличения.
@@ -177,11 +177,32 @@ function ok(cond, msg) {
           ok(/^intent:\/\/.*package=com\.android\.chrome/.test(esc), "есть ссылка, открывающая Chrome");
         }
 
-        // Мини-вопрос отвечает.
-        await page.locator(".chip").nth(2).click();
-        await page.waitForTimeout(150);
+        // Квиз проходится целиком и выдаёт личный результат.
+        const stepCount = await page.locator(".quiz-step").count();
+        for (let s = 0; s < stepCount; s++) {
+          await page.locator(`.quiz-step[data-step-i="${s}"] .chip`).first().click();
+          await page.waitForTimeout(220);
+        }
         const answer = (await page.textContent("[data-answer-out]")).trim();
-        ok(answer.length > 20, "мини-вопрос подставляет текст");
+        const shown = await page.isVisible("[data-answer-out]");
+        ok(stepCount === 3, `в квизе ${stepCount} шага`);
+        ok(shown && answer.length > 60, "квиз доходит до конца и выдаёт результат");
+
+        // Шкала прогресса заполняется.
+        const barFull = await page.evaluate(() => {
+          const b = document.querySelector("[data-bar]");
+          return b ? b.style.width : "";
+        });
+        ok(barFull === "100%", `шкала прогресса дошла до конца (${barFull})`);
+
+        // Кнопка регистрации видна на каждом шаге, квиз её не загораживает.
+        await page.reload();
+        await page.waitForTimeout(300);
+        const ctaAlways = await page.evaluate(() => {
+          const a = document.querySelector('[data-cta="hero"]');
+          return !!a && a.getBoundingClientRect().height > 0;
+        });
+        ok(ctaAlways, "кнопка регистрации видна с первого шага квиза");
 
         if (size.w === 360) {
           const tag = `${lang}-${uaName.replace(/\s+/g, "-")}`;

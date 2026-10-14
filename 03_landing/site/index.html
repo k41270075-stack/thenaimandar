@@ -42,10 +42,10 @@
   <div class="hero">
 
     <div class="hero-copy">
-      <h1><em>Какая профессия тебе подходит</em> и куда с ней поступить</h1>
+      <h1><em>Кем стать</em> и куда поступить</h1>
       <p class="lead reveal reveal-delay">
-        Ventorme — платформа для школьников Казахстана: профтест, подбор вузов
-        и калькулятор гранта по ЕНТ. Регистрация бесплатная.
+        Ответь на 3 вопроса и увидишь, с чего начать. Дальше Ventorme подберёт
+        вузы и посчитает шансы на грант по ЕНТ. Регистрация бесплатная.
       </p>
     </div>
 
@@ -55,19 +55,43 @@
            Здесь он первое, с чем человек встречается. -->
       <div class="panel">
         <div class="panel-core">
-          <div class="quiz">
-            <p class="quiz-q">Ты в каком классе?</p>
-            <div class="chips">
-              <button type="button" class="chip" aria-pressed="false" data-value="8-9"
-                data-answer="Для 8–9 класса: профтест подскажет, какие предметы выбирать, чтобы в 11 классе не менять решение второй раз.">8–9</button>
-              <button type="button" class="chip" aria-pressed="false" data-value="10"
-                data-answer="Для 10 класса: ещё есть год, чтобы подтянуть нужные предметы и посчитать шансы на грант заранее.">10</button>
-              <button type="button" class="chip" aria-pressed="false" data-value="11"
-                data-answer="Для 11 класса: калькулятор гранта по ЕНТ и подбор вузов под твои баллы — можно посмотреть уже сегодня.">11</button>
-              <button type="button" class="chip" aria-pressed="false" data-value="grad"
-                data-answer="Для выпускников: подбор вузов, помощь с эссе и подготовка к IELTS и SAT, если думаешь про заграницу.">Уже выпустился</button>
+          <div class="quiz" data-quiz data-tpl="{0} По ответам тебе ближе {1}. {2}">
+            <div class="quiz-top">
+              <div class="bar" aria-hidden="true"><span data-bar></span></div>
+              <span class="quiz-count"><b data-step>1</b> из 3</span>
             </div>
+
+            <div class="quiz-step" data-step-i="0">
+              <p class="quiz-q">Ты в каком классе?</p>
+              <div class="chips">
+                <button type="button" class="chip" aria-pressed="false" data-value="8-9" data-p="До ЕНТ ещё есть время, и это плюс: предметы можно выбрать под направление заранее.">8–9</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="10" data-p="Остался год, чтобы подтянуть нужные предметы.">10</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="11" data-p="Времени мало, поэтому начинать стоит с того, что даёт результат быстрее.">11</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="grad" data-p="Школа позади, значит смотрим сразу на поступление.">Уже выпустился</button>
+              </div>
+            </div>
+
+            <div class="quiz-step" data-step-i="1" hidden>
+              <p class="quiz-q">Что тебе интереснее?</p>
+              <div class="chips chips-col">
+                <button type="button" class="chip" aria-pressed="false" data-value="tech" data-p="технические направления">Техника, расчёты, как всё устроено</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="people" data-p="медицина и помогающие профессии">Люди, здоровье, помогать</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="create" data-p="творческие направления">Придумывать, рисовать, снимать</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="biz" data-p="экономика и право">Бизнес, право, деньги</button>
+              </div>
+            </div>
+
+            <div class="quiz-step" data-step-i="2" hidden>
+              <p class="quiz-q">Что сейчас важнее?</p>
+              <div class="chips chips-col">
+                <button type="button" class="chip" aria-pressed="false" data-value="prof" data-p="Начни с профтеста: он уточнит направление внутри этой области.">Понять, кем быть</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="grant" data-p="Начни с калькулятора гранта по ЕНТ: он покажет, на что хватает баллов.">Поступить на грант</button>
+                <button type="button" class="chip" aria-pressed="false" data-value="abroad" data-p="Начни с подбора вузов за границей и помощи с эссе.">Уехать учиться за границу</button>
+              </div>
+            </div>
+
             <p class="answer" data-answer-out hidden></p>
+            <button type="button" class="quiz-back" data-back hidden>Назад</button>
           </div>
 
           <div class="btn-row">
