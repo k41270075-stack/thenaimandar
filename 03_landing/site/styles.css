@@ -1078,3 +1078,20 @@ section > h2 { position: relative; }
   .js .steps li::after, .js section.reveal > h2::after { transform: none; }
   body::before { display: none; }
 }
+
+/* ---------------------------------------------- 3D-сцена на three.js
+   Холст добавляет three-hero.js, только если WebGL есть и сеть не медленная.
+   Пока его нет, работает CSS-знак .hero-mark; когда сцена включилась,
+   CSS-знак прячем, чтобы не было двух звёзд. */
+.hero-3d {
+  position: absolute;
+  z-index: -1;
+  left: -20px; right: -20px; top: -70px; bottom: -10px;
+  width: calc(100% + 40px); height: calc(100% + 80px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease);
+}
+.hero-3d.is-on { opacity: .9; }
+.has-3d .hero-mark { display: none; }
+@media (max-width: 699px) { .hero-3d.is-on { opacity: .6; } }
