@@ -93,7 +93,7 @@ async function onMessage(msg) {
     case 'feedback': return onFeedback(chatId, arg);
     case 'site': return send(chatId, T.site, [[['Открыть ventorme.ai', SITE]]]);
     // Для команды Ventorme
-    case 'demo_tomorrow': return onDemoTomorrow(chatId, msg.from?.id);
+    case 'demo_tomorrow': return onDemoTomorrow(chatId);
     case 'stats': return onStats(chatId, msg.from?.id);
     case 'sync_commands': return onSyncCommands(chatId, msg.from?.id);
     default: return send(chatId, T.unknown, MENU);
@@ -200,8 +200,8 @@ async function onFeedback(chatId, text) {
   return send(chatId, T.feedbackThanks);
 }
 
-async function onDemoTomorrow(chatId, fromId) {
-  if (!isAdmin(fromId)) return send(chatId, T.notAdmin(fromId));
+// Для показа на защите: присылает «завтрашнее» напоминание самому себе, поэтому доступна всем
+async function onDemoTomorrow(chatId) {
   return sendReminder(chatId, await loadUser(chatId));
 }
 
