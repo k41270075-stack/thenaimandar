@@ -1,1 +1,302 @@
-/* Участник 1, часть 1: S0, S1, S2 и фон #bg. Только классы с префиксом своих экранов. */
+/* Участник 1, часть 1: S0, S1, S2 и фон #bg. Только классы с префиксом своих экранов.
+   Движение по скиллу web-animation-design: появление ease-out (--ease), стаггер 80 мс,
+   старт со scale(.96), а не с нуля; пружина (--ease-spring) только в «вау»-моментах.
+   У каждого анимированного элемента свой блок prefers-reduced-motion. */
+
+/* Общий вход блоков экранов S0–S2: раздельно и по очереди, а не весь контейнер разом */
+.s0-rise {
+  animation: s0-rise .5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+@keyframes s0-rise {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- S0 ---------- */
+.s0-progress {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.s0-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(.9);
+  animation: s0-bar .9s var(--ease) .2s both;
+}
+@keyframes s0-bar { from { transform: scaleX(.75); } to { transform: scaleX(.9); } }
+
+.s0-groups { display: flex; flex-direction: column; gap: 18px; }
+.s0-group { display: flex; flex-direction: column; gap: 9px; }
+.s0-label { font-size: 13px; font-weight: 650; color: var(--ink-muted); letter-spacing: .01em; }
+.s0-group .chip { flex: 1 1 auto; }
+.s0-cta { margin-top: auto; padding-top: 4px; }
+
+/* ---------- S1 ---------- */
+.s1-stage {
+  position: relative;
+  height: 250px;
+  margin: 4px 0;
+  border-radius: var(--r-panel);
+  overflow: hidden;
+  background: radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%);
+}
+.s1-dot {
+  position: absolute;
+  left: 50%; top: 50%;
+  padding: 5px 9px;
+  border-radius: var(--r-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--lift);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -50%) translate(var(--x), var(--y));
+  animation: s1-suck 1.25s cubic-bezier(.645, .045, .355, 1) var(--d) forwards;
+}
+/* Точка уже на экране и перемещается: ease-in-out, как велит скилл для движения */
+@keyframes s1-suck {
+  0%   { opacity: 0; transform: translate(-50%, -50%) translate(var(--x), var(--y)) scale(.96); }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+}
+
+.s1-core {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 76px; height: 76px;
+  margin: -38px 0 0 -38px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: grid; place-items: center;
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 16%, transparent), 0 12px 30px -10px var(--accent);
+  animation: s1-pulse 1.1s ease-in-out infinite;
+}
+.s1-core-in { color: var(--lime); font-weight: 800; font-size: 30px; letter-spacing: -.04em; }
+@keyframes s1-pulse { 50% { transform: scale(1.06); } }
+
+.s1-beam {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 54px;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--lime) 55%, transparent) 85%, var(--lime));
+  opacity: .55;
+  transform: translateY(-60px);
+  animation: s1-beam 1.25s cubic-bezier(.645, .045, .355, 1) .15s 2;
+}
+@keyframes s1-beam { to { transform: translateY(260px); } }
+
+.s1-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.s1-stats div {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+}
+.s1-stats b { font-size: 28px; font-weight: 750; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--accent); }
+.s1-stats span { font-size: 14px; color: var(--ink-muted); }
+
+.s1-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.s1-lines li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 16px; font-weight: 600;
+  opacity: 0;
+  animation: s0-rise .4s var(--ease) var(--d) forwards;
+}
+.s1-lines li::before {
+  content: "✓";
+  flex: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 13px; font-weight: 800;
+  background: var(--good-soft); color: var(--good);
+}
+.s1-skip { text-align: center; margin-top: auto; }
+
+/* ---------- S2: сундук ---------- */
+.s2-intro { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.s2-chest {
+  position: relative;
+  align-self: center;
+  width: 200px; height: 190px;
+  margin: auto 0;
+  border: 0; padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.s2-chest:active { transform: scale(.97); }
+.s2-chest-glow {
+  position: absolute; left: 50%; bottom: 0;
+  width: 220px; height: 60px; margin-left: -110px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--lime) 70%, transparent), transparent);
+  filter: blur(6px);
+}
+.s2-chest-box, .s2-chest-lid {
+  position: absolute; left: 20px; right: 20px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #4A55FF, #2B36E0);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .25), inset 0 -6px 0 rgba(0, 3, 62, .25);
+}
+.s2-chest-box { bottom: 26px; height: 92px; border-radius: 10px 10px 18px 18px; }
+.s2-chest-lid {
+  bottom: 112px; height: 52px;
+  border-radius: 26px 26px 8px 8px;
+  background: linear-gradient(160deg, #6A73FF, #3B47FF);
+  transform-origin: 85% 100%;
+}
+/* Металлические полосы и замок в лаймовом фирменном цвете */
+.s2-chest-box::before, .s2-chest-lid::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 22px; margin-left: -11px;
+  background: color-mix(in srgb, var(--lime) 85%, #000 0%);
+  opacity: .9;
+}
+.s2-chest-lock {
+  position: absolute; left: 50%; top: -14px;
+  width: 34px; height: 30px; margin-left: -17px;
+  border-radius: 8px;
+  background: var(--lime);
+  box-shadow: 0 0 0 3px #2B36E0;
+}
+/* Ожидание: короткая тряска раз в 2,4 с, пауза между ними, чтобы не раздражать */
+.s2-chest-box, .s2-chest-lid, .s2-chest-lock { animation: s2-wiggle 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes s2-wiggle {
+  0%, 70%, 100% { transform: rotate(0); }
+  76% { transform: rotate(-4deg); }
+  82% { transform: rotate(4deg); }
+  88% { transform: rotate(-3deg); }
+  94% { transform: rotate(2deg); }
+}
+.s2-chest.is-opening .s2-chest-lid { animation: s2-lid .3s var(--ease) forwards; }
+@keyframes s2-lid { to { transform: translateY(-34px) rotate(-24deg); opacity: 0; } }
+
+/* ---------- S2: результат ---------- */
+.s2-hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 230px;
+  perspective: 900px;
+}
+.s2-rays {
+  position: absolute;
+  width: 420px; height: 420px;
+  left: 50%; top: 50%;
+  margin: -210px 0 0 -210px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 30%, transparent) 0deg 10deg, transparent 10deg 24deg, color-mix(in srgb, var(--lime) 40%, transparent) 24deg 32deg, transparent 32deg 45deg);
+  -webkit-mask: radial-gradient(closest-side, #000 30%, transparent);
+  mask: radial-gradient(closest-side, #000 30%, transparent);
+  opacity: 0;
+  animation: s2-rays-in .5s var(--ease) forwards, s2-spin 9s linear infinite;
+}
+@keyframes s2-rays-in { from { opacity: 0; transform: scale(.6); } to { opacity: .75; transform: scale(1); } }
+@keyframes s2-spin { to { rotate: 360deg; } }
+
+.s2-card {
+  position: relative;
+  width: min(280px, 82%);
+  padding: 20px;
+  border-radius: 22px;
+  color: #fff;
+  background:
+    radial-gradient(90% 70% at 100% 0%, rgba(198, 244, 50, .35), transparent 60%),
+    linear-gradient(155deg, #3B47FF, #00033E);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .12) inset, 0 30px 60px -24px rgba(0, 3, 62, .7);
+  display: flex; flex-direction: column; gap: 6px;
+  transform-style: preserve-3d;
+  animation: s2-card-out .9s var(--ease-spring) .05s both;
+}
+/* Карточка вылетает из сундука и переворачивается лицом: пружина, потому что это «вау» */
+@keyframes s2-card-out {
+  0%   { opacity: 0; transform: translateY(80px) scale(.6) rotateY(180deg); }
+  40%  { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.s2-rarity {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--lime);
+  color: var(--lime-ink);
+  font-size: 12px; font-weight: 800; letter-spacing: .02em;
+}
+.s2-card-k { font-size: 13px; opacity: .75; margin-top: 6px; }
+.s2-card-t { font-size: 26px; font-weight: 750; letter-spacing: -.035em; line-height: 1.1; text-wrap: balance; }
+.s2-card-m { font-size: 15px; opacity: .9; }
+.s2-card-m b { color: var(--lime); font-size: 20px; font-variant-numeric: tabular-nums; }
+
+/* Остальные блоки появляются после карточки, по очереди */
+.s2-late {
+  opacity: 0;
+  animation: s0-rise .45s var(--ease) both;
+  animation-delay: calc(700ms + var(--i, 0) * 80ms);
+}
+.s2-block { display: flex; flex-direction: column; gap: 12px; }
+
+.s2-prof { display: flex; flex-direction: column; gap: 6px; animation: none; opacity: 1; }
+.s2-prof-top { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; }
+.s2-prof-top b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.s2-bar { display: block; height: 8px; border-radius: var(--r-pill); background: var(--surface-2); overflow: hidden; }
+.s2-bar i {
+  display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--violet));
+  transform-origin: left;
+  transform: scaleX(var(--w));
+  animation: s2-grow .7s var(--ease) both;
+  animation-delay: calc(700ms + var(--d));
+}
+@keyframes s2-grow { from { transform: scaleX(0); } }
+
+.s2-unis { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.s2-uni {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 52px; padding: 8px 0;
+  border-top: 1px solid var(--hairline);
+}
+.s2-uni:first-child { border-top: 0; }
+.s2-uni-name { display: block; font-size: 15px; font-weight: 650; line-height: 1.3; }
+.s2-uni-c { display: block; font-size: 13px; color: var(--ink-subtle); }
+.s2-uni b { flex: none; padding: 3px 9px; border-radius: var(--r-pill); background: var(--good-soft); color: var(--good); font-size: 13px; font-variant-numeric: tabular-nums; }
+.s2-uni-locked .s2-uni-name { filter: blur(4px); user-select: none; }
+.s2-lock { flex: none; font-size: 13px; font-weight: 700; color: var(--ink-muted); padding: 3px 9px; border-radius: var(--r-pill); background: var(--surface-2); }
+
+.s2-grant { flex-direction: row; align-items: center; gap: 16px; }
+.s2-ring { flex: none; width: 108px; height: 108px; transform: rotate(-90deg); filter: drop-shadow(0 0 10px color-mix(in srgb, var(--lime) 55%, transparent)); }
+.s2-ring-track { fill: none; stroke: var(--surface-2); stroke-width: 12; }
+.s2-ring-fill { fill: none; stroke: var(--lime); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.215, .61, .355, 1); }
+.s2-grant-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.s2-grant-k { font-size: 14px; color: var(--ink-muted); font-weight: 600; }
+.s2-grant-v { font-size: 34px; font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.s2-levers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.s2-lever { font-size: 13px; font-weight: 600; padding: 4px 9px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--ink); }
+.s2-lever b { color: var(--accent); }
+
+/* Пропуск тапом: всё доигрывается мгновенно */
+.s2-skip .s2-late, .s2-skip .s2-card, .s2-skip .s2-bar i { animation-delay: 0s !important; animation-duration: .01ms !important; }
+.s2-skip .s2-ring-fill { transition-duration: .01ms; }
+
+/* ---------- Уменьшенное движение: только появление, без полётов, тряски и вращения ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .s0-rise, .s2-late { animation: s0-fade .2s ease-out both; animation-delay: 0s; }
+  .s0-progress span { animation: none; }
+  .s1-dot, .s1-beam { display: none; }
+  .s1-core { animation: none; }
+  .s1-lines li { animation: s0-fade .2s ease-out forwards; animation-delay: 0s; }
+  .s2-chest-box, .s2-chest-lid, .s2-chest-lock { animation: none; }
+  .s2-rays { animation: none; opacity: .5; }
+  .s2-card { animation: s0-fade .2s ease-out both; }
+  .s2-bar i { animation: none; }
+  .s2-ring-fill { transition: none; }
+}
+@keyframes s0-fade { from { opacity: 0; } to { opacity: 1; } }
