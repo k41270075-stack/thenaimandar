@@ -104,7 +104,7 @@
 
     document.getElementById('rg-go').addEventListener('click', function () {
       try { localStorage.removeItem(STATE_KEY); } catch (e) {}
-      location.href = 'index.html';
+      location.href = 'index.html' + (REF ? '?ref=' + REF : '');
     });
   }
 

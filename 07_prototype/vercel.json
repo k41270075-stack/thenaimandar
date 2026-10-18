@@ -2,9 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "api/telegram.js": { "maxDuration": 60 },
-    "api/remind.js": { "maxDuration": 60 }
+    "api/remind.js": { "maxDuration": 60 },
+    "api/tg.js": { "maxDuration": 60 }
   },
   "crons": [
     { "path": "/api/remind", "schedule": "0 14 * * *" }
+  ],
+  "redirects": [
+    { "source": "/", "destination": "/landing/", "permanent": false }
   ]
 }

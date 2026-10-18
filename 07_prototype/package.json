@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node bot/local.js",
-    "check": "node --check api/telegram.js && node --check api/remind.js && node --check api/setup.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done",
+    "check": "node --check api/telegram.js && node --check api/remind.js && node --check api/setup.js && node --check api/tg.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done",
     "build:demo": "node bot/build-demo.mjs"
   },
   "dependencies": {

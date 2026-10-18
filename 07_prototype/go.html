@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00033E">
+<title>Переходим на демо · Ventorme</title>
+<link rel="icon" href="img/ventorme-icon.png">
+<!-- Переход с лендинга на демо: короткая загрузка, затем register.html с теми же параметрами ссылки -->
+<style>
+  :root { --navy: #00033E; --blue: #3B47FF; --lime: #C6F432; --ink: #F4F5FF; --muted: #8C94FF; --ease: cubic-bezier(.32, .72, 0, 1); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: grid; place-items: center;
+    background: radial-gradient(ellipse at 50% 30%, #1C2266 0%, var(--navy) 65%);
+    color: var(--ink);
+    font: 600 18px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+  }
+  .wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 24px; text-align: center; }
+  .logo { width: 150px; height: auto; opacity: 0; animation: rise .5s var(--ease) .05s forwards; }
+  .ring { position: relative; width: 96px; height: 96px; }
+  .ring svg { width: 96px; height: 96px; transform: rotate(-90deg); }
+  .ring .track { stroke: rgba(140, 148, 255, .2); }
+  .ring .bar { stroke: var(--lime); stroke-dasharray: 264; stroke-dashoffset: 264; animation: fill 1.5s var(--ease) .15s forwards; }
+  .ring .dot { position: absolute; inset: 0; display: grid; place-items: center; font-size: 34px; animation: pulse 1s ease-in-out infinite; }
+  h1 { margin: 0; font-size: clamp(26px, 6vw, 40px); font-weight: 800; letter-spacing: -.02em; opacity: 0; animation: rise .5s var(--ease) .2s forwards; }
+  h1 span { color: var(--lime); }
+  p { margin: 0; color: var(--muted); font-weight: 500; opacity: 0; animation: rise .5s var(--ease) .35s forwards; }
+  .steps { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: rise .5s var(--ease) .5s forwards; }
+  .steps b { padding: 8px 14px; border-radius: 999px; background: rgba(59, 71, 255, .25); border: 1px solid rgba(140, 148, 255, .35); font-size: 15px; font-weight: 600; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes fill { to { stroke-dashoffset: 0; } }
+  @keyframes pulse { 50% { transform: scale(1.12); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; } }
+</style>
+</head>
+<body>
+<main class="wrap" aria-live="polite">
+  <img class="logo" src="img/ventorme-logo-white.svg" alt="Ventorme" width="150" height="33">
+  <div class="ring" aria-hidden="true">
+    <svg viewBox="0 0 96 96"><circle class="track" cx="48" cy="48" r="42" fill="none" stroke-width="6"/><circle class="bar" cx="48" cy="48" r="42" fill="none" stroke-width="6" stroke-linecap="round"/></svg>
+    <span class="dot">🔥</span>
+  </div>
+  <h1>Переходим на <span>демо</span></h1>
+  <p>Первые 5 минут Ventorme после анкеты</p>
+  <div class="steps"><b>Регистрация</b><b>Анкета</b><b>Первый уровень</b></div>
+</main>
+<script>
+  (function () {
+    var next = 'register.html' + location.search;
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () { location.replace(next); }, reduced ? 300 : 1800);
+  })();
+</script>
+</body>
+</html>
