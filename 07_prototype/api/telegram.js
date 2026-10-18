@@ -1,8 +1,8 @@
 // Вебхук Telegram-бота Ventorme AI: POST /api/telegram
-// Telegram присылает заголовок X-Telegram-Bot-Api-Secret-Token = TG_WEBHOOK_SECRET (задаётся в setWebhook).
+// Telegram присылает заголовок X-Telegram-Bot-Api-Secret-Token с секретом из setWebhook (см. api/setup.js).
 // Апдейт обрабатываем до ответа: после ответа Vercel может заморозить функцию.
 // Повторную доставку того же апдейта отсекает store.firstDelivery.
-import { refuseIfMissing, safeEqual } from '../bot/env.js';
+import { refuseIfMissing, safeEqual, webhookSecret } from '../bot/env.js';
 import { handleUpdate } from '../bot/handlers.js';
 
 function readBody(req) {
@@ -11,13 +11,13 @@ function readBody(req) {
 }
 
 export default async function handler(req, res) {
-  if (refuseIfMissing(res, 'telegram', ['TG_BOT_TOKEN', 'TG_WEBHOOK_SECRET'])) return;
+  if (refuseIfMissing(res, 'telegram', ['TG_BOT_TOKEN'])) return;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
-  if (!safeEqual(req.headers['x-telegram-bot-api-secret-token'], process.env.TG_WEBHOOK_SECRET)) {
+  if (!safeEqual(req.headers['x-telegram-bot-api-secret-token'], webhookSecret())) {
     return res.status(401).json({ ok: false, error: 'unauthorized' });
   }
 

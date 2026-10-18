@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "check": "node --check api/telegram.js && node --check api/remind.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done"
+    "check": "node --check api/telegram.js && node --check api/remind.js && node --check api/setup.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

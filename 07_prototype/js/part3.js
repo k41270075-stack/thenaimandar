@@ -2,8 +2,8 @@
 // Этап 1 (статика): экраны работают без анимаций. Эффекты этапа 2 (перемотка часов, падение уведомления,
 // осколки замка, «печатает» в пузыре, выезд шторки) добавляются после вызова скилла моушн-дизайна.
 (function () {
-  // Имя бота из @BotFather, без @. Поменять на своё перед деплоем (см. DEPLOY.md)
-  var BOT_USERNAME = 'ventorme_ai_bot';
+  // Юзернейм бота из @BotFather, без @ (см. DEPLOY.md)
+  var BOT_USERNAME = 'VentormeAI_bot';
 
   var GOALS = { ent: 'ЕНТ', sat: 'SAT', ielts: 'IELTS', unknown: 'профтеста' };
   var DEMO_ANSWERS = { grade: '11', goal: 'ent', field: 'it' };

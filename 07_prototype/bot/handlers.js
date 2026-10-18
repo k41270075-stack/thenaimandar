@@ -1,7 +1,8 @@
 // Логика бота Ventorme AI: команды, кнопки, задание дня, ИИ-ответы, напоминания.
 import { tg, send } from './tg.js';
 import * as store from './store.js';
-import { T, BTN, MENU, GOALS } from './texts.js';
+import { T, BTN, MENU, GOALS, SITE } from './texts.js';
+import { COMMANDS, AI_SHORTCUTS } from './commands.js';
 import { poolFor, pickForDay } from './tasks.js';
 import { askVenti } from './venti.js';
 import { dayKey, liveStreak, touchStreak, isQuietHours } from './util.js';
@@ -15,9 +16,21 @@ const GOAL_BUTTONS = [
   [['ЕНТ', 'goal:ent'], ['SAT', 'goal:sat'], ['IELTS', 'goal:ielts']],
   [['Пока не знаю', 'goal:unknown']]
 ];
+const FIELD_BUTTONS = [[['IT', 'field:it'], ['Медицина', 'field:med'], ['Бизнес', 'field:biz']]];
+const GRADE_BUTTONS = [[['8–9', 'grade:8-9'], ['10', 'grade:10'], ['11–12', 'grade:11-12']]];
+const DELETE_BUTTONS = [[['Да, удалить всё', 'delete:yes']], [['Отмена', 'delete:no']]];
 
 function logError(where) {
   return (err) => console.error(`[bot] ${where}:`, err.message || err);
+}
+
+// Счётчики метрик не должны ломать ответ ученику
+async function track(event) {
+  try { await store.track(event, dayKey()); } catch (err) { logError('track')(err); }
+}
+
+function isAdmin(fromId) {
+  return adminIds().includes(String(fromId));
 }
 
 // payload из S6: `${field}_${goal}_${grade}`, например it_ent_11 или med_unknown_8-9
@@ -50,13 +63,40 @@ async function onMessage(msg) {
   const cmd = text.match(/^\/([a-z_]+)(?:@\w+)?(?:\s+([\s\S]*))?$/i);
   if (!cmd) return onQuestion(chatId, text);
 
-  switch (cmd[1].toLowerCase()) {
-    case 'start': return onStart(chatId, msg.from?.first_name, cmd[2]);
+  const name = cmd[1].toLowerCase();
+  const arg = (cmd[2] || '').trim();
+  if (Object.hasOwn(AI_SHORTCUTS, name)) return onQuestion(chatId, AI_SHORTCUTS[name]);
+
+  switch (name) {
+    case 'start': return onStart(chatId, msg.from?.first_name, arg);
+    case 'help': return send(chatId, T.help, MENU);
+    // Задания
     case 'task': return startQuiz(chatId);
+    case 'ent': case 'sat': case 'ielts': return startQuiz(chatId, name);
+    case 'proftest': return startQuiz(chatId, 'unknown');
+    case 'tip': return send(chatId, T.tip(dayKey()), [[BTN.taskShort, BTN.more]]);
+    // Venti
+    case 'ask': return arg ? onQuestion(chatId, arg) : send(chatId, T.ask);
+    case 'new': return onNewDialog(chatId);
+    // Прогресс и профиль
     case 'plan': return showPlan(chatId);
+    case 'me': return showMe(chatId);
+    case 'goal': return send(chatId, T.chooseGoal, GOAL_BUTTONS);
+    case 'field': return send(chatId, T.chooseField, FIELD_BUTTONS);
+    case 'grade': return send(chatId, T.chooseGrade, GRADE_BUTTONS);
+    // Напоминания
+    case 'remind': return onRemind(chatId);
     case 'stop': return onStop(chatId);
+    // Данные и связь
+    case 'privacy': return send(chatId, T.privacy, [[BTN.deleteData]]);
+    case 'delete': return send(chatId, T.deleteConfirm, DELETE_BUTTONS);
+    case 'feedback': return onFeedback(chatId, arg);
+    case 'site': return send(chatId, T.site, [[['Открыть ventorme.ai', SITE]]]);
+    // Для команды Ventorme
     case 'demo_tomorrow': return onDemoTomorrow(chatId, msg.from?.id);
-    default: return send(chatId, T.help, MENU);
+    case 'stats': return onStats(chatId, msg.from?.id);
+    case 'sync_commands': return onSyncCommands(chatId, msg.from?.id);
+    default: return send(chatId, T.unknown, MENU);
   }
 }
 
@@ -68,6 +108,7 @@ async function onStart(chatId, name, payload) {
   user.joined = user.joined || today;
   // День первого входа — первый день серии (ученик только что прошёл вызов на сайте)
   if (!user.lastActive) touchStreak(user, today);
+  await track('start');
 
   if (p.goal || p.field) {
     user.field = p.field || user.field;
@@ -84,16 +125,46 @@ async function onGoal(chatId, goal) {
   if (!Object.hasOwn(GOALS, goal)) return;
   const user = await loadUser(chatId);
   user.goal = goal;
-  user.subscribed = true;
   user.joined = user.joined || dayKey();
   if (!user.lastActive) touchStreak(user);
   await store.saveUser(chatId, user);
   return send(chatId, T.goalSaved(goal, liveStreak(user)), MENU);
 }
 
+async function onField(chatId, field) {
+  if (!FIELDS.includes(field)) return;
+  const user = await loadUser(chatId);
+  user.field = field;
+  user.joined = user.joined || dayKey();
+  await store.saveUser(chatId, user);
+  return send(chatId, T.fieldSaved(field), [[BTN.professions, BTN.unis]]);
+}
+
+async function onGrade(chatId, grade) {
+  if (!/^\d{1,2}(-\d{1,2})?$/.test(grade)) return;
+  const user = await loadUser(chatId);
+  user.grade = grade;
+  user.joined = user.joined || dayKey();
+  await store.saveUser(chatId, user);
+  return send(chatId, T.gradeSaved(grade), MENU);
+}
+
 async function showPlan(chatId) {
   const user = await loadUser(chatId);
   return send(chatId, T.plan(user, liveStreak(user)), [[BTN.task], [BTN.ask]]);
+}
+
+async function showMe(chatId) {
+  const user = await loadUser(chatId);
+  return send(chatId, T.me(user, liveStreak(user)), [[BTN.goal, BTN.field, BTN.grade]]);
+}
+
+async function onRemind(chatId) {
+  const user = await loadUser(chatId);
+  user.subscribed = true;
+  user.joined = user.joined || dayKey();
+  await store.saveUser(chatId, user);
+  return send(chatId, T.remindOn, MENU);
 }
 
 async function onStop(chatId) {
@@ -102,12 +173,48 @@ async function onStop(chatId) {
     user.subscribed = false;
     await store.saveUser(chatId, user);
   }
+  await track('stop');
   return send(chatId, T.stop);
 }
 
+async function onNewDialog(chatId) {
+  await store.clearHistory(chatId);
+  return send(chatId, T.newDialog);
+}
+
+async function onDelete(chatId) {
+  await store.deleteUser(chatId, dayKey());
+  await track('delete');
+  return send(chatId, T.deleted);
+}
+
+// Отзыв уходит команде без имени и chat_id ученика
+async function onFeedback(chatId, text) {
+  if (!text) return send(chatId, T.feedbackHow);
+  const clean = text.slice(0, MAX_QUESTION);
+  await store.pushFeedback(clean, dayKey());
+  await track('feedback');
+  for (const admin of adminIds()) {
+    await send(admin, T.feedbackForAdmins(clean)).catch(logError('feedback'));
+  }
+  return send(chatId, T.feedbackThanks);
+}
+
 async function onDemoTomorrow(chatId, fromId) {
-  if (!adminIds().includes(String(fromId))) return send(chatId, T.notAdmin(fromId));
+  if (!isAdmin(fromId)) return send(chatId, T.notAdmin(fromId));
   return sendReminder(chatId, await loadUser(chatId));
+}
+
+async function onStats(chatId, fromId) {
+  if (!isAdmin(fromId)) return send(chatId, T.notAdmin(fromId));
+  return send(chatId, T.stats(await store.stats(dayKey())));
+}
+
+// Записывает COMMANDS в меню Telegram: после смены списка команд достаточно отправить /sync_commands
+async function onSyncCommands(chatId, fromId) {
+  if (!isAdmin(fromId)) return send(chatId, T.notAdmin(fromId));
+  await tg('setMyCommands', { commands: COMMANDS.map(({ command, description }) => ({ command, description })) });
+  return send(chatId, T.synced(COMMANDS.length));
 }
 
 // ИИ-ответ Venti на любой текст
@@ -120,15 +227,19 @@ async function onQuestion(chatId, text) {
   const question = text.slice(0, MAX_QUESTION);
   const history = await store.getHistory(chatId);
   const answer = await askVenti(user, liveStreak(user), history, question);
-  if (answer.ok) await store.pushHistory(chatId, question, answer.text);
+  if (answer.ok) {
+    await store.pushHistory(chatId, question, answer.text);
+    await track('ai');
+  }
   return send(chatId, answer.text, [[BTN.taskShort, BTN.more]]);
 }
 
 // ---------- Задание дня ----------
 
-async function startQuiz(chatId) {
+// goal не задан — задание под цель ученика; /ent, /sat, /ielts, /proftest задают свою
+async function startQuiz(chatId, goalOverride) {
   const user = await loadUser(chatId);
-  const goal = user.goal || 'ent';
+  const goal = goalOverride || user.goal || 'ent';
   const day = dayKey();
   const quiz = {
     id: Date.now().toString(36),
@@ -208,6 +319,7 @@ async function finishQuiz(chatId, quiz) {
   const field = quiz.goal === 'unknown' ? topField(quiz.picks) : null;
   if (field && !user.field) user.field = field;
   await store.saveUser(chatId, user);
+  await track('task');
 
   const streak = liveStreak(user);
   const text = field
@@ -227,10 +339,20 @@ async function onCallback(cq) {
 
   if (data.startsWith('a:')) return onAnswer(chatId, cq, ack);
   await ack();
+  const [kind, value] = data.split(':');
   if (data === 'task') return startQuiz(chatId);
   if (data === 'ask') return send(chatId, T.ask);
   if (data === 'plan') return showPlan(chatId);
-  if (data.startsWith('goal:')) return onGoal(chatId, data.slice(5));
+  if (kind === 'goal') return onGoal(chatId, value);
+  if (kind === 'field') return onField(chatId, value);
+  if (kind === 'grade') return onGrade(chatId, value);
+  if (kind === 'ai' && Object.hasOwn(AI_SHORTCUTS, value)) return onQuestion(chatId, AI_SHORTCUTS[value]);
+  if (data === 'menu:goal') return send(chatId, T.chooseGoal, GOAL_BUTTONS);
+  if (data === 'menu:field') return send(chatId, T.chooseField, FIELD_BUTTONS);
+  if (data === 'menu:grade') return send(chatId, T.chooseGrade, GRADE_BUTTONS);
+  if (data === 'delete:ask') return send(chatId, T.deleteConfirm, DELETE_BUTTONS);
+  if (data === 'delete:yes') return onDelete(chatId);
+  if (data === 'delete:no') return send(chatId, T.deleteCancelled);
 }
 
 // ---------- Напоминания ----------
