@@ -231,7 +231,7 @@ async function onQuestion(chatId, text) {
     await store.pushHistory(chatId, question, answer.text);
     await track('ai');
   }
-  return send(chatId, answer.text, [[BTN.taskShort, BTN.more]]);
+  return send(chatId, answer.text, answer.rows || [[BTN.taskShort, BTN.more]]);
 }
 
 // ---------- Задание дня ----------

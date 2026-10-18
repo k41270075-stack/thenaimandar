@@ -2,6 +2,8 @@
 
 Два способа: **на своём компьютере** (localhost, 5 минут, без Vercel) и **на Vercel** (ссылка для чужих телефонов и QR на слайде).
 
+**Полностью бесплатно.** Vercel (тариф Hobby), Upstash (бесплатный тариф) и Telegram ничего не стоят, карта не нужна. Платный только Claude API, и он необязателен: без `ANTHROPIC_API_KEY` Venti отвечает готовыми ответами из `bot/faq.js`. Он подбирает ответ по ключевым словам и закрывает темы: гранты, ЕНТ/ҰБТ, SAT, IELTS, эссе, вузы и профессии под профиль, сроки, учёба за рубежом, план на неделю, мотивация. Если ученик пишет о беде, бот даёт линию доверия. На вопрос не по теме бот покажет кнопки тем. Задания, серия, напоминания и все команды работают одинаково. Если позже добавить ключ, Venti сам переключится на ИИ, а готовые ответы останутся запасными на случай сбоя API.
+
 ## 0. На своём компьютере (localhost)
 
 Нужны [Node.js 20+](https://nodejs.org) и [Git](https://git-scm.com). Без Git: на GitHub **Code → Download ZIP** и распаковать.
@@ -14,7 +16,7 @@ npm install
 
 Скопируйте `.env.example` в `.env` (Windows: `copy .env.example .env`, macOS/Linux: `cp .env.example .env`) и впишите в `.env`:
 - `TG_BOT_TOKEN` — токен из @BotFather (без него запустится только сайт);
-- `ANTHROPIC_API_KEY` — ключ Claude API (без него Venti отвечает заготовкой);
+- `ANTHROPIC_API_KEY` — ключ Claude API, необязательно (без него Venti бесплатно отвечает готовыми ответами на частые вопросы);
 - `TG_ADMIN_IDS` — свой Telegram id для `/stats`, `/demo_tomorrow`, `/sync_commands`.
 
 Файл `.env` в git не попадает. Запуск:
@@ -113,7 +115,7 @@ npm start
 Проще всего через Vercel: **Storage → Marketplace → Upstash → Redis → Create**, затем **Connect** к проекту.
 Vercel сам добавит `KV_REST_API_URL` и `KV_REST_API_TOKEN`. Бот понимает и их, и `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`, если базу создали прямо на upstash.com. Бесплатного тарифа хватает.
 
-## 3. Ключ Claude API
+## 3. Ключ Claude API (необязательно, платно)
 
 [platform.claude.com](https://platform.claude.com) → **API Keys** → создать ключ. Это `ANTHROPIC_API_KEY`.
 Пополните баланс и поставьте лимит расходов в настройках организации. В коде уже есть лимит: до 20 ИИ-ответов на ученика в день.
@@ -127,7 +129,7 @@ Vercel сам добавит `KV_REST_API_URL` и `KV_REST_API_TOKEN`. Бот п
 | Переменная | Значение | Обязательна |
 |---|---|---|
 | `TG_BOT_TOKEN` | Токен из @BotFather | Да |
-| `ANTHROPIC_API_KEY` | Ключ Claude API | Без него бот работает, но на вопросы отвечает заготовкой «Venti сейчас не на связи» |
+| `ANTHROPIC_API_KEY` | Ключ Claude API (платный) | Нет: без него Venti бесплатно отвечает готовыми ответами на частые вопросы (`bot/faq.js`) |
 | `CRON_SECRET` | Любые 30–40 латинских букв и цифр подряд (или `openssl rand -hex 32`) | Да: им защищены `/api/remind` и `/api/setup` |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Появятся сами после шага 2 (как `KV_REST_API_*`) | Да |
 | `TG_WEBHOOK_SECRET` | Своя случайная строка для вебхука | Нет: без неё секрет вычисляется из токена |
@@ -200,7 +202,7 @@ curl -s -H "Authorization: Bearer $CRON_SECRET" "$APP/api/remind"
 | Бот молчит | Ещё раз откройте `/api/setup?key=…`; логи функции `api/telegram` в Vercel |
 | `/api/setup` отвечает `502` | В ответе причина от Telegram, чаще всего неверный `TG_BOT_TOKEN` |
 | `503` | В логе перечислены недостающие переменные. После добавления нужен **Redeploy** |
-| Venti отвечает «не на связи» | Нет `ANTHROPIC_API_KEY`, кончился баланс или лимит; в логе строка `[venti] …` |
+| Venti отвечает «не на связи» | Ключ Claude есть, но кончился баланс или лимит, а тема вопроса не из `bot/faq.js`; в логе строка `[venti] …` |
 | Токен утёк | @BotFather → `/revoke`, новый токен в Vercel, Redeploy, снова `/api/setup?key=…` |
 
 Локально код проверяется так: `npm install && npm run check` (синтаксис всех функций и модулей бота).

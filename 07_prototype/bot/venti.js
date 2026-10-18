@@ -1,7 +1,8 @@
 // ИИ-помощник Venti на Claude API (официальный SDK @anthropic-ai/sdk).
 // Короткие ответы в чате: effort low, max_tokens ~1000, история из последних 6 реплик.
 import Anthropic from '@anthropic-ai/sdk';
-import { HELPLINE, SITE, GOALS, FIELDS, RESULTS, T } from './texts.js';
+import { HELPLINE, SITE, GOALS, FIELDS, RESULTS, T, TOPIC_BUTTONS } from './texts.js';
+import { faqAnswer, isCrisis } from './faq.js';
 
 // Модель можно сменить переменной VENTI_MODEL (например, claude-haiku-5-5, если важна цена)
 const MODEL = process.env.VENTI_MODEL || 'claude-opus-5-5';
@@ -41,11 +42,22 @@ function anthropic() {
   return client;
 }
 
-// → { ok, text }. Никогда не бросает: при любой беде возвращает заготовленный ответ.
+// Без ИИ: готовый ответ по теме, а если тема не распознана — меню тем (rows — кнопки)
+function offline(question, user, fallbackText) {
+  const text = faqAnswer(question, user);
+  // Под ответом о беде — без кнопок «Задание» и «Ещё вопрос»
+  if (text) return { ok: true, text, faq: true, rows: isCrisis(question) ? [] : undefined };
+  return fallbackText ? { ok: false, text: fallbackText } : { ok: false, text: T.faqMenu, rows: TOPIC_BUTTONS };
+}
+
+let warnedNoKey = false;
+
+// → { ok, text, rows? }. Никогда не бросает: при любой беде возвращает готовый ответ.
 export async function askVenti(user, streak, history, question) {
   if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('[venti] нет переменной окружения ANTHROPIC_API_KEY, отвечаю заготовкой. См. DEPLOY.md');
-    return { ok: false, text: T.aiDown };
+    if (!warnedNoKey) console.log('[venti] нет ANTHROPIC_API_KEY: Venti отвечает готовыми ответами из bot/faq.js');
+    warnedNoKey = true;
+    return offline(question, user);
   }
   try {
     const response = await anthropic().beta.messages.create({
@@ -64,7 +76,7 @@ export async function askVenti(user, streak, history, question) {
 
     if (response.stop_reason === 'refusal') {
       console.warn('[venti] отказ модели, категория:', response.stop_details?.category ?? 'нет');
-      return { ok: false, text: T.aiRefusal };
+      return isCrisis(question) ? { ok: false, text: faqAnswer(question, user), rows: [] } : { ok: false, text: T.aiRefusal };
     }
 
     let text = response.content
@@ -74,7 +86,7 @@ export async function askVenti(user, streak, history, question) {
       .trim();
     if (!text) {
       console.warn('[venti] пустой ответ, stop_reason:', response.stop_reason);
-      return { ok: false, text: T.aiDown };
+      return offline(question, user, T.aiDown);
     }
     if (text.length > MAX_CHARS) text = text.slice(0, MAX_CHARS).trimEnd() + '…';
     else if (response.stop_reason === 'max_tokens') text += '…';
@@ -89,6 +101,6 @@ export async function askVenti(user, streak, history, question) {
     } else {
       console.error('[venti] неожиданная ошибка:', err);
     }
-    return { ok: false, text: T.aiDown };
+    return offline(question, user, T.aiDown);
   }
 }
