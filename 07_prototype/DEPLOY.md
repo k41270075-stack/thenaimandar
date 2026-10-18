@@ -39,13 +39,36 @@
 
    `/setuserpic` — картинка `img/ventorme-icon.png`.
 
-   `/setcommands` — меню команд (то же делает `setMyCommands` в разделе 5):
+   `/setcommands` — меню команд, 26 штук. Проще отправить боту `/sync_commands` после деплоя (раздел 5): он сам запишет этот список из `bot/commands.js`. Или вставить вручную:
    ```
    task - Задание дня за 60 секунд
+   ent - 3 вопроса ЕНТ
+   sat - 3 вопроса SAT Math
+   ielts - 3 вопроса IELTS
+   proftest - Профтест: какое направление тебе ближе
+   tip - Совет дня
+   ask - Задать вопрос Venti
+   grant - Как поднять шанс на грант
+   unis - Какие вузы мне подходят
+   professions - Профессии под моё направление
+   essay - Как написать мотивационное эссе
+   week - План подготовки на неделю
+   new - Начать новый диалог с Venti
    plan - Мой план поступления
-   help - Что умеет Venti
-   stop - Больше не присылать напоминания
+   me - Мой профиль, серия и XP
+   goal - Сменить цель: ЕНТ, SAT, IELTS
+   field - Сменить направление
+   grade - Указать класс
+   remind - Включить напоминания в 19:00
+   stop - Отключить напоминания
+   privacy - Какие данные хранит бот
+   delete - Удалить мои данные
+   feedback - Написать команде Ventorme
+   site - Открыть ventorme.ai
+   start - Начать сначала
+   help - Все команды
    ```
+   Служебные команды для команды Ventorme в меню не показываются: `/demo_tomorrow`, `/stats`, `/sync_commands`.
 
 ## 2. Хранилище: Upstash Redis
 
@@ -70,7 +93,7 @@ Vercel сам добавит `KV_REST_API_URL` и `KV_REST_API_TOKEN`. Бот п
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Из Upstash (или `KV_REST_API_*` из шага 2) | Да |
 | `ANTHROPIC_API_KEY` | Ключ Claude API | Без него бот работает, но на вопросы отвечает заготовкой «Venti сейчас не на связи» |
 | `CRON_SECRET` | Ещё одна случайная строка: `openssl rand -hex 32` | Да, для `/api/remind` |
-| `TG_ADMIN_IDS` | Telegram id команды через запятую | Для `/demo_tomorrow` |
+| `TG_ADMIN_IDS` | Telegram id команды через запятую | Для `/demo_tomorrow`, `/stats`, `/sync_commands` и чтобы получать отзывы из `/feedback` |
 | `VENTI_MODEL` | По умолчанию `claude-opus-5-5`. Если важна цена: `claude-haiku-5-5` | Нет |
 
 4. **Deploy**. Адрес проекта дальше обозначен как `https://<проект>.vercel.app`.
@@ -92,12 +115,9 @@ curl -s "https://api.telegram.org/bot$TG_BOT_TOKEN/setWebhook" \
 
 # Проверка: url ваш, last_error_message пустой
 curl -s "https://api.telegram.org/bot$TG_BOT_TOKEN/getWebhookInfo"
-
-# Меню команд в Telegram
-curl -s "https://api.telegram.org/bot$TG_BOT_TOKEN/setMyCommands" \
-  -H 'content-type: application/json' \
-  -d '{"commands":[{"command":"task","description":"Задание дня за 60 секунд"},{"command":"plan","description":"Мой план поступления"},{"command":"help","description":"Что умеет Venti"},{"command":"stop","description":"Больше не присылать напоминания"}]}'
 ```
+
+Меню команд: напишите боту `/sync_commands` (нужно быть в `TG_ADMIN_IDS`). Он запишет в Telegram все 26 команд из `bot/commands.js`. После любой правки списка команд — снова `/sync_commands`.
 
 Telegram будет присылать заголовок `X-Telegram-Bot-Api-Secret-Token`. Запрос без него или с чужим секретом получит `401`.
 
@@ -117,6 +137,8 @@ curl -i "$APP/api/remind"                       # 401: нет CRON_SECRET
 3. Напишите «Как поднять шанс на грант?», Venti отвечает за пару секунд.
 4. `/stop` отвечает «Готово, больше не пишу», напоминания прекращаются.
 5. `/demo_tomorrow` присылает вечернее напоминание сразу. Если вы не в `TG_ADMIN_IDS`, бот ответит вашим id: добавьте его в переменную и сделайте **Redeploy**.
+6. `/help` показывает все 26 команд. Пройдитесь по ним: `/sat`, `/proftest`, `/grant`, `/me`, `/goal`, `/privacy`, `/delete`.
+7. `/stats` (только команда): сколько было `/start`, заданий, вопросов Venti, отписок и отзывов сегодня и за всё время. Цифры для слайда «Данные» после теста бота на площадке.
 
 **Напоминания (cron):** в **Settings → Cron Jobs** должна быть задача `/api/remind` с расписанием `0 14 * * *`. Vercel сам подставляет `Authorization: Bearer <CRON_SECRET>`. Ручной запуск:
 

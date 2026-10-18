@@ -1,10 +1,13 @@
 // Хранилище бота в Upstash Redis.
 //   user:<chat_id>        → {field, goal, grade, streak, xp, lastActive, lastTaskDay, tasksDone, subscribed, lastSent, joined}
+//   users                 → множество всех chat_id (для /stats)
 //   subs                  → множество chat_id, кому слать напоминание в 19:00
 //   hist:<chat_id>        → последние 6 реплик диалога с Venti (живут 7 дней)
 //   quiz:<chat_id>        → текущее задание дня (живёт сутки)
 //   ai:<chat_id>:<день>   → сколько ИИ-ответов уже было сегодня
 //   upd:<update_id>       → защита от повторной доставки одного апдейта
+//   stat:<день|all>:<событие> → обезличенные счётчики для /stats
+//   feedback              → последние 200 отзывов из /feedback, без chat_id
 // Личных данных не храним: ни имени, ни телефона, только chat_id и прогресс.
 import { Redis } from '@upstash/redis';
 import { redisConfig } from './env.js';
@@ -33,8 +36,17 @@ export async function getUser(chatId) {
 
 export async function saveUser(chatId, user) {
   await redis().set('user:' + chatId, user);
+  await redis().sadd('users', String(chatId));
   if (user.subscribed) await redis().sadd('subs', String(chatId));
   else await redis().srem('subs', String(chatId));
+}
+
+// /delete: стираем всё, что связано с учеником
+export async function deleteUser(chatId, day) {
+  const id = String(chatId);
+  await redis().del('user:' + id, 'hist:' + id, 'quiz:' + id, `ai:${id}:${day}`);
+  await redis().srem('subs', id);
+  await redis().srem('users', id);
 }
 
 export function subscribers() {
@@ -79,4 +91,31 @@ export function saveQuiz(chatId, quiz) {
 
 export function clearQuiz(chatId) {
   return redis().del('quiz:' + chatId);
+}
+
+// ---------- Метрики бота (без привязки к ученику) ----------
+
+const EVENTS = ['start', 'task', 'ai', 'stop', 'delete', 'feedback'];
+
+export async function track(event, day) {
+  const dayKey = `stat:${day}:${event}`;
+  await redis().incr(dayKey);
+  await redis().expire(dayKey, 60 * 86400);
+  await redis().incr('stat:all:' + event);
+}
+
+export async function stats(day) {
+  const keys = EVENTS.flatMap((e) => [`stat:${day}:${e}`, 'stat:all:' + e]);
+  const values = await redis().mget(...keys);
+  const today = {}, all = {};
+  EVENTS.forEach((e, i) => {
+    today[e] = Number(values[2 * i]) || 0;
+    all[e] = Number(values[2 * i + 1]) || 0;
+  });
+  return { today, all, users: await redis().scard('users'), subs: await redis().scard('subs') };
+}
+
+export async function pushFeedback(text, day) {
+  await redis().lpush('feedback', { day, text });
+  await redis().ltrim('feedback', 0, 199);
 }
