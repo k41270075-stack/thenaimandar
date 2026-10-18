@@ -13,10 +13,41 @@ function asForm(params) {
   return form;
 }
 
-export async function tg(method, params) {
-  const res = await fetch(API + process.env.TG_BOT_TOKEN + '/' + method, IN_BROWSER
+// Если браузер не пускает страницу к api.telegram.org (CORS), запросы идут через api/tg.js на Vercel.
+// Путь выбирает первый запрос (getMe — его безопасно повторить), дальше он не меняется:
+// так сообщение никогда не уйдёт дважды.
+let browserRoute = null;  // null → ещё не выбран, 'direct' или 'proxy'
+
+function direct(method, params) {
+  return fetch(API + process.env.TG_BOT_TOKEN + '/' + method, IN_BROWSER
     ? { method: 'POST', body: asForm(params) }
     : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(params) });
+}
+
+function viaProxy(method, params) {
+  return fetch(process.env.TG_PROXY, {
+    method: 'POST',
+    body: asForm({ token: process.env.TG_BOT_TOKEN, method, params: JSON.stringify(params) })
+  });
+}
+
+async function request(method, params) {
+  if (!IN_BROWSER || !process.env.TG_PROXY || browserRoute === 'direct') return direct(method, params);
+  if (browserRoute === 'proxy') return viaProxy(method, params);
+  try {
+    const res = await direct(method, params);
+    browserRoute = 'direct';
+    return res;
+  } catch (err) {
+    browserRoute = 'proxy';
+    return viaProxy(method, params);
+  }
+}
+
+export function route() { return browserRoute; }
+
+export async function tg(method, params) {
+  const res = await request(method, params);
   let data;
   try { data = await res.json(); } catch (e) { data = { ok: false, description: 'HTTP ' + res.status }; }
   if (!data.ok) {

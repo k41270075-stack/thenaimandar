@@ -1,11 +1,16 @@
 // Бот для демо прямо в браузере: страница bot.html сама забирает сообщения из Telegram, пока вкладка открыта.
 // Тот же код, что на Vercel и в npm start: handlers.js, задания, готовые ответы Venti (faq.js).
 // Данные живут в памяти вкладки. Токен хранится только в этом браузере и уходит только на api.telegram.org.
-import { tg } from './tg.js';
+import { tg, route } from './tg.js';
 import { handleUpdate } from './handlers.js';
 import { COMMANDS } from './commands.js';
 
 const TOKEN_KEY = 'vt-demo-token';
+const PROD = 'https://thenaimandar-07prototype.vercel.app';
+const STALE_SEC = 10 * 60;   // сообщения старше 10 минут при запуске не догоняем
+
+// Прокси на том же сайте, если страница открыта с Vercel; иначе — на основном адресе проекта
+process.env.TG_PROXY = (/^https?:$/.test(location.protocol) && /\.vercel\.app$/.test(location.hostname) ? location.origin : PROD) + '/api/tg';
 const $ = (id) => document.getElementById(id);
 
 let running = false;
@@ -46,6 +51,11 @@ async function poll() {
       const updates = await tg('getUpdates', { offset, timeout: 25, allowed_updates: ['message', 'callback_query'] });
       for (const update of updates) {
         offset = update.update_id + 1;
+        const sent = update.message && update.message.date;
+        if (sent && Date.now() / 1000 - sent > STALE_SEC) {
+          log('Пропущено старое сообщение (отправлено до запуска)');
+          continue;
+        }
         log(describe(update));
         try {
           await handleUpdate(update);
@@ -84,12 +94,14 @@ async function start() {
   } catch (err) {
     $('start').disabled = false;
     status(err.code === 401 || err.code === 404
-      ? 'Telegram не принял токен. Скопируй его из @BotFather целиком.'
-      : 'Нет связи с Telegram: ' + err.message, 'bad');
+      ? 'Telegram не принял токен. После /revoke старый токен не работает: возьми последний в @BotFather.'
+      : err.code === 403
+        ? 'Это токен другого бота. Нужен токен @VentormeAI_bot из @BotFather.'
+        : 'Нет связи с Telegram ни напрямую, ни через сервер. Проверь интернет и попробуй ещё раз.', 'bad');
     return;
   }
-  // Вебхук и эта страница не работают одновременно; старые сообщения не догоняем
-  await tg('deleteWebhook', { drop_pending_updates: true }).catch(() => {});
+  // Вебхук и эта страница не работают одновременно. Недавние сообщения (до 10 минут) бот догонит
+  await tg('deleteWebhook', { drop_pending_updates: false }).catch(() => {});
   await tg('setMyCommands', { commands: COMMANDS.map(({ command, description }) => ({ command, description })) }).catch(() => {});
 
   running = true;
@@ -97,7 +109,7 @@ async function start() {
   $('open').href = 'https://t.me/' + me.username;
   $('open').textContent = 'Открыть @' + me.username;
   status(`Бот @${me.username} работает. Не закрывай вкладку и не давай ноутбуку уснуть.`, 'good');
-  log('Бот запущен, жду сообщений', 'good');
+  log('Бот запущен, жду сообщений' + (route() === 'proxy' ? ' (через сервер Vercel)' : ''), 'good');
   keepAwake();
   loop = poll();
 }

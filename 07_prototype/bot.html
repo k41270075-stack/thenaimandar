@@ -108,8 +108,33 @@ globalThis.process = { env: { VT_LOCAL: "1" } };
     });
     return form;
   }
+  var browserRoute = null;
+  function direct(method, params) {
+    return fetch(API + process.env.TG_BOT_TOKEN + "/" + method, IN_BROWSER ? { method: "POST", body: asForm(params) } : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(params) });
+  }
+  function viaProxy(method, params) {
+    return fetch(process.env.TG_PROXY, {
+      method: "POST",
+      body: asForm({ token: process.env.TG_BOT_TOKEN, method, params: JSON.stringify(params) })
+    });
+  }
+  async function request(method, params) {
+    if (!IN_BROWSER || !process.env.TG_PROXY || browserRoute === "direct") return direct(method, params);
+    if (browserRoute === "proxy") return viaProxy(method, params);
+    try {
+      const res = await direct(method, params);
+      browserRoute = "direct";
+      return res;
+    } catch (err) {
+      browserRoute = "proxy";
+      return viaProxy(method, params);
+    }
+  }
+  function route() {
+    return browserRoute;
+  }
   async function tg(method, params) {
-    const res = await fetch(API + process.env.TG_BOT_TOKEN + "/" + method, IN_BROWSER ? { method: "POST", body: asForm(params) } : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(params) });
+    const res = await request(method, params);
     let data2;
     try {
       data2 = await res.json();
@@ -1248,6 +1273,9 @@ ${tail}`;
 
   // bot/demo.js
   var TOKEN_KEY = "vt-demo-token";
+  var PROD = "https://thenaimandar-07prototype.vercel.app";
+  var STALE_SEC = 10 * 60;
+  process.env.TG_PROXY = (/^https?:$/.test(location.protocol) && /\.vercel\.app$/.test(location.hostname) ? location.origin : PROD) + "/api/tg";
   var $ = (id) => document.getElementById(id);
   var running = false;
   var loop = Promise.resolve();
@@ -1285,6 +1313,11 @@ ${tail}`;
         const updates = await tg("getUpdates", { offset, timeout: 25, allowed_updates: ["message", "callback_query"] });
         for (const update of updates) {
           offset = update.update_id + 1;
+          const sent = update.message && update.message.date;
+          if (sent && Date.now() / 1e3 - sent > STALE_SEC) {
+            log("Пропущено старое сообщение (отправлено до запуска)");
+            continue;
+          }
           log(describe(update));
           try {
             await handleUpdate(update);
@@ -1319,10 +1352,10 @@ ${tail}`;
       me = await tg("getMe", {});
     } catch (err) {
       $("start").disabled = false;
-      status(err.code === 401 || err.code === 404 ? "Telegram не принял токен. Скопируй его из @BotFather целиком." : "Нет связи с Telegram: " + err.message, "bad");
+      status(err.code === 401 || err.code === 404 ? "Telegram не принял токен. После /revoke старый токен не работает: возьми последний в @BotFather." : err.code === 403 ? "Это токен другого бота. Нужен токен @VentormeAI_bot из @BotFather." : "Нет связи с Telegram ни напрямую, ни через сервер. Проверь интернет и попробуй ещё раз.", "bad");
       return;
     }
-    await tg("deleteWebhook", { drop_pending_updates: true }).catch(() => {
+    await tg("deleteWebhook", { drop_pending_updates: false }).catch(() => {
     });
     await tg("setMyCommands", { commands: COMMANDS.map(({ command, description }) => ({ command, description })) }).catch(() => {
     });
@@ -1331,7 +1364,7 @@ ${tail}`;
     $("open").href = "https://t.me/" + me.username;
     $("open").textContent = "Открыть @" + me.username;
     status(`Бот @${me.username} работает. Не закрывай вкладку и не давай ноутбуку уснуть.`, "good");
-    log("Бот запущен, жду сообщений", "good");
+    log("Бот запущен, жду сообщений" + (route() === "proxy" ? " (через сервер Vercel)" : ""), "good");
     keepAwake();
     loop = poll();
   }
