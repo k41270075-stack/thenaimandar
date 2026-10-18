@@ -37,10 +37,12 @@
   Screens.register('s0', {
     enter: function (el, state) {
       var picked = Object.assign({}, state.answers);
-      var h = '' +
+      var h = '<div class="s0-l">' +
         '<div class="s0-progress s0-rise" style="--i:0" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="Анкета почти готова"><span></span></div>' +
         '<h1 class="h1 s0-rise" style="--i:1">Последний <em>вопрос</em>, и результат готов</h1>' +
         '<p class="lead s0-rise" style="--i:2">Ответы меняют результат. Можно попробовать разные.</p>' +
+        '<ul class="s0-perks s0-rise" style="--i:3"><li>Профессии, которые тебе подходят</li><li>Вузы и шанс на грант</li><li>Первый шаг за 60 секунд</li></ul>' +
+        '</div><div class="s0-r">' +
         '<div class="panel s0-rise" style="--i:3"><div class="panel-core s0-groups">';
       GROUPS.forEach(function (g) {
         h += '<div class="s0-group" role="group" aria-labelledby="s0-l-' + g.key + '"><span class="s0-label" id="s0-l-' + g.key + '">' + g.label + '</span><div class="chips">';
@@ -51,7 +53,7 @@
       });
       h += '</div></div>' +
         '<div class="s0-cta s0-rise" style="--i:4"><button type="button" class="btn s0-done" id="s0-done"><span>Готово</span><span class="btn-arrow"></span></button>' +
-        '<p class="s0-hint" id="s0-hint" aria-live="polite"></p></div>';
+        '<p class="s0-hint" id="s0-hint" aria-live="polite"></p></div></div>';
       el.innerHTML = h;
 
       var done = el.querySelector('#s0-done');
@@ -99,7 +101,7 @@
         dots += '<span class="s1-dot" style="--x:' + Math.round(Math.cos(ang) * r) + 'px;--y:' + Math.round(Math.sin(ang) * r) + 'px;--d:' + (i * 40) + 'ms">' + esc(u) + '</span>';
       });
       el.innerHTML = '' +
-        '<h1 class="h1 s0-rise" style="--i:0">Venti подбирает <em>вузы</em> под тебя</h1>' +
+        '<div class="s1-l"><h1 class="h1 s0-rise s1-title" style="--i:0">Venti подбирает <em>вузы</em> под тебя</h1>' +
         '<div class="s1-stage" aria-hidden="true">' + dots +
           '<span class="s1-wave"></span><span class="s1-wave s1-wave-2"></span>' +
           '<span class="s1-core"><span class="s1-core-in">V</span></span><span class="s1-beam"></span></div>' +
@@ -109,7 +111,7 @@
           '<li style="--d:900ms">Ищу гранты под ' + (GOAL_LABEL[a.goal] || 'твою цель') + '</li>' +
           '<li style="--d:1500ms">Считаю шанс для ' + (GRADE_LABEL[a.grade] || 'тебя') + '</li>' +
         '</ul>' +
-        '<p class="s1-skip">Нажми, чтобы пропустить</p>';
+        '<p class="s1-skip">Нажми, чтобы пропустить</p></div>';
 
       countFmt(el.querySelector('#s1-u'), 1000, 1800, '+');
       countFmt(el.querySelector('#s1-g'), 300, 1800, '+');
@@ -135,38 +137,65 @@
       '<circle cx="60" cy="60" r="50" class="s2-ring-fill" id="s2-ring-fill"/></svg>';
   }
 
+  // Палитра графиков проверена validate_palette.js (скилл dataviz): база синяя, прирост лаймовый,
+  // в тёмной теме свои шаги. Подписи всегда текстом, цвет не единственный носитель смысла.
+  function grantWhatIf(p) {
+    var total = Math.min(95, p.grantChance + p.levers.reduce(function (a, l) { return a + l[1]; }, 0));
+    var segs = '<i class="s2-seg s2-seg-base" style="--w:' + p.grantChance + '" title="Сейчас: ' + p.grantChance + '%"></i>' +
+      p.levers.map(function (l, i) {
+        return '<i class="s2-seg s2-seg-gain" style="--w:' + l[1] + ';--d:' + (i + 1) + '" title="' + esc(l[0]) + ': +' + l[1] + '%"></i>';
+      }).join('');
+    return '<div class="s2-whatif">' +
+      '<div class="s2-whatif-top"><span>Если подтянуть</span><b>до ' + total + '%</b></div>' +
+      '<div class="s2-stack" role="img" aria-label="Сейчас ' + p.grantChance + '%, ' +
+        p.levers.map(function (l) { return esc(l[0]) + ' плюс ' + l[1] + '%'; }).join(', ') + ', итого до ' + total + '%">' + segs + '</div>' +
+      '<ul class="s2-legend">' +
+        '<li><span class="s2-key s2-key-base"></span>Сейчас <b>' + p.grantChance + '%</b></li>' +
+        p.levers.map(function (l) { return '<li><span class="s2-key s2-key-gain"></span>' + esc(l[0]) + ' <b>+' + l[1] + '%</b></li>'; }).join('') +
+      '</ul></div>';
+  }
+
   function renderResult(el, p) {
-    var others = p.professions.slice(1).map(function (pr, i) {
-      return '<div class="s2-prof"><div class="s2-prof-top"><span>' + esc(pr[0]) + '</span><b>' + pr[1] + '%</b></div>' +
-        '<span class="s2-bar"><i style="--w:' + (pr[1] / 100) + ';--d:' + (520 + i * 120) + 'ms"></i></span></div>';
+    var profs = p.professions.map(function (pr, i) {
+      return '<li class="s2-prof' + (i === 0 ? ' is-top' : '') + '" title="' + esc(pr[0]) + ': ' + pr[1] + '% совпадения">' +
+        '<span class="s2-rank">' + (i + 1) + '</span>' +
+        '<span class="s2-prof-main"><span class="s2-prof-top"><span>' + esc(pr[0]) + '</span><b>' + pr[1] + '%</b></span>' +
+        '<span class="s2-bar"><i style="--w:' + (pr[1] / 100) + ';--d:' + (420 + i * 120) + 'ms"></i></span></span></li>';
     }).join('');
     var unis = p.unis.map(function (u, i) {
       if (u.locked) {
         return '<li class="s2-uni s2-uni-locked s2-late" style="--i:' + (i + 3) + '"><span class="s2-uni-name" aria-hidden="true">' + esc(u.name) + '</span>' +
           '<span class="s2-lock">🔒 Откроется завтра</span></li>';
       }
-      return '<li class="s2-uni s2-late" style="--i:' + (i + 3) + '"><span><span class="s2-uni-name">' + esc(u.name) + '</span><span class="s2-uni-c">' + esc(u.country) + '</span></span><b>' + u.match + '%</b></li>';
+      return '<li class="s2-uni s2-late" style="--i:' + (i + 3) + '" title="' + esc(u.name) + ': ' + u.match + '% совпадения">' +
+        '<span class="s2-uni-txt"><span class="s2-uni-name">' + esc(u.name) + '</span><span class="s2-uni-c">' + esc(u.country) + '</span></span>' +
+        '<span class="s2-uni-m"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="s2-mini-t"/><circle cx="18" cy="18" r="15" class="s2-mini-f" style="--p:' + u.match + '"/></svg><b>' + u.match + '%</b></span></li>';
     }).join('');
 
     el.innerHTML = '' +
-      '<div class="s2-hero">' +
-        '<span class="s2-rays" aria-hidden="true"></span>' +
-        '<div class="s2-card" role="img" aria-label="Профессия: ' + esc(p.title) + ', совпадение ' + p.match + '%, редкость ' + esc(p.rarity) + '">' +
-          '<span class="s2-shine" aria-hidden="true"></span>' +
-          '<span class="s2-rarity">' + esc(p.rarity) + '</span>' +
-          '<span class="s2-card-k">Твоя профессия №1</span>' +
-          '<span class="s2-card-t">' + esc(p.title) + '</span>' +
-          '<span class="s2-card-m"><b>' + p.match + '%</b> совпадения</span>' +
+      '<div class="s2-l">' +
+        '<div class="s2-hero">' +
+          '<span class="s2-rays" aria-hidden="true"></span>' +
+          '<div class="s2-card" role="img" aria-label="Профессия: ' + esc(p.title) + ', совпадение ' + p.match + '%, редкость ' + esc(p.rarity) + '">' +
+            '<span class="s2-shine" aria-hidden="true"></span>' +
+            '<span class="s2-rarity">' + esc(p.rarity) + '</span>' +
+            '<span class="s2-card-k">Твоя профессия №1</span>' +
+            '<span class="s2-card-t">' + esc(p.title) + '</span>' +
+            '<span class="s2-card-m"><b>' + p.match + '%</b> совпадения</span>' +
+          '</div>' +
         '</div>' +
+        '<section class="card s2-block s2-grant s2-late" style="--i:7">' +
+          '<div class="s2-grant-row"><div class="s2-ring-wrap">' + ringSvg() + '<b class="s2-grant-v" id="s2-grant" aria-live="polite">0%</b></div>' +
+          '<div class="s2-grant-txt"><h2 class="h2">Шанс на грант</h2><span class="s2-grant-k">с твоими баллами сейчас</span></div></div>' +
+          grantWhatIf(p) +
+        '</section>' +
+        '<p class="tag-example s2-late s2-tag" style="--i:8">Пример: цифры в прототипе демонстрационные</p>' +
+        '<div class="s2-late s2-next" style="--i:9"><button type="button" class="btn" data-go="s3"><span>Дальше</span><span class="btn-arrow"></span></button></div>' +
       '</div>' +
-      '<section class="card s2-block s2-late" style="--i:0"><h2 class="h2">Ещё тебе подходят</h2>' + others + '</section>' +
-      '<section class="card s2-block s2-late" style="--i:2"><h2 class="h2">Вузы под тебя</h2><ul class="s2-unis">' + unis + '</ul></section>' +
-      '<section class="card s2-block s2-grant s2-late" style="--i:7">' + ringSvg() +
-        '<div class="s2-grant-txt"><span class="s2-grant-k">Шанс на грант</span><b class="s2-grant-v" id="s2-grant" aria-live="polite">0%</b>' +
-        '<div class="s2-levers">' + p.levers.map(function (l) { return '<span class="s2-lever">' + esc(l[0]) + ' <b>+' + l[1] + '%</b></span>'; }).join('') + '</div></div>' +
-      '</section>' +
-      '<p class="tag-example s2-late" style="--i:8">Пример: цифры в прототипе демонстрационные</p>' +
-      '<div class="s2-late" style="--i:9"><button type="button" class="btn" data-go="s3"><span>Дальше</span><span class="btn-arrow"></span></button></div>';
+      '<div class="s2-r">' +
+        '<section class="card s2-block s2-late s2-profs" style="--i:0"><h2 class="h2">Профессии под тебя</h2><ol class="s2-prof-list">' + profs + '</ol></section>' +
+        '<section class="card s2-block s2-late s2-unis-card" style="--i:2"><h2 class="h2">Вузы под тебя</h2><ul class="s2-unis">' + unis + '</ul></section>' +
+      '</div>';
 
     // Кольцо и счёт идут одновременно: одна длительность, одна кривая (правило парных элементов)
     var fill = el.querySelector('#s2-ring-fill');
@@ -177,6 +206,7 @@
       void fill.getBoundingClientRect();
       fill.style.strokeDashoffset = C * (1 - p.grantChance / 100);
       FX.countUp(el.querySelector('#s2-grant'), p.grantChance, { ms: el.classList.contains('s2-skip') ? 0 : 1200, suffix: '%' });
+      el.querySelector('.s2-whatif').classList.add('is-on');
     }, FX.reduced ? 0 : 1100));
   }
 

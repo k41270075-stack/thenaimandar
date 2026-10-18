@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0B14" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
+<title>Ventorme · Регистрация (демо)</title>
+<link rel="icon" href="img/ventorme-icon.png">
+<!-- Симуляция регистрации для демо финала: лендинг → регистрация → анкета → прототип (index.html).
+     Ничего никуда не отправляется, пароля нет. Стиль общий с прототипом (css/base.css). -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+<div class="phone rg-page" id="app">
+  <header class="rg-top">
+    <a class="rg-back" href="landing/" aria-label="Назад на главную">
+      <picture>
+        <source srcset="img/ventorme-logo-white.svg" media="(prefers-color-scheme: dark)">
+        <img src="img/ventorme-logo.svg" alt="Ventorme" width="104" height="23">
+      </picture>
+    </a>
+    <span class="rg-demo">Демо</span>
+  </header>
+
+  <main class="rg-main" id="rg-main" aria-live="polite"></main>
+</div>
+<script src="js/register.js"></script>
+</body>
+</html>

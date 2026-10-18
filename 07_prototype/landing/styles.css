@@ -1,0 +1,1174 @@
+/* ===========================================================================
+   Лендинг Ventorme, команда HackNext 2026.
+
+   Откуда взята система:
+   - Типографическая шкала, лестница поверхностей и волосяные линии вместо
+     заливок — из разбора Linear-подобных продуктовых систем. Взята структура,
+     не цвета: палитра своя, её контраст проверен отдельно.
+   - Вложенные корпуса (панель в панели с согласованными радиусами) и
+     кнопка-в-кнопке — из премиального режима оформления.
+
+   Что держим жёстко, несмотря на любые украшения:
+   - 80,5% посетителей главной Ventorme приходят с телефона (Т2): верстаем от
+     320px.
+   - 52,5% трафика идёт из Instagram (Т3), а его встроенный браузер медленный.
+     Поэтому ни одного внешнего запроса: ни шрифтов, ни картинок, ни библиотек.
+   - Движение только на transform и opacity, появление секций через
+     IntersectionObserver. Никаких обработчиков скролла.
+   - Весь текст проходит WCAG AA в светлой и тёмной теме.
+   =========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* Лестница поверхностей: холст -> карточка -> поднятая карточка. */
+  /* Цвета бренда взяты с ventorme.ai: синий знака #3B47FF и тёмно-синий
+     текста логотипа #00033E. Белый текст на #3B47FF — 5,9:1 (AA). */
+  --canvas:       #FBFBFD;
+  --surface-1:    #FFFFFF;
+  --surface-2:    #F3F4F9;
+  --hairline:     #E4E6EF;
+  --hairline-str: #D0D3E0;
+
+  --ink:          #0B0D24;
+  --ink-muted:    #4A4E66;
+  --ink-subtle:   #676B82;
+
+  --accent:       #3B47FF;
+  --accent-press: #2B36E0;
+  --accent-soft:  #EEF0FF;
+  --accent-line:  #C9CDFF;
+  --band:         #00033E;
+
+  --warn-bg:      #FFF6E3;
+  --warn-line:    #E8C372;
+  --warn-ink:     #4A3608;
+
+  /* Форма. Правило одно: всё интерактивное — пилюля, панели — 20px,
+     карточки внутри них — 14px. Радиусы вложенных блоков согласованы. */
+  --r-pill:  999px;
+  --r-panel: 20px;
+  --r-card:  14px;
+  --r-chip:  12px;
+
+  /* Тень одна, мягкая и подкрашенная под фон. Жёстких чёрных теней нет. */
+  --lift: 0 1px 2px rgba(17, 20, 15, .04),
+          0 8px 24px -12px rgba(17, 20, 15, .10),
+          0 24px 48px -28px rgba(17, 20, 15, .12);
+
+  /* Одна кривая на все переходы. */
+  --ease: cubic-bezier(.32, .72, 0, 1);
+
+  --gutter: 20px;
+  --max: 1140px;
+  --sticky-h: 78px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas:       #0A0B14;
+    --surface-1:    #12141F;
+    --surface-2:    #181B28;
+    --hairline:     #23263A;
+    --hairline-str: #33374F;
+
+    --ink:          #F2F3F8;
+    --ink-muted:    #ADB0C4;
+    --ink-subtle:   #8C90A6;
+
+    --accent:       #8C94FF;
+    --accent-press: #7A83FF;
+    --accent-soft:  #171A35;
+    --accent-line:  #2C3170;
+    --band:         #0E1240;
+
+    --warn-bg:      #241D0C;
+    --warn-line:    #5C4718;
+    --warn-ink:     #F0DCA8;
+
+    --lift: 0 1px 2px rgba(0, 0, 0, .40),
+            0 10px 30px -14px rgba(0, 0, 0, .55);
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { -webkit-text-size-adjust: 100%; }
+/* Декоративные слои (сияние, знак, кольца) могут выходить за край при
+   повороте. Обрезаем по ширине, чтобы на телефоне не было бокового скролла. */
+html, body { overflow-x: hidden; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
+
+body {
+  margin: 0;
+  padding: 0 0 var(--sticky-h);
+  background: var(--canvas);
+  color: var(--ink);
+  font: 400 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.01em;
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Зерно. Плитка 160px, растеризуется один раз и повторяется, поэтому дешёвая.
+   Слой зафиксирован и не ловит нажатия: на прокрутке он не перерисовывается. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+@media (prefers-color-scheme: dark) { body::after { opacity: .055; } }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* --------------------------------------------------------------- шапка */
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0 4px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.brand-mark {
+  width: 28px; height: 28px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-size: 14px; font-weight: 700; letter-spacing: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+@media (prefers-color-scheme: dark) { .brand-mark { color: #0A0B14; } }
+
+/* Переключатель языка: вложенный корпус, как у всех панелей на странице. */
+.lang {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+.lang a {
+  /* 44px по высоте: это палец, а не курсор. Цвет — ink-muted, а не subtle:
+     на светлой теме subtle давал 4,38:1, то есть ниже порога AA. */
+  min-width: 46px; min-height: 44px;
+  display: grid; place-items: center;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color .2s var(--ease), background-color .2s var(--ease);
+}
+.lang a:hover { color: var(--ink); }
+.lang a[aria-current="true"] {
+  background: var(--surface-1);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(17, 20, 15, .07);
+}
+@media (prefers-color-scheme: dark) {
+  .lang a[aria-current="true"] { box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+}
+
+/* ---------------------------------------------------------- первый экран */
+
+.hero { position: relative; padding: 10px 0 6px; }
+
+/* Мягкое свечение за заголовком. Один радиальный градиент, без картинок. */
+.hero::before {
+  content: "";
+  position: absolute;
+  left: -20%; top: -28%;
+  width: 90%; height: 150%;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(60% 50% at 50% 50%,
+              color-mix(in srgb, var(--accent) 13%, transparent), transparent 72%);
+}
+
+h1 {
+  margin: 12px 0 16px;
+  font-size: clamp(31px, 8.7vw, 56px);
+  line-height: 1.03;
+  letter-spacing: -0.042em;
+  font-weight: 700;
+  max-width: 15ch;
+  text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--accent); }
+
+.lead {
+  margin: 0 0 24px;
+  max-width: 44ch;
+  font-size: 17.5px;
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+/* Вложенный корпус: внешняя обойма с волосяной линией, внутри — ядро со
+   своим фоном и бликом по верхней грани. Радиусы согласованы, поэтому
+   скругления выглядят концентрическими, а не наложенными. */
+.panel {
+  padding: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-panel);
+  background: var(--surface-2);
+  box-shadow: var(--lift);
+
+  /* Настоящий 3D: панель поворачивается вслед за курсором. Включается
+     скриптом только там, где есть мышь, и только если человек не просил
+     меньше анимаций. На телефоне не работает вообще — там это и не нужно,
+     и стоило бы кадров. Трансформ один, слоёв не добавляет. */
+  transform: perspective(1000px)
+             rotateX(var(--rx, 0deg))
+             rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+  will-change: auto;
+}
+.panel.is-tilting {
+  transition: transform .12s linear, box-shadow .5s var(--ease);
+  will-change: transform;
+}
+/* Ядро приподнято над обоймой: при наклоне видно, что это два слоя,
+   а не нарисованная рамка. */
+.panel-core { transform: translateZ(14px); }
+.panel-core {
+  padding: 20px;
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+@media (prefers-color-scheme: dark) {
+  .panel-core { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05); }
+}
+
+.quiz-q {
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--ink-muted);
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+
+.chip {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-chip);
+  background: var(--surface-1);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 560;
+  letter-spacing: -0.012em;
+  cursor: pointer;
+  transition: border-color .2s var(--ease), background-color .2s var(--ease),
+              transform .12s var(--ease), color .2s var(--ease);
+}
+.chip:hover { border-color: var(--ink-subtle); }
+.chip:active { transform: scale(.97); }
+.chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+@media (prefers-color-scheme: dark) { .chip[aria-pressed="true"] { color: var(--ink); } }
+
+.answer {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-card);
+  background: var(--accent-soft);
+  font-size: 15.5px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.answer[hidden] { display: none; }
+
+/* -------------------------------------------------------------- кнопки */
+
+.btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 16px 14px 24px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 16.5px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .25s var(--ease), transform .12s var(--ease),
+              box-shadow .25s var(--ease);
+  box-shadow: 0 1px 2px rgba(59, 71, 255, .30), inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.btn:hover { background: var(--accent-press); }
+.btn:active { transform: scale(.985); }
+@media (prefers-color-scheme: dark) {
+  .btn { color: #0A0B14; box-shadow: 0 1px 2px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .25); }
+}
+
+/* Кнопка в кнопке: стрелка живёт в своём круге, прижатом к правому краю,
+   и слегка уезжает на наведении. Деталь дешёвая, а читается дорого. */
+.btn-arrow {
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .18);
+  display: grid; place-items: center;
+  transition: transform .3s var(--ease), background-color .25s var(--ease);
+}
+.btn-arrow::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg) translate(-1px, 1px);
+}
+.btn:hover .btn-arrow { transform: translateX(2px); background: rgba(255, 255, 255, .28); }
+@media (prefers-color-scheme: dark) {
+  .btn-arrow { background: rgba(12, 15, 13, .18); }
+  .btn:hover .btn-arrow { background: rgba(12, 15, 13, .3); }
+}
+
+.btn-label { min-width: 0; line-height: 1.2; }
+
+.btn-ghost {
+  min-height: 50px;
+  padding: 13px 22px;
+  background: var(--surface-1);
+  color: var(--ink);
+  border: 1px solid var(--hairline-str);
+  box-shadow: none;
+  font-size: 15.5px;
+}
+.btn-ghost:hover { background: var(--surface-2); border-color: var(--ink-subtle); }
+.btn-ghost .btn-arrow { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+
+.btn-row { margin: 16px 0 10px; }
+
+.under-btn {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-subtle);
+  text-align: center;
+}
+
+/* Закреплённая кнопка. С телефона на «Регистрация» нажали 0,8% против 11,1%
+   с компьютера (Т9): кнопку просто не находят. */
+.sticky {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 40;
+  padding: 11px var(--gutter) calc(11px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--canvas) 86%, transparent);
+  backdrop-filter: saturate(170%) blur(14px);
+  -webkit-backdrop-filter: saturate(170%) blur(14px);
+  border-top: 1px solid var(--hairline);
+  transition: transform .35s var(--ease), opacity .25s var(--ease);
+}
+.sticky .btn { max-width: var(--max); margin: 0 auto; }
+.sticky.is-hidden { transform: translateY(115%); opacity: 0; pointer-events: none; }
+@supports not (backdrop-filter: blur(1px)) { .sticky { background: var(--canvas); } }
+
+/* ----------------------------------------- трёхмерная карусель профессий
+
+   Настоящий 3D на CSS-перспективе: восемь карточек расставлены по кольцу
+   поворотом вокруг оси Y и выносом по Z, кольцо непрерывно вращается.
+   Ни одной библиотеки, ни WebGL, ни единого внешнего запроса.
+
+   Стоит отдельным блоком сразу под первым экраном, а не внутри него: в
+   первом экране живёт кнопка, и двигать её вниз ради украшения нельзя.   */
+
+.showcase {
+  padding: 10px 0 34px;
+  text-align: center;
+}
+
+.ring-stage {
+  position: relative;
+  height: 190px;
+  perspective: 900px;
+  perspective-origin: 50% 42%;
+  margin-bottom: 14px;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 150px; height: 56px;
+  transform-style: preserve-3d;
+  transform: rotateX(-10deg);
+  animation: ring-spin 30s linear infinite;
+}
+@keyframes ring-spin {
+  from { transform: rotateX(-10deg) rotateY(0deg); }
+  to   { transform: rotateX(-10deg) rotateY(-360deg); }
+}
+
+.ring span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-chip);
+  background: var(--surface-1);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -10px rgba(17, 20, 15, .25);
+  transform: rotateY(var(--a)) translateZ(182px);
+
+  /* Изнанка скрыта: иначе дальние карточки видно зеркально, и это читается
+     как сломанная вёрстка, а не как объём. Видна всегда передняя половина. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.ring span:nth-child(odd) {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  .ring span { box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .6); }
+  .ring span:nth-child(odd) { color: var(--ink); }
+}
+
+.showcase p {
+  margin: 0 auto;
+  max-width: 34ch;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+  color: var(--ink-subtle);
+}
+
+/* Кольцо замирает, если человек просил меньше анимаций, и если вкладка не
+   на экране его всё равно не рисуют. */
+@media (prefers-reduced-motion: reduce) {
+  .ring { animation: none; }
+}
+
+/* ----------------------------------- появление панели при открытии
+
+   Единственная анимация, которая играет сразу при загрузке, в том числе на
+   телефоне: панель с вопросом прилетает поворотом по оси X. Видно в первую
+   же секунду, без прокрутки и без мыши. */
+.js .panel { animation: panel-in .85s var(--ease) both; }
+@keyframes panel-in {
+  from { opacity: 0; transform: perspective(1000px) rotateX(12deg) translateY(22px); }
+  to   { opacity: 1; transform: perspective(1000px) rotateX(0deg) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .panel { animation: none; }
+}
+
+/* --------------------------------- подсказка про встроенный браузер */
+
+.inapp {
+  margin: 16px 0 0;
+  padding: 15px 16px;
+  border: 1px solid var(--warn-line);
+  border-radius: var(--r-card);
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.inapp[hidden] { display: none; }
+.inapp b { display: block; margin-bottom: 4px; font-size: 15.5px; }
+.inapp ol { margin: 10px 0 0; padding-left: 20px; }
+.inapp li { margin-bottom: 4px; }
+.inapp .btn { margin-top: 12px; }
+.inapp .under-btn { margin-top: 8px; color: inherit; opacity: .8; }
+.inapp code {
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--warn-ink) 12%, transparent);
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------- секции */
+
+section { padding: 56px 0; }
+section + section { border-top: 1px solid var(--hairline); }
+
+h2 {
+  margin: 0 0 8px;
+  font-size: clamp(24px, 5.8vw, 38px);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  font-weight: 680;
+  max-width: 17ch;
+  text-wrap: balance;
+}
+
+.sub {
+  margin: 0 0 26px;
+  max-width: 50ch;
+  font-size: 16.5px;
+  letter-spacing: -0.012em;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+/* Бенто: ячеек ровно столько, сколько пунктов. Глубина здесь не тенями, а
+   лестницей поверхностей и волосяной линией. */
+.bento { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+.tile {
+  padding: 20px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+  transition: border-color .25s var(--ease), background-color .25s var(--ease),
+              transform .25s var(--ease);
+}
+.tile:hover { border-color: var(--hairline-str); background: var(--surface-2); transform: translateY(-2px); }
+.tile h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 640;
+  letter-spacing: -0.025em;
+}
+.tile p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.45;
+  letter-spacing: -0.008em;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+.tile-lead {
+  padding: 24px 20px;
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+.tile-lead:hover { background: var(--accent-soft); border-color: var(--accent); }
+.tile-lead h3 { font-size: 21px; letter-spacing: -0.03em; }
+.tile-lead p { color: var(--ink); opacity: .76; }
+
+/* Шаги: другое семейство раскладки, не карточки. */
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 24px 46px;
+  font-size: 16.5px;
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0; top: -1px;
+  width: 30px; height: 30px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-size: 14px; font-weight: 650; letter-spacing: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+.steps li::after {
+  content: "";
+  position: absolute;
+  left: 14.5px; top: 34px; bottom: 6px;
+  width: 1px;
+  background: var(--hairline-str);
+}
+.steps li:last-child { padding-bottom: 0; }
+.steps li:last-child::after { display: none; }
+@media (prefers-color-scheme: dark) { .steps li::before { color: #0A0B14; } }
+
+/* Вопросы: третье семейство. */
+.faq details { border-bottom: 1px solid var(--hairline); }
+.faq details:first-of-type { border-top: 1px solid var(--hairline); }
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0;
+  min-height: 28px;
+  font-size: 16.5px;
+  font-weight: 620;
+  letter-spacing: -0.022em;
+  cursor: pointer;
+  list-style: none;
+  transition: color .2s var(--ease);
+}
+.faq summary:hover { color: var(--accent); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "";
+  flex: none;
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform .3s var(--ease);
+}
+.faq details[open] summary::after { transform: rotate(225deg) translate(-2px, -2px); }
+.faq details p {
+  margin: 0 0 18px;
+  max-width: 58ch;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+/* Полоса для родителей: единственный цветной блок, смена фона осознанная. */
+.band { margin: 0; padding: 44px 0; background: var(--band); color: #fff; }
+.band h2 { color: #fff; }
+.band p {
+  margin: 0 0 22px;
+  max-width: 46ch;
+  font-size: 16.5px;
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+  color: rgba(255, 255, 255, .76);
+  text-wrap: pretty;
+}
+.band .btn-ghost {
+  width: auto;
+  background: rgba(255, 255, 255, .07);
+  color: #fff;
+  border-color: rgba(255, 255, 255, .22);
+}
+.band .btn-ghost:hover { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .45); }
+.band .btn-arrow { background: rgba(255, 255, 255, .16); }
+
+footer {
+  padding: 32px 0 38px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-subtle);
+}
+footer p { margin: 0; max-width: 58ch; text-wrap: pretty; }
+footer a { color: var(--accent); text-underline-offset: 3px; }
+
+.cookie {
+  position: fixed;
+  left: 0; right: 0; bottom: var(--sticky-h);
+  z-index: 39;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 10px var(--gutter);
+  background: var(--ink);
+  color: var(--canvas);
+  font-size: 13px;
+}
+.cookie[hidden] { display: none; }
+.cookie button {
+  flex: none;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, var(--canvas) 40%, transparent);
+  border-radius: var(--r-pill);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Появление. Только transform и opacity, через IntersectionObserver.
+   Прячем ТОЛЬКО если скрипт работает: класс js ставится первой строкой в
+   <head>. Если скрипт отвалился, страница просто видна целиком, а не пуста.
+
+   .reveal          — блок проявляется целиком;
+   .reveal-stagger  — проявляются его дети по очереди, сам блок не трогаем. */
+.js .reveal { opacity: 0; transform: translateY(18px); }
+.js .reveal.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity .7s var(--ease), transform .7s var(--ease);
+}
+.js .reveal-delay { transition-delay: .12s; }
+
+.js .reveal-stagger > * { opacity: 0; transform: translateY(14px); }
+.js .reveal-stagger.is-in > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity .55s var(--ease), transform .55s var(--ease);
+}
+.js .reveal-stagger.is-in > *:nth-child(1) { transition-delay: .04s; }
+.js .reveal-stagger.is-in > *:nth-child(2) { transition-delay: .10s; }
+.js .reveal-stagger.is-in > *:nth-child(3) { transition-delay: .16s; }
+.js .reveal-stagger.is-in > *:nth-child(4) { transition-delay: .22s; }
+.js .reveal-stagger.is-in > *:nth-child(5) { transition-delay: .28s; }
+.js .reveal-stagger.is-in > *:nth-child(6) { transition-delay: .34s; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .01ms !important; animation-duration: .01ms !important;
+      transition-delay: 0s !important; }
+  .js .reveal, .js .reveal-stagger > * { opacity: 1; transform: none; }
+  .panel { transform: none; }
+  .panel-core { transform: none; }
+}
+
+/* Ничего, кроме кнопок и ссылок, не должно выглядеть нажимаемым: на главной
+   на картинки и пустые места нажали 20,5% посетителей с телефона (Т9). */
+.answer, .band p { pointer-events: none; }
+.answer a, .band a, .band button { pointer-events: auto; }
+
+:where(a, button, summary, .chip):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  outline-offset: 3px;
+  border-radius: var(--r-chip);
+}
+
+/* ------------------------------------------------------- шире телефона */
+
+@media (min-width: 700px) {
+  :root { --gutter: 32px; --sticky-h: 0px; }
+
+  body { padding-bottom: 0; }
+  .sticky { display: none; }
+  .cookie { bottom: 0; }
+
+  /* Первый экран не растягиваем на всю высоту: на широком мониторе текстовый
+     герой столько не заполняет, и вместо воздуха получается дыра. Делаем его
+     плотным, а присутствие добирается кеглем заголовка. */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+    gap: 52px;
+    align-items: center;
+    padding: 24px 0 8px;
+  }
+  .hero-copy { grid-column: 1; }
+  .hero-act { grid-column: 2; }
+
+  h1 { margin-top: 0; font-size: clamp(44px, 5vw, 64px); max-width: 12ch; }
+  .lead { font-size: 18.5px; }
+
+  .btn { width: auto; min-width: 290px; }
+  .btn-row .btn { width: 100%; }
+  .under-btn { text-align: left; }
+
+  section { padding: 68px 0; }
+
+  /* Пять плиток, ни одной пустой ячейки: на двух столбцах ведущая занимает
+     строку целиком, на четырёх — квадрат два на два. */
+  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .tile-lead { grid-column: span 2; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+  .steps li { padding: 46px 0 0 0; }
+  .steps li::before { top: 0; }
+  .steps li::after { left: 42px; top: 14.5px; right: 0; bottom: auto; width: auto; height: 1px; }
+  .steps li:last-child::after { display: none; }
+
+  .band { padding: 64px 0; }
+
+  .showcase { padding: 4px 0 48px; }
+  .ring-stage { height: 230px; }
+  .ring { width: 180px; height: 62px; }
+  .ring span { font-size: 16px; transform: rotateY(var(--a)) translateZ(220px); }
+}
+
+@media (min-width: 980px) {
+  .bento { grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(150px, auto); }
+  .tile-lead { grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
+  .tile-lead h3 { font-size: 24px; }
+  .tile-lead p { font-size: 16.5px; max-width: 34ch; }
+}
+
+@media (min-width: 1000px) {
+  .faq { display: grid; grid-template-columns: minmax(0, 22ch) minmax(0, 1fr); gap: 56px; }
+  .faq h2 { grid-column: 1; }
+  .faq .faq-list { grid-column: 2; }
+}
+
+/* ------------------------------------- узкие и короткие экраны */
+
+/* Узкие и короткие экраны: iPhone SE, старые Android. Здесь всё лишнее
+   поджимается, потому что главное требование одно — кнопка должна помещаться
+   в первый экран вместе с мини-вопросом. */
+@media (max-width: 374px), (max-height: 600px) {
+  :root { --gutter: 16px; }
+  .ring-stage { height: 165px; }
+  .ring { width: 128px; }
+  .ring span { font-size: 13.5px; transform: rotateY(var(--a)) translateZ(155px); }
+  .top { padding: 10px 0 2px; }
+  .lang a { min-height: 40px; min-width: 42px; }
+  .hero { padding: 4px 0 0; }
+  h1 { font-size: clamp(25px, 7.8vw, 31px); margin: 5px 0 8px; line-height: 1.06; }
+  /* 16px — нижняя граница: ниже текст на телефоне читается только с
+     увеличением, а это прямой минус по критерию «удобен с телефона». */
+  .lead { font-size: 16px; line-height: 1.42; margin-bottom: 12px; }
+  .panel { padding: 4px; }
+  .panel-core { padding: 12px; }
+  .quiz-q { margin-bottom: 8px; font-size: 14px; }
+  .chips { gap: 6px; }
+  .chip { min-height: 40px; padding: 0 12px; font-size: 14.5px; }
+  .answer { margin-top: 11px; padding: 12px 13px; font-size: 15px; }
+  .btn-row { margin: 11px 0 7px; }
+  .btn { min-height: 48px; padding: 11px 12px 11px 18px; font-size: 15.5px; }
+  .btn-arrow { width: 26px; height: 26px; }
+  .under-btn { font-size: 12.5px; }
+  section { padding: 40px 0; }
+}
+
+/* ------------------------------------------- официальный логотип и 3D-знак */
+
+.brand-logo { display: block; width: 132px; height: auto; }
+
+/* Знак Ventorme за заголовком: медленно вращается в 3D и покачивается.
+   Картинка локальная (10 КБ), без внешних запросов. Полупрозрачный и под
+   текстом, поэтому не мешает читать и не выглядит нажимаемым. */
+.hero-mark {
+  position: absolute;
+  right: -26px; top: -6px;
+  width: 132px; height: 132px;
+  z-index: -1;
+  pointer-events: none;
+  perspective: 600px;
+  opacity: .16;
+}
+.hero-mark img {
+  display: block; width: 100%; height: 100%;
+  animation: mark-spin 14s linear infinite, mark-float 6s ease-in-out infinite;
+  filter: drop-shadow(0 18px 24px rgba(59, 71, 255, .35));
+}
+@keyframes mark-spin {
+  from { transform: rotateY(0deg) rotateZ(0deg); }
+  to   { transform: rotateY(360deg) rotateZ(45deg); }
+}
+@keyframes mark-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -10px; }
+}
+@media (prefers-color-scheme: dark) { .hero-mark { opacity: .22; } }
+
+/* Плитки «Что ты получишь» наклоняются за курсором, как панель первого
+   экрана. Только при мыши (скрипт), на телефоне просто приподнимаются. */
+/* Селекторы длиннее обычного: правило появления .reveal-stagger.is-in > *
+   ставит transform: none и иначе перебило бы наклон. */
+.tile,
+.js .reveal-stagger.is-in > .tile {
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+.tile:hover,
+.js .reveal-stagger.is-in > .tile:hover {
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-2px);
+  box-shadow: var(--lift);
+}
+.js .reveal-stagger.is-in > .tile.is-tilting,
+.tile.is-tilting {
+  transition: transform .12s linear, border-color .25s var(--ease), background-color .25s var(--ease);
+  transition-delay: 0s;
+}
+
+/* Номера шагов один раз «переворачиваются», когда блок появляется. */
+.js .steps.is-in li::before { animation: step-flip .8s var(--ease) both; }
+.js .steps.is-in li:nth-child(2)::before { animation-delay: .12s; }
+.js .steps.is-in li:nth-child(3)::before { animation-delay: .24s; }
+@keyframes step-flip {
+  from { transform: perspective(300px) rotateY(-180deg); opacity: 0; }
+  to   { transform: perspective(300px) rotateY(0deg); opacity: 1; }
+}
+
+/* Кнопка регистрации: мягкий блик пробегает раз в несколько секунд.
+   Только transform, без перерисовки текста. */
+.btn { position: relative; overflow: hidden; isolation: isolate; }
+.btn:not(.btn-ghost)::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .28) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: btn-shine 4.5s var(--ease) 1.2s infinite;
+}
+@keyframes btn-shine {
+  0%   { transform: translateX(-120%); }
+  35%, 100% { transform: translateX(120%); }
+}
+
+@media (min-width: 700px) {
+  .hero-mark { right: auto; left: 40%; top: -30px; width: 220px; height: 220px; opacity: .12; }
+  .brand-logo { width: 150px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mark img, .btn::after, .js .steps.is-in li::before { animation: none !important; }
+  .tile, .tile:hover, .js .reveal-stagger.is-in > .tile { transform: none; }
+}
+
+/* ================================================= живой фон и эффекты
+   Всё на transform и opacity, без обработчиков скролла. На слабых
+   телефонах это по-прежнему один-два слоя, а не WebGL. */
+
+/* Северное сияние за первым экраном: два мягких пятна бренда плавают. */
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  pointer-events: none;
+  left: 30%; top: -10%;
+  width: 70%; height: 120%;
+  background:
+    radial-gradient(40% 40% at 30% 40%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+    radial-gradient(35% 35% at 70% 60%, rgba(198, 244, 50, .18), transparent 70%);
+  filter: blur(20px);
+  animation: aurora 16s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate3d(-6%, 4%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(4%, -3%, 0) rotate(-6deg) scale(.96); }
+}
+
+/* Выделенная часть заголовка переливается фирменным градиентом. */
+h1 em {
+  background: linear-gradient(100deg, var(--accent) 0%, #7B5CFF 35%, var(--accent) 60%, #2B36E0 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ink-flow 7s ease-in-out infinite alternate;
+}
+@keyframes ink-flow {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+/* Полоса прогресса чтения сверху. Только там, где браузер умеет
+   анимацию по скроллу (Chrome); в остальных её просто нет. */
+@supports (animation-timeline: scroll()) {
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    z-index: 70;
+    background: linear-gradient(90deg, var(--accent), #C6F432);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    animation: read-progress linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes read-progress { to { transform: scaleX(1); } }
+}
+
+/* Выбранный класс в мини-вопросе «подпрыгивает». */
+.chip[aria-pressed="true"] { animation: chip-pop .45s var(--ease); }
+@keyframes chip-pop {
+  0%   { transform: scale(.9); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Ответ под мини-вопросом выезжает с поворотом, а не появляется скачком. */
+.answer:not([hidden]) { animation: answer-in .5s var(--ease) both; transform-origin: 50% 0; }
+@keyframes answer-in {
+  from { opacity: 0; transform: perspective(600px) rotateX(-25deg) translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Линия между шагами прорисовывается, когда блок появился. */
+.js .steps li::after { transform-origin: 50% 0; transform: scaleY(0); transition: transform .9s var(--ease) .3s; }
+.js .steps.is-in li::after { transform: scaleY(1); }
+
+/* У плиток при наведении загорается кромка цвета бренда. */
+.tile { position: relative; }
+.tile::before {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent), rgba(198, 244, 50, .9), var(--accent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s var(--ease);
+  pointer-events: none;
+}
+.tile:hover::before { opacity: 1; }
+
+/* Заголовки секций: короткий акцентный штрих вырастает при появлении. */
+section > h2 { position: relative; }
+.js section.reveal > h2::after {
+  content: "";
+  display: block;
+  width: 56px; height: 4px;
+  margin-top: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), #C6F432);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .8s var(--ease) .25s;
+}
+.js section.reveal.is-in > h2::after { transform: scaleX(1); }
+.band h2::after { background: #C6F432 !important; }
+
+/* Блок «Родителям»: по тёмному фону медленно плывут кольца. */
+.band { position: relative; overflow: hidden; }
+.band::before, .band::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  border: 1.5px solid rgba(198, 244, 50, .35);
+}
+.band::before { width: 360px; height: 360px; right: -120px; top: -140px; animation: ring-drift 18s ease-in-out infinite alternate; }
+.band::after  { width: 220px; height: 220px; right: 80px; bottom: -120px; border-color: rgba(140, 148, 255, .45); animation: ring-drift 14s ease-in-out infinite alternate-reverse; }
+.band .wrap { position: relative; z-index: 1; }
+@keyframes ring-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to   { transform: translate3d(-30px, 24px, 0) rotate(40deg); }
+}
+
+/* Закреплённая кнопка на телефоне мягко «дышит» свечением. */
+.sticky .btn { animation: glow 3.2s ease-in-out infinite; }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 6px 18px -8px rgba(59, 71, 255, .45); }
+  50%      { box-shadow: 0 10px 30px -6px rgba(59, 71, 255, .75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::after, h1 em, .chip[aria-pressed="true"], .answer:not([hidden]),
+  .band::before, .band::after, .sticky .btn { animation: none !important; }
+  .js .steps li::after, .js section.reveal > h2::after { transform: none; }
+  body::before { display: none; }
+}
+
+/* ---------------------------------------------- 3D-сцена на three.js
+   Холст добавляет three-hero.js, только если WebGL есть и сеть не медленная.
+   Пока его нет, работает CSS-знак .hero-mark; когда сцена включилась,
+   CSS-знак прячем, чтобы не было двух звёзд. */
+.hero-3d {
+  position: absolute;
+  z-index: -1;
+  left: -20px; right: -20px; top: -70px; bottom: -10px;
+  width: calc(100% + 40px); height: calc(100% + 80px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease);
+}
+.hero-3d.is-on { opacity: .9; }
+.has-3d .hero-mark { display: none; }
+@media (max-width: 699px) { .hero-3d.is-on { opacity: .6; } }
+
+/* --------------------------------------- плашка «Регистрация через Google» */
+.gsheet {
+  position: fixed;
+  left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 65;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 22px;
+  background: var(--surface-1);
+  box-shadow: 0 -2px 6px rgba(11, 13, 36, .04), 0 18px 50px -12px rgba(11, 13, 36, .35);
+  transform: translateY(140%);
+  opacity: 0;
+  transition: transform .55s var(--ease), opacity .4s var(--ease);
+}
+.gsheet[hidden] { display: none; }
+.gsheet.is-open { transform: none; opacity: 1; }
+.gsheet::before {               /* «ручка» сверху, как у нижних шторок iOS */
+  content: "";
+  position: absolute; top: 6px; left: 50%;
+  width: 38px; height: 4px; margin-left: -19px;
+  border-radius: 4px;
+  background: var(--hairline-str);
+}
+.gsheet-title { margin: 6px 44px 2px 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.gsheet-sub { margin: 0 0 12px; font-size: 14.5px; line-height: 1.4; color: var(--ink-muted); }
+.gsheet-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 40px; height: 40px;
+  border: 0; border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  font-size: 24px; line-height: 1;
+  cursor: pointer;
+}
+.gsheet-close:hover { color: var(--ink); }
+.gbtn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 54px;
+  padding: 12px 18px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-pill);
+  background: #FFFFFF;
+  color: #1F1F1F;
+  font-size: 16.5px; font-weight: 650;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(11, 13, 36, .08);
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.gbtn:hover { box-shadow: 0 6px 16px -6px rgba(59, 71, 255, .45); }
+.gbtn:active { transform: scale(.98); }
+.g-icon { flex: none; }
+/* Во встроенном браузере Instagram вход через Google ломается — там кнопка
+   ведёт на регистрацию по почте и красится в цвет бренда, без значка Google. */
+.gsheet.is-inapp .g-icon { display: none; }
+.gsheet.is-inapp .gbtn { background: var(--accent); border-color: var(--accent); color: #fff; }
+@media (prefers-color-scheme: dark) { .gsheet.is-inapp .gbtn { color: #0A0B14; } }
+/* Пока плашка открыта, нижняя закреплённая кнопка не нужна. */
+.sheet-open .sticky { transform: translateY(115%); opacity: 0; pointer-events: none; }
+@media (min-width: 700px) {
+  .gsheet { left: 0; right: 0; bottom: 24px; width: 440px; margin: 0 auto; }
+}
+@media (prefers-reduced-motion: reduce) { .gsheet { transition: none; } }
+
+/* Фон из 3D-звёзд на всю страницу (three-hero.js). Под всем содержимым. */
+.stars-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.6s var(--ease);
+}
+.stars-bg.is-on { opacity: 1; }
