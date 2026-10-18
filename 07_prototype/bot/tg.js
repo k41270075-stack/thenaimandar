@@ -27,6 +27,6 @@ export function keyboard(rows) {
 
 export function send(chatId, text, rows) {
   const params = { chat_id: chatId, text, link_preview_options: { is_disabled: true } };
-  if (rows) params.reply_markup = keyboard(rows);
+  if (rows && rows.length) params.reply_markup = keyboard(rows);
   return tg('sendMessage', params);
 }

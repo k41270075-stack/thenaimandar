@@ -140,7 +140,7 @@ server.listen(PORT, () => {
     console.log('  Бот:           выключен — впиши TG_BOT_TOKEN в файл .env (образец: .env.example)\n');
     return;
   }
-  if (!process.env.ANTHROPIC_API_KEY) console.log('  Venti:         без ИИ — нет ANTHROPIC_API_KEY, на вопросы будет заготовка');
+  if (!process.env.ANTHROPIC_API_KEY) console.log('  Venti:         бесплатный режим — готовые ответы на частые вопросы (ключа Claude нет)');
   if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.KV_REST_API_URL) console.log('  Данные бота:   в памяти, сбросятся при остановке');
   runBot();
 });
