@@ -1,12 +1,13 @@
 {
   "name": "ventorme-first-5-minutes",
   "private": true,
-  "description": "Прототип «Первые 5 минут» и Telegram-бот Ventorme AI (Vercel-функции в api/)",
+  "description": "Прототип «Первые 5 минут» и Telegram-бот Ventorme AI. Локально: npm start. На Vercel: функции в api/",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "start": "node bot/local.js",
     "check": "node --check api/telegram.js && node --check api/remind.js && node --check api/setup.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done"
   },
   "dependencies": {
