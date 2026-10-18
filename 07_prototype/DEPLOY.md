@@ -16,7 +16,7 @@
 ## 1. Бот в Telegram
 
 1. Напишите [@BotFather](https://t.me/BotFather) → `/newbot`.
-   Имя: `Ventorme AI`. Юзернейм должен заканчиваться на `bot`, например `ventorme_ai_bot`.
+   Имя: `Ventorme AI`. Юзернейм должен заканчиваться на `bot`. Наш бот: [@VentormeAI_bot](https://t.me/VentormeAI_bot).
 2. BotFather пришлёт **токен**. Это `TG_BOT_TOKEN`, никому его не показывайте.
 3. Впишите юзернейм (без `@`) в константу `BOT_USERNAME` в начале `js/part3.js`. Туда ведёт кнопка «Подключить Venti» на S6.
 4. По желанию: `/setuserpic` (картинка `img/ventorme-icon.png`) и `/setdescription` («Задание на 60 секунд каждый день и ответы на вопросы про поступление»).
