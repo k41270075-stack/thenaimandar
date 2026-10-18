@@ -16,12 +16,18 @@ import { memoryRedis } from './memory.js';
 const HISTORY_TURNS = 6;
 const HISTORY_TTL = 7 * 86400;
 
-// На Vercel — Upstash. При запуске на компьютере (npm start) без ключей Upstash — память процесса.
+// С ключами Upstash — Upstash. Без них — память процесса: так бот работает для демо без базы
+// (на компьютере через npm start и на Vercel), но данные сбрасываются при перезапуске.
 let client = null;
 function redis() {
   if (!client) {
     const config = redisConfig();
-    client = !config.url && process.env.VT_LOCAL === '1' ? memoryRedis : new Redis(config);
+    if (config.url && config.token) {
+      client = new Redis(config);
+    } else {
+      if (process.env.VT_LOCAL !== '1') console.warn('[store] нет ключей Upstash: данные бота в памяти, для демо этого хватит');
+      client = memoryRedis;
+    }
   }
   return client;
 }

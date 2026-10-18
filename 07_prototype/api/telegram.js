@@ -11,7 +11,7 @@ function readBody(req) {
 }
 
 export default async function handler(req, res) {
-  if (refuseIfMissing(res, 'telegram', ['TG_BOT_TOKEN'])) return;
+  if (refuseIfMissing(res, 'telegram', ['TG_BOT_TOKEN'], { redis: false })) return;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');

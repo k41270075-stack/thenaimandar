@@ -4,7 +4,7 @@ import { refuseIfMissing, safeEqual } from '../bot/env.js';
 import { sendDailyReminders } from '../bot/handlers.js';
 
 export default async function handler(req, res) {
-  if (refuseIfMissing(res, 'remind', ['TG_BOT_TOKEN', 'CRON_SECRET'])) return;
+  if (refuseIfMissing(res, 'remind', ['TG_BOT_TOKEN', 'CRON_SECRET'], { redis: false })) return;
 
   if (!safeEqual(req.headers.authorization, 'Bearer ' + process.env.CRON_SECRET)) {
     return res.status(401).json({ ok: false, error: 'unauthorized' });
