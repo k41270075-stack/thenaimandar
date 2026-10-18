@@ -1,5 +1,3 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
-
 // Переменные окружения бота. Значения живут только в Vercel → Settings → Environment Variables.
 // В коде и логах — только имена переменных, никогда их значения.
 
@@ -30,22 +28,8 @@ export function refuseIfMissing(res, where, names, opts) {
   return true;
 }
 
-// Секрет вебхука: TG_WEBHOOK_SECRET, а если его не задали — выводится из токена бота.
-// Это не слабее: кто знает токен, и так управляет ботом. Зато на одну переменную меньше.
-export function webhookSecret() {
-  return process.env.TG_WEBHOOK_SECRET ||
-    createHash('sha256').update('ventorme-webhook:' + process.env.TG_BOT_TOKEN).digest('hex');
-}
-
 export function adminIds() {
   return String(process.env.TG_ADMIN_IDS || '')
     .split(/[\s,]+/)
     .filter(Boolean);
-}
-
-// Сравнение секретов за постоянное время
-export function safeEqual(a, b) {
-  const x = Buffer.from(String(a || ''));
-  const y = Buffer.from(String(b || ''));
-  return x.length === y.length && timingSafeEqual(x, y);
 }

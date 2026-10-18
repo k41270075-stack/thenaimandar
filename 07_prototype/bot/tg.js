@@ -1,12 +1,22 @@
 // Тонкая обёртка над Telegram Bot API. Токен не попадает ни в ошибки, ни в логи.
 const API = 'https://api.telegram.org/bot';
 
-export async function tg(method, params) {
-  const res = await fetch(API + process.env.TG_BOT_TOKEN + '/' + method, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(params)
+// В браузере (bot.html) шлём параметры формой: такой запрос не требует предварительной CORS-проверки.
+// Вложенные объекты (кнопки, списки) Telegram принимает в форме строкой JSON.
+const IN_BROWSER = typeof window !== 'undefined';
+
+function asForm(params) {
+  const form = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined) form.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
   });
+  return form;
+}
+
+export async function tg(method, params) {
+  const res = await fetch(API + process.env.TG_BOT_TOKEN + '/' + method, IN_BROWSER
+    ? { method: 'POST', body: asForm(params) }
+    : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(params) });
   let data;
   try { data = await res.json(); } catch (e) { data = { ok: false, description: 'HTTP ' + res.status }; }
   if (!data.ok) {

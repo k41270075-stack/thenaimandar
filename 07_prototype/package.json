@@ -8,10 +8,14 @@
   },
   "scripts": {
     "start": "node bot/local.js",
-    "check": "node --check api/telegram.js && node --check api/remind.js && node --check api/setup.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done"
+    "check": "node --check api/telegram.js && node --check api/remind.js && node --check api/setup.js && for f in bot/*.js; do node --check \"$f\" || exit 1; done",
+    "build:demo": "node bot/build-demo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
     "@upstash/redis": "^1.39.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

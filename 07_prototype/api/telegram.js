@@ -2,7 +2,8 @@
 // Telegram присылает заголовок X-Telegram-Bot-Api-Secret-Token с секретом из setWebhook (см. api/setup.js).
 // Апдейт обрабатываем до ответа: после ответа Vercel может заморозить функцию.
 // Повторную доставку того же апдейта отсекает store.firstDelivery.
-import { refuseIfMissing, safeEqual, webhookSecret } from '../bot/env.js';
+import { refuseIfMissing } from '../bot/env.js';
+import { safeEqual, webhookSecret } from '../bot/secret.js';
 import { handleUpdate } from '../bot/handlers.js';
 
 function readBody(req) {

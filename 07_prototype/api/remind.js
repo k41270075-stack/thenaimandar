@@ -1,6 +1,7 @@
 // Напоминания «задание дня»: GET /api/remind
 // Вызывает Vercel Cron (vercel.json, 14:00 UTC = 19:00 Астана) с заголовком Authorization: Bearer <CRON_SECRET>.
-import { refuseIfMissing, safeEqual } from '../bot/env.js';
+import { refuseIfMissing } from '../bot/env.js';
+import { safeEqual } from '../bot/secret.js';
 import { sendDailyReminders } from '../bot/handlers.js';
 
 export default async function handler(req, res) {
