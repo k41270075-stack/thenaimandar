@@ -1,0 +1,6 @@
+# Netlify: сайт — папка 07_prototype (лендинг → «Переходим на демо» → регистрация → прототип).
+# Сборки нет, это статические файлы. Главная «/» ведёт на лендинг (07_prototype/_redirects).
+[build]
+  base = "07_prototype"
+  publish = "."
+  command = "echo 'static site, no build'"
