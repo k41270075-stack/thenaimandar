@@ -8,8 +8,26 @@
    - одна кривая --ease на все переходы, движение только на transform и opacity;
    - светлая и тёмная тема по настройке телефона. */
 
+/* Unbounded: заголовки и большие цифры. Вшит в проект (fonts/, лицензия OFL), без внешних запросов:
+   встроенный браузер Instagram медленный, а на защите может не быть сети. */
+@font-face {
+  font-family: "Unbounded";
+  src: url("../fonts/unbounded-cyrillic.woff2") format("woff2");
+  font-weight: 200 900;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Unbounded";
+  src: url("../fonts/unbounded-latin.woff2") format("woff2");
+  font-weight: 200 900;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   color-scheme: light dark;
+  --font-display: "Unbounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Лестница поверхностей: холст → карточка → поднятая карточка */
   --canvas:       #FBFBFD;
@@ -51,6 +69,9 @@
 
   /* Одна кривая на все переходы, как на лендинге. Пружина только для «вау»-моментов. */
   --ease: cubic-bezier(.32, .72, 0, 1);
+  /* Сильные кривые из скилла emil-design-eng: появление и движение по экрану */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
 
   --hud-h: 56px;
@@ -156,6 +177,9 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
+/* Иконки Phosphor (js/icons.js): размер от шрифта, цвет от текста */
+.ico { width: 1.1em; height: 1.1em; flex: none; display: inline-block; vertical-align: -0.18em; }
+
 /* Шапка */
 .hud {
   position: absolute;
@@ -194,6 +218,7 @@ button { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 .hud-streak b { color: var(--fire); }
+.hud-streak .ico { color: var(--fire); width: 16px; height: 16px; }
 .hud-level b { color: var(--accent); }
 
 .hud-xp { position: relative; overflow: hidden; min-width: 74px; justify-content: center; }
@@ -240,25 +265,25 @@ button { font: inherit; color: inherit; }
 /* Типографика, как на лендинге */
 .h1 {
   margin: 0;
-  font-size: clamp(28px, 8vw, 34px);
-  line-height: 1.05;
-  letter-spacing: -0.042em;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(25px, 7vw, 30px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  font-weight: 600;
   text-wrap: balance;
 }
-/* Выделенное слово переливается фирменным градиентом */
-.h1 em {
-  font-style: normal;
-  background: linear-gradient(100deg, var(--accent) 0%, var(--violet) 35%, var(--accent) 60%, var(--accent-press) 100%);
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: ink-flow 7s ease-in-out infinite alternate;
-}
-@keyframes ink-flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+/* Выделенное слово больше не подсвечивается: одно цветное слово в заголовке выглядит шаблонно
+   (скилл frontend-design). <em> в разметке остаётся, но читается как обычный текст. */
+.h1 em { font-style: normal; }
 
-.h2 { margin: 0; font-size: 21px; line-height: 1.2; font-weight: 700; letter-spacing: -0.03em; }
+/* Большие цифры игры тем же шрифтом, что и заголовки: XP, проценты, серия, время */
+.s1-stats b, .s2-card-t, .s2-card-m b, .s2-grant-v, .s3-plan-v, .s5-flip b, .s5-lvl, .s5-badge-t,
+.s7-time, .s7-streak-num, .s7-uni-match, .s4-q, .s4-combo span {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.h2 { margin: 0; font-family: var(--font-display); font-size: 17px; line-height: 1.25; font-weight: 600; letter-spacing: -0.02em; }
 .lead { margin: 0; font-size: 16.5px; line-height: 1.5; color: var(--ink-muted); text-wrap: pretty; }
 .muted { color: var(--ink-muted); }
 .tag-example { font-size: 12px; color: var(--ink-subtle); }
@@ -334,16 +359,16 @@ button { font: inherit; color: inherit; }
   letter-spacing: -0.015em;
   text-align: center;
   cursor: pointer;
-  transition: background-color .25s var(--ease), transform .12s var(--ease), box-shadow .25s var(--ease);
+  transition: background-color .2s ease, transform .16s var(--ease-out), box-shadow .2s ease;
   box-shadow: 0 1px 2px rgba(59, 71, 255, .30), inset 0 1px 0 rgba(255, 255, 255, .18);
   user-select: none;
 }
-.btn:active { transform: scale(.975); }
+.btn:active { transform: scale(.97); }
 .btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 3px; }
 .btn[disabled] { opacity: .45; pointer-events: none; }
 
 /* Блик пробегает по кнопке, как на лендинге */
-.btn:not(.btn-ghost)::after {
+.btn-lime::after {
   content: "";
   position: absolute; inset: 0;
   z-index: -1;
@@ -383,8 +408,8 @@ button { font: inherit; color: inherit; }
 /* Главная кнопка экрана мягко «дышит» свечением, как закреплённая кнопка лендинга */
 .btn-glow { animation: glow 3.2s ease-in-out infinite; }
 @keyframes glow {
-  0%, 100% { box-shadow: 0 6px 18px -8px rgba(59, 71, 255, .45); }
-  50%      { box-shadow: 0 10px 30px -6px rgba(59, 71, 255, .75); }
+  0%, 100% { box-shadow: 0 6px 16px -10px rgba(59, 71, 255, .45); }
+  50%      { box-shadow: 0 12px 26px -12px rgba(59, 71, 255, .6); }
 }
 
 /* Заглушка экрана */
@@ -431,13 +456,13 @@ button { font: inherit; color: inherit; }
 /* Телефон: во весь экран. Ноутбук (от 900px): во весь экран как сайт, без рамки телефона.
    Контент экранов по центру колонкой 760px; экраны S0–S5 расширяют её у себя (part1.css, part2.css). */
 @media (min-width: 900px) {
-  .phone { max-width: none; }
-  .hud { padding-inline: max(24px, calc((100% - 1120px) / 2)); }
-  .screen {
+  html:not([data-view="phone"]) .phone { max-width: none; }
+  html:not([data-view="phone"]) .hud { padding-inline: max(24px, calc((100% - 1120px) / 2)); }
+  html:not([data-view="phone"]) .screen {
     padding-left: max(24px, calc((100% - 760px) / 2));
     padding-right: max(24px, calc((100% - 760px) / 2));
     padding-top: calc(var(--hud-h) + 28px);
   }
-  .h1 { font-size: clamp(36px, 3.4vw, 48px); }
-  .lead { font-size: 18px; }
+  html:not([data-view="phone"]) .h1 { font-size: clamp(36px, 3.4vw, 48px); }
+  html:not([data-view="phone"]) .lead { font-size: 18px; }
 }

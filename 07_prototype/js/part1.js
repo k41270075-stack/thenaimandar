@@ -86,26 +86,37 @@
   /* ======================================================================
      S1. Venti сканирует вузы (2,5 с, тап пропускает)
      ====================================================================== */
-  var UNIS = ['NU', 'KBTU', 'HKU', 'UCL', 'ETH', 'NUS', 'KAIST', 'SDU', 'AITU', 'ЕНУ', 'КазНУ', 'TUM', 'KIMEP', 'Narxoz',
-    'Bocconi', 'Tsinghua', 'Toronto', 'Seoul', 'Charles', 'Erasmus', 'Satbayev', 'Sorbonne', 'Monash', 'Leiden', 'КазНМУ', 'Aalto', 'KAU', 'Purdue'];
+  // Вузы на кольцах радара: [название, угол по часовой от верха, кольцо 0–2]
+  // Расставлены так, чтобы надписи не наезжали друг на друга и на вузы ученика (48°, 200°, 258° на среднем кольце)
+  var RADAR = [['ETH', 15, 2], ['KAIST', 85, 2], ['Seoul', 130, 2], ['TUM', 175, 2], ['SDU', 225, 2], ['Toronto', 285, 2],
+    ['Monash', 330, 2], ['NUS', 110, 1], ['Bocconi', 150, 1], ['Leiden', 320, 1]];
+  var RX = [62, 104, 146], SWEEP = 1100, SWEEP_START = 200;
 
   var s1Timers = [];
   Screens.register('s1', {
     enter: function (el, state) {
       var a = state.answers;
-      var dots = '';
-      UNIS.forEach(function (u, i) {
-        // Старт на краю круга, у каждой точки своя задержка: «всасывание» в центр волной
-        var ang = (i / UNIS.length) * Math.PI * 2 + (i % 3) * 0.35;
-        var r = 150 + (i % 4) * 22;
-        dots += '<span class="s1-dot" style="--x:' + Math.round(Math.cos(ang) * r) + 'px;--y:' + Math.round(Math.sin(ang) * r) + 'px;--d:' + (i * 40) + 'ms">' + esc(u) + '</span>';
+      var p = window.PROFILES[state.profileId] || window.PROFILES.it;
+      // Вузы ученика из профиля: их радар «находит», они остаются гореть лаймом
+      var mine = p.unis.filter(function (u) { return !u.locked; }).slice(0, 3).map(function (u, i) {
+        return [u.name.split(/[\s,]/)[0], [48, 200, 258][i], 1, u.match];
       });
+      var chips = RADAR.concat(mine).map(function (c) {
+        var ang = c[1] * Math.PI / 180, rx = RX[c[2]];
+        var hit = SWEEP_START + c[1] / 360 * SWEEP;    // момент, когда луч проходит над вузом
+        return '<span class="s1-chip' + (c[3] ? ' is-mine' : '') + '" style="--x:' + Math.round(Math.sin(ang) * rx) + 'px;--y:' + Math.round(-Math.cos(ang) * rx * 0.72) +
+          'px;--hit:' + Math.round(hit) + 'ms">' + esc(c[0]) + (c[3] ? '<b>' + c[3] + '%</b>' : '') + '</span>';
+      }).join('');
       el.innerHTML = '' +
         '<div class="s1-l"><h1 class="h1 s0-rise s1-title" style="--i:0">Venti подбирает <em>вузы</em> под тебя</h1>' +
-        '<div class="s1-stage" aria-hidden="true">' + dots +
+        '<div class="s1-stage" aria-hidden="true">' +
+          '<span class="s1-radar"><span class="s1-ring s1-ring-0"></span><span class="s1-ring s1-ring-1"></span><span class="s1-ring s1-ring-2"></span>' +
+          '<span class="s1-sweep"></span></span>' +
+          chips +
           '<span class="s1-wave"></span><span class="s1-wave s1-wave-2"></span>' +
-          '<span class="s1-core"><span class="s1-core-in">V</span></span><span class="s1-beam"></span></div>' +
+          '<span class="s1-core"><span class="s1-core-in">V</span></span></div>' +
         '<div class="s1-stats s0-rise" style="--i:1"><div><b id="s1-u">0</b><span>вузов</span></div><div><b id="s1-g">0</b><span>грантов</span></div></div>' +
+        '<div class="s1-prog s0-rise" style="--i:2"><div class="s1-prog-top"><span>Анализ</span><b id="s1-pct">0%</b></div><span class="s1-prog-bar"><i></i></span></div>' +
         '<ul class="s1-lines" aria-live="polite">' +
           '<li style="--d:300ms">Сравниваю 1 000+ вузов</li>' +
           '<li style="--d:900ms">Ищу гранты под ' + (GOAL_LABEL[a.goal] || 'твою цель') + '</li>' +
@@ -113,6 +124,7 @@
         '</ul>' +
         '<p class="s1-skip">Нажми, чтобы пропустить</p></div>';
 
+      countFmt(el.querySelector('#s1-pct'), 100, 2300, '%');
       countFmt(el.querySelector('#s1-u'), 1000, 1800, '+');
       countFmt(el.querySelector('#s1-g'), 300, 1800, '+');
 
@@ -165,7 +177,7 @@
     var unis = p.unis.map(function (u, i) {
       if (u.locked) {
         return '<li class="s2-uni s2-uni-locked s2-late" style="--i:' + (i + 3) + '"><span class="s2-uni-name" aria-hidden="true">' + esc(u.name) + '</span>' +
-          '<span class="s2-lock">🔒 Откроется завтра</span></li>';
+          '<span class="s2-lock">' + Icon.svg('lock') + 'Откроется завтра</span></li>';
       }
       return '<li class="s2-uni s2-late" style="--i:' + (i + 3) + '" title="' + esc(u.name) + ': ' + u.match + '% совпадения">' +
         '<span class="s2-uni-txt"><span class="s2-uni-name">' + esc(u.name) + '</span><span class="s2-uni-c">' + esc(u.country) + '</span></span>' +
@@ -177,7 +189,7 @@
         '<div class="s2-hero">' +
           '<span class="s2-rays" aria-hidden="true"></span>' +
           '<div class="s2-card" role="img" aria-label="Профессия: ' + esc(p.title) + ', совпадение ' + p.match + '%, редкость ' + esc(p.rarity) + '">' +
-            '<span class="s2-shine" aria-hidden="true"></span>' +
+            '<span class="s2-foil" aria-hidden="true"></span><span class="s2-shine" aria-hidden="true"></span>' +
             '<span class="s2-rarity">' + esc(p.rarity) + '</span>' +
             '<span class="s2-card-k">Твоя профессия №1</span>' +
             '<span class="s2-card-t">' + esc(p.title) + '</span>' +
@@ -197,6 +209,29 @@
         '<section class="card s2-block s2-late s2-unis-card" style="--i:2"><h2 class="h2">Вузы под тебя</h2><ul class="s2-unis">' + unis + '</ul></section>' +
       '</div>';
 
+    // Голографическая карта: после вылета наклоняется за мышкой, по ней бежит радужный блик
+    var card = el.querySelector('.s2-card');
+    var hero = el.querySelector('.s2-hero');
+    card.addEventListener('animationend', function (e) {
+      if (e.animationName === 's2-card-out') card.classList.add('is-live');
+    });
+    hero.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse' || FX.reduced || !card.classList.contains('is-live')) return;
+      var r = card.getBoundingClientRect();
+      var x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      var y = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+      card.style.setProperty('--rx', ((0.5 - y) * 16).toFixed(1) + 'deg');
+      card.style.setProperty('--ry', ((x - 0.5) * 20).toFixed(1) + 'deg');
+      card.style.setProperty('--mx', (x * 100).toFixed(0) + '%');
+      card.style.setProperty('--my', (y * 100).toFixed(0) + '%');
+      card.classList.add('is-hover');
+    });
+    hero.addEventListener('pointerleave', function () {
+      card.classList.remove('is-hover');
+      card.style.setProperty('--rx', '0deg');
+      card.style.setProperty('--ry', '0deg');
+    });
+
     // Кольцо и счёт идут одновременно: одна длительность, одна кривая (правило парных элементов)
     var fill = el.querySelector('#s2-ring-fill');
     var C = 2 * Math.PI * 50;
@@ -214,40 +249,74 @@
     enter: function (el, state) {
       var p = window.PROFILES[state.profileId] || window.PROFILES.it;
       el.classList.remove('s2-skip', 's2-open');
+      // Искры, которые вылетают из сундука при открытии: у каждой свой вектор и задержка
+      var burst = '';
+      for (var b = 0; b < 14; b++) {
+        var ang = -Math.PI / 2 + (b / 13 - 0.5) * Math.PI * 1.15;
+        var dist = 110 + (b % 4) * 28;
+        burst += '<span class="s2-fly" style="--dx:' + Math.round(Math.cos(ang) * dist) + 'px;--dy:' + Math.round(Math.sin(ang) * dist) +
+          'px;--fd:' + (b % 5) * 30 + 'ms;--fs:' + (0.6 + (b % 3) * 0.25) + '"></span>';
+      }
       el.innerHTML = '' +
         '<div class="s2-intro">' +
           '<h1 class="h1 s0-rise" style="--i:0">Твой результат <em>готов</em></h1>' +
-          '<p class="lead s0-rise" style="--i:1">Открой свой результат</p>' +
-          '<button type="button" class="s2-chest s0-rise" style="--i:2" aria-label="Открой свой результат">' +
-            '<span class="s2-chest-glow"></span>' +
-            '<span class="s2-spark" style="--sx:-86px;--sy:-70px;--sd:0s"></span>' +
-            '<span class="s2-spark" style="--sx:82px;--sy:-52px;--sd:.7s"></span>' +
-            '<span class="s2-spark" style="--sx:-70px;--sy:30px;--sd:1.3s"></span>' +
-            '<span class="s2-spark" style="--sx:92px;--sy:24px;--sd:1.9s"></span>' +
-            '<span class="s2-chest-lid"></span><span class="s2-chest-box"><span class="s2-chest-lock"></span></span>' +
+          '<p class="lead s0-rise" style="--i:1">Профессия, вузы и шанс на грант уже внутри.</p>' +
+          '<button type="button" class="s2-chest s0-rise" style="--i:2" aria-label="Открыть сундук с результатом">' +
+            '<span class="s2-floor" aria-hidden="true"></span>' +
+            '<span class="s2-burst" aria-hidden="true"><span class="s2-burst-rays"></span><span class="s2-burst-core"></span>' + burst + '</span>' +
+            '<span class="s2-rig" aria-hidden="true"><span class="s2-hop"><span class="s2-box">' +
+              '<span class="s2-f s2-front"></span><span class="s2-f s2-back"></span>' +
+              '<span class="s2-f s2-left"></span><span class="s2-f s2-right"></span>' +
+              '<span class="s2-f s2-bottom"></span><span class="s2-f s2-glow"></span>' +
+              '<span class="s2-lid">' +
+                '<span class="s2-f s2-lid-top"></span><span class="s2-f s2-lid-front"><span class="s2-plate"></span></span>' +
+                '<span class="s2-f s2-lid-back"></span><span class="s2-f s2-lid-left"></span>' +
+                '<span class="s2-f s2-lid-right"></span><span class="s2-f s2-lid-under"></span>' +
+              '</span>' +
+            '</span></span></span>' +
+            '<span class="s2-spark" style="--sx:-104px;--sy:-78px;--sd:0s"></span>' +
+            '<span class="s2-spark" style="--sx:100px;--sy:-58px;--sd:.7s"></span>' +
+            '<span class="s2-spark" style="--sx:-92px;--sy:34px;--sd:1.3s"></span>' +
+            '<span class="s2-spark" style="--sx:108px;--sy:26px;--sd:1.9s"></span>' +
           '</button>' +
-          '<p class="s2-tap">Нажми на сундук</p>' +
+          '<p class="s2-tap s0-rise" style="--i:3">Нажми на сундук</p>' +
         '</div>';
 
       var chest = el.querySelector('.s2-chest');
+      var rig = el.querySelector('.s2-rig');
       var opened = false;
+
+      // На ноутбуке сундук поворачивается за мышкой: видно, что он объёмный
+      el.onpointermove = function (e) {
+        if (e.pointerType !== 'mouse' || opened || FX.reduced) return;
+        var r = chest.getBoundingClientRect();
+        var nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+        var ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+        rig.style.setProperty('--py', (nx * 22).toFixed(1) + 'deg');
+        rig.style.setProperty('--px', (-ny * 10).toFixed(1) + 'deg');
+      };
+
       chest.addEventListener('click', function (e) {
         e.stopPropagation();
         if (opened) return;
         opened = true;
-        FX.flash();
         FX.vibrate([30, 50, 80]);
         FX.sound('ding');
+        // Крышка распахивается, изнутри бьёт свет и летят искры; вспышка в момент, когда свет максимальный
         chest.classList.add('is-opening');
+        rig.style.removeProperty('--py');
+        rig.style.removeProperty('--px');
+        s2Timers.push(setTimeout(function () { FX.flash(); FX.sound('levelup'); }, FX.reduced ? 0 : 620));
         s2Timers.push(setTimeout(function () {
           el.classList.add('s2-open');
+          el.onpointermove = null;
           renderResult(el, p);
           el.scrollTop = 0;
           // Фокус на карточку: экранный диктор сразу читает результат
           var card = el.querySelector('.s2-card');
           card.setAttribute('tabindex', '-1');
           card.focus({ preventScroll: true });
-        }, FX.reduced ? 0 : 260));
+        }, FX.reduced ? 0 : 820));
       });
 
       // Тап по экрану во время раскрытия доигрывает всё мгновенно
@@ -260,6 +329,7 @@
       s2Timers.forEach(clearTimeout);
       s2Timers = [];
       el.onclick = null;
+      el.onpointermove = null;
     }
   });
 

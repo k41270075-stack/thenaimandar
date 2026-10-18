@@ -57,16 +57,17 @@
             '<img class="s6-avatar" src="img/ventorme-icon.png" alt="" width="40" height="40">' +
             '<div class="s6-chat-name"><b>Venti · Ventorme AI</b><span>бот в Telegram</span></div>' +
           '</div>' +
+          '<div class="s6-msg"><div class="s6-typing" aria-hidden="true"><span></span><span></span><span></span></div>' +
           '<div class="s6-bubble">' +
             '<p>Привет! Я Venti из Ventorme. ' + result + ' Серия: ' + streakText(streak) + ' 🔥</p>' +
             '<p>Завтра в 19:00 пришлю задание на 60 секунд.</p>' +
-          '</div>' +
+          '</div></div>' +
           '<span class="tag-example">пример первого сообщения</span>' +
         '</div>' +
       '</div>' +
 
       '<div class="card s6-time">' +
-        '<span class="s6-time-icon" aria-hidden="true">⏰</span>' +
+        '<span class="s6-time-icon" aria-hidden="true">' + Icon.svg('alarm') + '</span>' +
         '<div><b>Каждый день в 19:00</b><span>Одно сообщение в день. Отписка одной командой /stop</span></div>' +
       '</div>' +
 
@@ -168,11 +169,11 @@
 
       '<div class="s7-result" hidden>' +
         '<div class="panel"><div class="panel-core s7-streak">' +
-          '<span class="s7-fire" aria-hidden="true">🔥</span>' +
+          '<span class="s7-fire" aria-hidden="true">' + Icon.svg('fire') + '</span>' +
           '<div><b class="s7-streak-num"></b><span>Серия растёт, план поступления тоже</span></div>' +
         '</div></div>' +
         '<div class="card s7-uni">' +
-          '<span class="s7-uni-icon" aria-hidden="true">🔓</span>' +
+          '<span class="s7-uni-icon" aria-hidden="true">' + Icon.svg('unlock') + '</span>' +
           '<div class="s7-uni-name"><b>' + esc(uni.name) + '</b><span>' + esc(uni.country) + ' · открыт после задания</span></div>' +
           '<b class="s7-uni-match">' + uni.match + '%</b>' +
         '</div>' +
@@ -206,9 +207,15 @@
 
     if (s.tomorrow) {
       open();
+      el.classList.add('s7-seen');
     } else {
-      FX.vibrate([20, 40, 20]);
-      FX.sound('pop');
+      el.classList.remove('s7-seen');
+      // Вибрация и звук в момент, когда уведомление падает сверху (после перемотки часов)
+      setTimeout(function () {
+        if (Screens.current() !== 's7') return;
+        FX.vibrate([20, 40, 20]);
+        FX.sound('pop');
+      }, FX.reduced ? 0 : 1350);
     }
   }
 

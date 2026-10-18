@@ -8,10 +8,24 @@
   var xpText = xpEl.querySelector('b');
   var xpFill = xpEl.querySelector('.hud-xp-fill');
 
+  // XP набегает от старого значения к новому: видно, сколько начислили (300 мс, сильный ease-out)
+  var shownXP = null, xpRaf = 0;
+  function countXP(to) {
+    var from = shownXP == null || window.FX && FX.reduced ? to : shownXP;
+    var start = performance.now();
+    cancelAnimationFrame(xpRaf);
+    (function tick(now) {
+      var t = Math.min(1, (now - start) / 300);
+      shownXP = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 4)));
+      xpText.textContent = shownXP + ' XP';
+      if (t < 1) xpRaf = requestAnimationFrame(tick);
+    })(start);
+  }
+
   function render(s) {
     streakEl.textContent = s.streak;
     levelEl.textContent = s.level;
-    xpText.textContent = s.xp + ' XP';
+    countXP(s.xp);
     xpFill.style.width = ((s.xp % State.XP_PER_LEVEL) / State.XP_PER_LEVEL * 100) + '%';
   }
 

@@ -149,23 +149,72 @@
 .s5-dim.is-out { animation: s5-fade-out .22s ease-out forwards; }
 @keyframes s5-fade { from { opacity: 0; } }
 @keyframes s5-fade-out { to { opacity: 0; } }
+/* Медаль «Первые 5 минут»: объёмная монета с ребром. Прилетает, делает полтора оборота и ложится лицом,
+   по лицу один раз проходит блик. Празднование, которое ученик видит один раз, поэтому здесь можно дольше
+   обычных 300 мс (скилл animate: rare / first-time = delight). */
 .s5-badge {
+  position: relative;
   width: 200px; aspect-ratio: 1;
+  perspective: 900px;
+}
+.s5-coin {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  animation: s5-coin 1.3s cubic-bezier(.23, 1, .32, 1) .1s both, s5-coin-idle 3.2s ease-in-out 1.5s infinite;
+}
+@keyframes s5-coin {
+  from { opacity: 0; transform: translateY(-60px) rotateY(-540deg) rotateX(20deg) scale(.7); }
+  25%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes s5-coin-idle { 0%, 100% { transform: rotateY(0) rotateX(0); } 50% { transform: rotateY(14deg) rotateX(-6deg); } }
+.s5-edge {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #6E8F00, #A9D422 45%, #6E8F00);
+  transform: translateZ(calc(var(--z) * -1.2px));
+}
+.s5-face {
+  position: absolute; inset: 0;
   border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   text-align: center;
-  background: radial-gradient(circle at 30% 25%, #E4FF8A, var(--lime) 45%, #8FB800);
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+.s5-face-front {
+  transform: translateZ(1px);
   color: var(--lime-ink);
-  box-shadow: 0 0 0 8px rgba(198, 244, 50, .25), 0 0 60px rgba(198, 244, 50, .55);
-  animation: s5-badge .9s var(--ease-spring) .1s both;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(11, 13, 36, .14) 59%, transparent 61%),
+    radial-gradient(circle at 30% 25%, #EEFFB0, var(--lime) 45%, #8FB800);
+  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, .35), inset 0 -10px 24px rgba(60, 80, 0, .35);
 }
-/* 3D-переворот бейджа: пружина, потому что это главный «вау» момент экрана */
-@keyframes s5-badge {
-  from { opacity: 0; transform: perspective(700px) rotateY(-180deg) scale(.5); }
-  to   { opacity: 1; transform: perspective(700px) rotateY(0) scale(1); }
+.s5-face-back {
+  transform: translateZ(-15.4px) rotateY(180deg);
+  color: var(--lime);
+  font-size: 84px;
+  background: radial-gradient(circle at 30% 25%, #4A55FF, #00033E);
+  box-shadow: inset 0 0 0 6px rgba(198, 244, 50, .5);
 }
-.s5-badge-t { font-size: 22px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; max-width: 8em; }
-.s5-badge-xp { font-size: 15px; font-weight: 800; margin-top: 4px; }
+.s5-glare {
+  position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .7) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: s5-glare .8s cubic-bezier(.77, 0, .175, 1) 1.25s both;
+}
+@keyframes s5-glare { to { transform: translateX(120%); } }
+/* Свечение под монетой */
+.s5-badge::after {
+  content: "";
+  position: absolute; inset: 8%;
+  z-index: -1;
+  border-radius: 50%;
+  box-shadow: 0 0 0 10px rgba(198, 244, 50, .18), 0 0 70px rgba(198, 244, 50, .55);
+  animation: s0-fade .6s ease-out .4s both;
+}
+.s5-badge-t { font-size: 22px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; max-width: 7em; }
+.s5-badge-xp { font-size: 15px; font-weight: 800; margin-top: 4px; padding: 3px 10px; border-radius: var(--r-pill); background: rgba(11, 13, 36, .1); }
 .s5-lvl { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.03em; animation: s3-rise .4s var(--ease) .6s both; }
 .s5-tap { margin: 0; font-size: 15px; opacity: .75; }
 
@@ -183,7 +232,8 @@
 .s5-dim:focus { outline: none; }
 .s5-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .s5-streak { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 14px; }
-.s5-fire { font-size: 44px; line-height: 1; transform: scale(.6); opacity: .4; }
+.s5-fire { font-size: 44px; line-height: 1; color: var(--fire); transform: scale(.6); opacity: .4; display: grid; place-items: center; }
+.s5-fire .ico { width: 1em; height: 1em; filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--fire) 45%, transparent)); }
 .s5-go .s5-fire { animation: s5-fire .7s var(--ease-spring) both; }
 @keyframes s5-fire { from { transform: scale(.6); opacity: .4; } to { transform: none; opacity: 1; } }
 .s5-streak-txt { display: flex; align-items: baseline; gap: 8px; font-size: 16px; font-weight: 600; }
@@ -207,7 +257,8 @@
 .s5-locked { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; border-style: dashed; border-color: var(--accent-line); background: var(--accent-soft); }
 .s5-locked b { display: block; font-size: 16px; }
 .s5-locked span { font-size: 15px; color: var(--ink-muted); }
-.s5-lock { font-size: 30px; display: grid; place-items: center; animation: s5-lock 3s ease-in-out infinite; transform-origin: 50% 20%; }
+.s5-locked .s5-lock { width: 44px; height: 44px; border-radius: 12px; background: var(--surface-1); font-size: 24px; color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.s5-lock { font-size: 30px; color: var(--accent); display: grid; place-items: center; animation: s5-lock 3s ease-in-out infinite; transform-origin: 50% 20%; }
 /* Замок подрагивает раз в 3 секунды: «загляни завтра» */
 @keyframes s5-lock { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-8deg); } 90% { transform: rotate(7deg); } 95% { transform: rotate(-4deg); } }
 .s5-cta { margin-top: auto; }
@@ -217,29 +268,29 @@
 .s3-l, .s3-r, .s5-l, .s5-r { display: contents; }
 
 @media (min-width: 900px) {
-  [data-screen="s3"], [data-screen="s5"] {
+  html:not([data-view="phone"]) [data-screen="s3"], html:not([data-view="phone"]) [data-screen="s5"] {
     padding-left: max(32px, calc((100% - 1080px) / 2));
     padding-right: max(32px, calc((100% - 1080px) / 2));
     display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-content: center;
   }
-  .s3-l, .s3-r, .s5-l, .s5-r { display: flex; flex-direction: column; gap: 18px; }
-  .s3-l { justify-content: center; }
-  .s3-go { min-height: 96px; font-size: 21px; }
-  .s3-all ul { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  html:not([data-view="phone"]) .s3-l, html:not([data-view="phone"]) .s3-r, html:not([data-view="phone"]) .s5-l, html:not([data-view="phone"]) .s5-r { display: flex; flex-direction: column; gap: 18px; }
+  html:not([data-view="phone"]) .s3-l { justify-content: center; }
+  html:not([data-view="phone"]) .s3-go { min-height: 96px; font-size: 21px; }
+  html:not([data-view="phone"]) .s3-all ul { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
 
   /* Вызов: одна колонка по центру, ответы сеткой 2×2 */
-  [data-screen="s4"] {
+  html:not([data-view="phone"]) [data-screen="s4"] {
     padding-left: max(32px, calc((100% - 720px) / 2));
     padding-right: max(32px, calc((100% - 720px) / 2));
   }
-  .s4-card { padding: 28px; }
-  .s4-q { font-size: 26px; }
-  .s4-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .s4-opt { min-height: 64px; font-size: 17px; }
-  .s4-next .btn { max-width: 360px; margin-left: auto; }
+  html:not([data-view="phone"]) .s4-card { padding: 28px; }
+  html:not([data-view="phone"]) .s4-q { font-size: 26px; }
+  html:not([data-view="phone"]) .s4-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  html:not([data-view="phone"]) .s4-opt { min-height: 64px; font-size: 17px; }
+  html:not([data-view="phone"]) .s4-next .btn { max-width: 360px; margin-left: auto; }
 
-  .s5-cta { margin-top: 0; }
-  .s5-badge { width: 240px; }
+  html:not([data-view="phone"]) .s5-cta { margin-top: 0; }
+  html:not([data-view="phone"]) .s5-badge { width: 240px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -247,7 +298,8 @@
   .s3-go-wrap { animation: none; }
   .s3-go { transition: none; }
   .s4-hurry .s4-time, .s4-combo.is-on span, .s4-opt.is-right, .s4-opt.is-picked { animation: none; }
-  .s5-badge { animation: s3-fade .2s ease-out both; }
+  .s5-coin { animation: s3-fade .2s ease-out both; }
+  .s5-glare { display: none; }
   .s5-go .s5-fire { animation: none; transform: none; opacity: 1; }
   .s5-flip-in, .s5-week li { transition: none; }
   .s5-go .s3-segs li.is-new::after { animation: none; transform: none; }

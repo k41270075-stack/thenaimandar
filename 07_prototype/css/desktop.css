@@ -1,0 +1,437 @@
+/* Широкий вид для ноутбука и «вид телефона» по Shift + CapsLock + Tab (переключает js/view.js).
+   Подключается последним и только переставляет готовые блоки экранов: разметку и классы частей не меняет.
+
+   - Ширина от 900px: сайт во весь экран, шапка с шагами пути, экраны в две колонки.
+   - html[data-view="phone"]: на любом ноутбуке телефон в рамке по центру, внутри мобильная вёрстка.
+   - Уже 900px всё как раньше (телефон и планшет). */
+
+/* Шаги пути и подсказка нужны только широкому виду */
+.dk-steps { display: none; }
+
+/* ========================================================================
+   Вид телефона на ноутбуке: рамка по центру при любой высоте окна
+   ======================================================================== */
+@media (min-width: 600px) {
+  html[data-view="phone"] body {
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(50% 60% at 20% 20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+      radial-gradient(40% 50% at 85% 85%, rgba(198, 244, 50, .14), transparent 70%),
+      var(--surface-2);
+  }
+  html[data-view="phone"] .phone {
+    width: 390px;
+    height: min(844px, calc(100dvh - 40px));
+    border-radius: 48px;
+    border: 11px solid #15172A;
+    box-shadow: 0 0 0 1.5px #2A2D45, var(--lift), 0 50px 100px -30px rgba(11, 13, 36, .5);
+  }
+}
+
+/* ========================================================================
+   Широкий вид
+   ======================================================================== */
+@media (min-width: 900px) {
+  html:not([data-view="phone"]) {
+    --dk-wrap: 1160px;
+    --dk-pad: max(48px, calc((100% - var(--dk-wrap)) / 2));
+    --hud-h: 72px;
+  }
+
+  html:not([data-view="phone"]) body { display: block; background: var(--canvas); }
+
+  html:not([data-view="phone"]) .phone {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Сияние шире и спокойнее, второе пятно снизу справа */
+  html:not([data-view="phone"]) .phone::before {
+    left: -5%; top: -20%;
+    width: 110%; height: 80%;
+    filter: blur(40px);
+    opacity: .9;
+  }
+
+  /* ---------- Шапка: логотип, шаги пути, счётчики ---------- */
+  html:not([data-view="phone"]) .hud {
+    padding: 0 var(--dk-pad);
+    gap: 24px;
+    background: color-mix(in srgb, var(--canvas) 72%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(16px);
+    backdrop-filter: saturate(1.4) blur(16px);
+    border-bottom: 1px solid color-mix(in srgb, var(--hairline) 70%, transparent);
+  }
+  html:not([data-view="phone"]) .hud-logo img { width: 124px; }
+  html:not([data-view="phone"]) .hud-stats { gap: 8px; font-size: 14px; }
+  html:not([data-view="phone"]) .hud-streak,
+  html:not([data-view="phone"]) .hud-level,
+  html:not([data-view="phone"]) .hud-xp { height: 36px; padding: 0 14px; }
+  html:not([data-view="phone"]) .hud-xp { min-width: 92px; }
+
+  html:not([data-view="phone"]) .dk-steps {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 auto;
+    padding: 4px;
+    list-style: none;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--surface-1) 80%, transparent);
+  }
+  .dk-steps li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 12px 0 5px;
+    border-radius: var(--r-pill);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-subtle);
+    white-space: nowrap;
+    transition: background-color .3s var(--ease), color .3s var(--ease);
+  }
+  .dk-step-n {
+    display: grid;
+    place-items: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: background-color .3s var(--ease), color .3s var(--ease);
+  }
+  .dk-steps li.is-done { color: var(--ink-muted); }
+  .dk-steps li.is-done .dk-step-n { background: var(--accent-soft); color: transparent; position: relative; }
+  .dk-steps li.is-done .dk-step-n::after {
+    content: "";
+    position: absolute;
+    width: 9px; height: 5px;
+    border-left: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: translateY(-1px) rotate(-45deg);
+  }
+  .dk-steps li[aria-current] { background: var(--accent); color: var(--on-accent); }
+  .dk-steps li[aria-current] .dk-step-n { background: rgba(255, 255, 255, .22); color: var(--on-accent); }
+  /* На узком ноутбуке у шагов остаются только номера, подпись у текущего */
+  @media (max-width: 1380px) {
+    .dk-steps li:not([aria-current]) .dk-step-t { display: none; }
+    .dk-steps li:not([aria-current]) { padding: 0 5px; }
+  }
+
+  /* ---------- Экраны: две колонки по центру ---------- */
+  html:not([data-view="phone"]) .screen {
+    padding-top: calc(var(--hud-h) + 40px);
+    padding-bottom: 48px;
+    transform: translateY(16px);
+  }
+  /* S6 и S7: две колонки по центру */
+  html:not([data-view="phone"]) [data-screen="s6"],
+  html:not([data-view="phone"]) [data-screen="s7"] {
+    padding-left: var(--dk-pad);
+    padding-right: var(--dk-pad);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(40px, 5vw, 80px);
+    row-gap: 18px;
+    align-content: safe center;
+    align-items: start;
+  }
+  html:not([data-view="phone"]) .screen.is-active { transform: none; }
+  html:not([data-view="phone"]) .screen.is-leaving { transform: translateY(-16px); }
+  html:not([data-view="phone"]) .screen > * { min-width: 0; }
+
+  /* Типографика крупнее: на ноутбуке читают с метра, а на защите с проектора */
+  html:not([data-view="phone"]) .h1 { font-size: clamp(32px, 3vw, 44px); line-height: 1.08; letter-spacing: -0.04em; }
+  html:not([data-view="phone"]) .h2 { font-size: 19px; }
+  html:not([data-view="phone"]) .lead { font-size: 19px; max-width: 32em; }
+  html:not([data-view="phone"]) .btn { min-height: 60px; font-size: 17px; }
+  /* Наведение только для мышки: на тач-экранах тап вызывает ложный hover */
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-view="phone"]) .btn:hover { background: var(--accent-press); }
+    html:not([data-view="phone"]) .btn-lime:hover { background: color-mix(in srgb, var(--lime) 88%, #000); }
+    html:not([data-view="phone"]) .btn-ghost:hover { background: var(--surface-2); }
+    html:not([data-view="phone"]) .chip:hover:not([aria-pressed="true"]) { border-color: var(--accent-line); background: var(--accent-soft); }
+    html:not([data-view="phone"]) .s4-opt:hover:not([disabled]) { border-color: var(--accent); background: var(--accent-soft); }
+  }
+  html:not([data-view="phone"]) .card { padding: 20px 22px; }
+
+  /* S0–S5: раскладка для ноутбука живёт в part1.css и part2.css (обёртки .s0-l, .s2-l, .s5-r и т. п.).
+     Здесь только то, что их дополняет. */
+  html:not([data-view="phone"]) .s2-chest { scale: 1.3; }
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-view="phone"]) .s2-chest:hover:not(.is-opening) .s2-floor::after { opacity: 1; }
+  }
+
+  /* ---------- S6: действие слева, предпросмотр Telegram справа ---------- */
+  html:not([data-view="phone"]) [data-screen="s6"] {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-areas: ". chat" "h1 chat" "lead chat" "time chat" "connect chat" "mail chat" "done chat" ". chat";
+    grid-template-rows: 1fr repeat(6, auto) 1fr;
+    row-gap: 14px;
+  }
+  [data-screen="s6"] > .h1 { grid-area: h1; }
+  [data-screen="s6"] > .lead { grid-area: lead; }
+  [data-screen="s6"] > .s6-chat { grid-area: chat; }
+  [data-screen="s6"] > .s6-time { grid-area: time; }
+  [data-screen="s6"] > .s6-connect { grid-area: connect; }
+  [data-screen="s6"] > .s6-mail { grid-area: mail; }
+  [data-screen="s6"] > .s6-done { grid-area: done; }
+  html:not([data-view="phone"]) [data-screen="s6"] .lead { margin-bottom: 6px; }
+  html:not([data-view="phone"]) [data-screen="s6"] .s6-done { margin-top: 0; }
+  html:not([data-view="phone"]) .s6-chat { align-self: center; }
+  html:not([data-view="phone"]) .s6-chat .panel-core {
+    gap: 16px;
+    padding: 26px;
+    background:
+      radial-gradient(60% 50% at 100% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+      var(--surface-1);
+  }
+  html:not([data-view="phone"]) .s6-avatar { width: 52px; height: 52px; }
+  html:not([data-view="phone"]) .s6-chat-name b { font-size: 18px; }
+  html:not([data-view="phone"]) .s6-chat-head { padding-bottom: 16px; border-bottom: 1px solid var(--hairline); }
+  html:not([data-view="phone"]) .s6-bubble { font-size: 17px; padding: 16px 18px; max-width: 86%; }
+
+  /* ---------- S7: текст и итог слева, экран блокировки справа ---------- */
+  html:not([data-view="phone"]) [data-screen="s7"] {
+    grid-template-areas: ". lock" "h1 lock" "lead lock" "result lock" ". lock";
+    grid-template-rows: 1fr auto auto auto 1fr;
+  }
+  [data-screen="s7"] > .h1 { grid-area: h1; }
+  [data-screen="s7"] > .lead { grid-area: lead; }
+  [data-screen="s7"] > .s7-lock { grid-area: lock; align-self: center; }
+  [data-screen="s7"] > .s7-result { grid-area: result; }
+  html:not([data-view="phone"]) .s7-lock {
+    justify-content: center;
+    min-height: min(560px, 66dvh);
+    padding: 40px 32px;
+    border-radius: 32px;
+  }
+  html:not([data-view="phone"]) .s7-clock { width: 96px; height: 96px; }
+  html:not([data-view="phone"]) .s7-time { font-size: 76px; }
+  html:not([data-view="phone"]) .s7-notif { max-width: 420px; padding: 14px; }
+  html:not([data-view="phone"]) .s7-result { max-width: 480px; margin-top: 10px; }
+
+  /* ---------- Демо-меню: окно по центру снизу, а не шторка во всю ширину ---------- */
+  html:not([data-view="phone"]) .demo-sheet {
+    left: 50%; right: auto;
+    width: 420px;
+    bottom: 32px;
+    transform: translateX(-50%);
+  }
+}
+
+/* Подсказка при смене вида */
+.view-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: #0B0D24;
+  color: #F2F3F8;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 18px 40px -12px rgba(11, 13, 36, .5);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+}
+.view-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.view-toast kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .14);
+  font: inherit;
+  font-size: 12.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-view="phone"]) .screen,
+  html:not([data-view="phone"]) .screen.is-leaving { transform: none; }
+}
+
+/* ========================================================================
+   Фон: кнопка с палитрой в шапке и окно выбора (js/view.js)
+   ======================================================================== */
+.bg-btn {
+  display: grid; place-items: center;
+  width: 30px; height: 30px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--surface-1);
+  color: var(--accent);
+  cursor: pointer;
+  transition: transform .16s var(--ease-out), background-color .2s ease;
+}
+.bg-btn .ico { width: 16px; height: 16px; }
+.bg-btn:active { transform: scale(.94); }
+.bg-btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+.bg-btn[aria-expanded="true"] { background: var(--accent-soft); }
+@media (min-width: 900px) { html:not([data-view="phone"]) .bg-btn { width: 36px; height: 36px; } }
+
+/* Окно растёт из кнопки (правый верхний угол), 200 мс, сильный ease-out; закрывается быстрее */
+.bg-pop {
+  position: absolute;
+  z-index: 45;
+  width: 248px;
+  padding: 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-panel);
+  background: var(--surface-1);
+  box-shadow: 0 18px 50px -14px rgba(11, 13, 36, .35);
+  transform-origin: top right;
+  opacity: 0;
+  transform: scale(.95);
+  transition: opacity .15s var(--ease-out), transform .15s var(--ease-out);
+}
+.bg-pop.is-open { opacity: 1; transform: none; transition-duration: .2s; }
+.bg-pop[hidden] { display: none; }
+.bg-pop-t { margin: 2px 4px 10px; font-size: 15px; font-weight: 650; }
+.bg-pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bg-opt {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 6px;
+  border: 1.5px solid var(--hairline);
+  border-radius: var(--r-card);
+  background: none;
+  font-size: 13.5px; font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: border-color .2s ease, transform .16s var(--ease-out);
+}
+.bg-opt:active { transform: scale(.97); }
+.bg-opt:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 1px; }
+.bg-opt[aria-checked="true"] { border-color: var(--accent); color: var(--ink); }
+.bg-swatch { display: block; height: 52px; border-radius: 9px; background-color: var(--canvas); box-shadow: inset 0 0 0 1px var(--hairline); }
+.bg-swatch-stars {
+  background:
+    radial-gradient(1.5px 1.5px at 20% 30%, var(--accent), transparent), radial-gradient(1.5px 1.5px at 70% 20%, var(--violet), transparent),
+    radial-gradient(2px 2px at 45% 70%, var(--accent), transparent), radial-gradient(1.5px 1.5px at 85% 65%, #8FB800, transparent),
+    radial-gradient(1px 1px at 30% 85%, var(--accent), transparent), var(--canvas);
+}
+.bg-swatch-aurora {
+  background:
+    radial-gradient(60% 80% at 25% 30%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 70%),
+    radial-gradient(55% 70% at 80% 70%, rgba(198, 244, 50, .55), transparent 70%), var(--canvas);
+}
+.bg-swatch-grid { background: radial-gradient(circle, color-mix(in srgb, var(--accent) 35%, transparent) 1px, transparent 1.6px) 0 0 / 8px 8px, var(--canvas); }
+@media (hover: hover) and (pointer: fine) { .bg-opt:hover:not([aria-checked="true"]) { border-color: var(--accent-line); } }
+
+/* Фоны */
+html[data-bg="aurora"] #bg, html[data-bg="grid"] #bg, html[data-bg="plain"] #bg { display: none; }
+html[data-bg="aurora"] .phone::before {
+  left: -20%; top: -15%;
+  width: 140%; height: 130%;
+  background:
+    radial-gradient(35% 30% at 25% 25%, color-mix(in srgb, var(--accent) 38%, transparent), transparent 70%),
+    radial-gradient(30% 28% at 75% 60%, rgba(198, 244, 50, .32), transparent 70%),
+    radial-gradient(28% 24% at 40% 85%, color-mix(in srgb, var(--violet) 26%, transparent), transparent 70%);
+  filter: blur(30px);
+}
+html[data-bg="grid"] .phone {
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--accent) 24%, transparent) 1px, transparent 1.6px) 0 0 / 24px 24px,
+    var(--canvas);
+}
+html[data-bg="grid"] .phone::before { opacity: .5; }
+html[data-bg="plain"] .phone::before { display: none; }
+
+/* ---------- Окно фона на узком экране: шторка снизу, как в iOS (кривая --ease = ease-drawer) ---------- */
+.bg-scrim {
+  position: absolute; inset: 0;
+  z-index: 44;
+  background: rgba(11, 13, 36, .35);
+  opacity: 0;
+  transition: opacity .24s var(--ease-out);
+}
+.bg-scrim.is-open { opacity: 1; transition-duration: .4s; }
+.bg-scrim[hidden] { display: none; }
+.bg-pop.is-sheet {
+  top: auto; right: 10px; left: 10px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  width: auto;
+  padding: 20px 14px 14px;
+  border-radius: 24px;
+  transform-origin: 50% 100%;
+  opacity: 1;
+  transform: translateY(calc(100% + 24px));
+  transition: transform .24s var(--ease-out);
+}
+.bg-pop.is-sheet.is-open { transform: none; transition: transform .4s var(--ease); }
+.bg-pop.is-sheet::before {
+  content: ""; position: absolute; top: 7px; left: 50%;
+  width: 38px; height: 4px; margin-left: -19px;
+  border-radius: 4px; background: var(--hairline-str);
+}
+.bg-pop.is-sheet .bg-pop-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bg-pop.is-sheet .bg-swatch { height: 64px; }
+.bg-pop.is-sheet .bg-opt { font-size: 13px; padding: 5px; }
+
+/* ---------- Слой фона под экранами: «Сетка» и «Сияние» ---------- */
+.bg-layer { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; display: none; }
+html[data-bg="grid"] .bg-layer, html[data-bg="aurora"] .bg-layer { display: block; }
+html[data-bg="grid"] .phone { background: var(--canvas); }
+.bg-grid {
+  position: absolute; inset: -24px;
+  display: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, transparent) 1.1px, transparent 1.7px) 0 0 / 24px 24px;
+  -webkit-mask: radial-gradient(120% 70% at 50% 0%, #000 30%, transparent 80%);
+  mask: radial-gradient(120% 70% at 50% 0%, #000 30%, transparent 80%);
+  animation: bg-grid-drift 9s linear infinite;
+}
+html[data-bg="grid"] .bg-grid { display: block; }
+@keyframes bg-grid-drift { to { transform: translate(24px, 24px); } }
+.bg-blob {
+  position: absolute;
+  display: none;
+  width: 70%; aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: .7;
+}
+html[data-bg="aurora"] .bg-blob { display: block; }
+html[data-bg="aurora"] .phone::before { display: none; }
+.bg-blob-1 { left: -20%; top: -15%; background: var(--accent); animation: bg-blob-1 14s ease-in-out infinite alternate; }
+.bg-blob-2 { right: -25%; top: 30%; background: var(--lime); opacity: .55; animation: bg-blob-2 17s ease-in-out infinite alternate; }
+.bg-blob-3 { left: 5%; bottom: -25%; background: var(--violet); opacity: .35; animation: bg-blob-3 12s ease-in-out infinite alternate; }
+@keyframes bg-blob-1 { to { transform: translate(30%, 20%) scale(1.15); } }
+@keyframes bg-blob-2 { to { transform: translate(-25%, -15%) scale(.9); } }
+@keyframes bg-blob-3 { to { transform: translate(20%, -30%) scale(1.2); } }
+@media (prefers-color-scheme: dark) { .bg-blob { opacity: .4; } .bg-blob-2 { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .bg-grid, .bg-blob { animation: none; } }
+
+/* ---------- Телефон ---------- */
+/* Лучи и вспышки шире экрана не должны давать прокрутку вбок */
+.screen { overflow-x: hidden; }
+
+/* Переход между экранами: к сдвигу добавлено лёгкое размытие, экраны перетекают, а не перескакивают */
+.screen { filter: blur(6px); transition: opacity .28s var(--ease), transform .28s var(--ease), filter .28s var(--ease), visibility 0s linear .28s; }
+.screen.is-active { filter: none; transition: opacity .28s var(--ease), transform .28s var(--ease), filter .28s var(--ease), visibility 0s; }
+@media (prefers-reduced-motion: reduce) { .screen, .screen.is-active { filter: none; } }
+
+/* Узкий телефон: шапка компактнее, чтобы логотип, палитра и три счётчика влезали */
+@media (max-width: 389px) {
+  .hud { padding-left: 12px; padding-right: 12px; gap: 6px; }
+  .hud-logo img { width: 90px; }
+  .hud-stats { gap: 4px; font-size: 12.5px; }
+  .hud-streak, .hud-level, .hud-xp { height: 28px; padding: 0 8px; gap: 3px; }
+  .hud-xp { min-width: 64px; }
+  .bg-btn { width: 28px; height: 28px; }
+}
+/* Лучи за карточкой профессии шире экрана: обрезаем по горизонтали у самого блока */
+.s2-hero { overflow-x: clip; }

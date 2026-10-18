@@ -179,6 +179,12 @@
      S5. Награда: level up, серия, замок на 4-м вузе
      ====================================================================== */
   var s5Timers = [];
+  // Ребро монеты: 12 тонких дисков друг за другом дают толщину при повороте
+  function coinEdge() {
+    var h = '';
+    for (var i = 1; i <= 12; i++) h += '<span class="s5-edge" style="--z:' + i + '"></span>';
+    return h;
+  }
   function levelName(c, t) {
     var r = t ? c / t : 0;
     return r === 1 ? 'сильный' : r >= 0.66 ? 'уверенный' : r > 0 ? 'базовый' : 'стартовый';
@@ -201,21 +207,24 @@
       el.innerHTML = '<div class="s5-l">' +
         '<h1 class="h1 s3-rise" style="--i:0">' + title + '</h1>' +
         '<div class="card s5-streak s3-rise" style="--i:1">' +
-          '<span class="s5-fire" aria-hidden="true">🔥</span>' +
+          '<span class="s5-fire" aria-hidden="true">' + Icon.svg('fire') + '</span>' +
           '<div class="s5-streak-txt"><span class="s5-flip" aria-hidden="true"><span class="s5-flip-in"><b>0</b><b>1</b></span></span><span>день подряд</span></div>' +
           '<span class="s5-sr">Серия: 1 день подряд</span>' +
           '<ol class="s5-week" aria-hidden="true">' + days.map(function (d, i) { return '<li class="' + (i === today ? 'is-today' : '') + '">' + d + '</li>'; }).join('') + '</ol>' +
         '</div>' +
         '</div><div class="s5-r">' +
         '<div class="card s3-rise" style="--i:2">' + planBar(25, 12) + '</div>' +
-        '<div class="card s5-locked s3-rise" style="--i:3"><span class="s5-lock" aria-hidden="true">🔒</span>' +
+        '<div class="card s5-locked s3-rise" style="--i:3"><span class="s5-lock" aria-hidden="true">' + Icon.svg('lock') + '</span>' +
           '<div><b class="s5-locked-name">' + esc(locked.name) + '</b><span>Откроется завтра после задания</span></div></div>' +
         '<p class="tag-example s3-rise" style="--i:4">Пример: цифры в прототипе демонстрационные</p>' +
         '<div class="s5-cta s3-rise" style="--i:5"><button type="button" class="btn s5-next" data-go="s6"><span>Не потерять серию</span><span class="btn-arrow"></span></button></div></div>' +
         // Слой level up поверх экрана
         '<div class="s5-dim" id="s5-dim" role="dialog" aria-modal="true" aria-labelledby="s5-lvl" tabindex="-1">' +
           '<div class="s5-badge-wrap"><span class="s5-badge-rays" aria-hidden="true"></span>' +
-          '<div class="s5-badge" id="s5-badge"><span class="s5-badge-t">Первые 5 минут</span><span class="s5-badge-xp">+' + bonus + ' XP</span></div></div>' +
+          '<div class="s5-badge" id="s5-badge"><span class="s5-coin">' + coinEdge() +
+            '<span class="s5-face s5-face-back">' + Icon.svg('sparkle') + '</span>' +
+            '<span class="s5-face s5-face-front"><span class="s5-badge-t">Первые 5 минут</span><span class="s5-badge-xp">+' + bonus + ' XP</span><span class="s5-glare"></span></span>' +
+          '</span></div></div>' +
           '<p class="s5-lvl" id="s5-lvl">Уровень 2</p>' +
           '<p class="s5-tap">Нажми, чтобы продолжить</p>' +
         '</div>';
