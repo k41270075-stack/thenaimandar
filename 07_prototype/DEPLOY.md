@@ -6,6 +6,7 @@
 |---|---|---|
 | Прототип S0–S7 | `index.html`, `css/`, `js/`, `data/`, `img/` | Статика, без сборки |
 | Вебхук бота | `api/telegram.js` → `POST /api/telegram` | Telegram присылает сюда каждое сообщение и нажатие кнопки |
+| Подключение бота | `api/setup.js` → `GET /api/setup?key=<CRON_SECRET>` | Один раз ставит вебхук и меню команд |
 | Напоминания | `api/remind.js` → `GET /api/remind` | Vercel Cron, каждый день в 14:00 UTC (19:00 Астана) |
 | Логика бота | `bot/*` | Тексты, задания, хранилище (Upstash Redis), ИИ Venti (Claude API) |
 
@@ -89,10 +90,10 @@ Vercel сам добавит `KV_REST_API_URL` и `KV_REST_API_TOKEN`. Бот п
 | Переменная | Значение | Обязательна |
 |---|---|---|
 | `TG_BOT_TOKEN` | Токен из @BotFather | Да |
-| `TG_WEBHOOK_SECRET` | Случайная строка: `openssl rand -hex 32` | Да |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Из Upstash (или `KV_REST_API_*` из шага 2) | Да |
 | `ANTHROPIC_API_KEY` | Ключ Claude API | Без него бот работает, но на вопросы отвечает заготовкой «Venti сейчас не на связи» |
-| `CRON_SECRET` | Ещё одна случайная строка: `openssl rand -hex 32` | Да, для `/api/remind` |
+| `CRON_SECRET` | Любые 30–40 латинских букв и цифр подряд (или `openssl rand -hex 32`) | Да: им защищены `/api/remind` и `/api/setup` |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Появятся сами после шага 2 (как `KV_REST_API_*`) | Да |
+| `TG_WEBHOOK_SECRET` | Своя случайная строка для вебхука | Нет: без неё секрет вычисляется из токена |
 | `TG_ADMIN_IDS` | Telegram id команды через запятую | Для `/demo_tomorrow`, `/stats`, `/sync_commands` и чтобы получать отзывы из `/feedback` |
 | `VENTI_MODEL` | По умолчанию `claude-opus-5-5`. Если важна цена: `claude-haiku-5-5` | Нет |
 
@@ -100,26 +101,23 @@ Vercel сам добавит `KV_REST_API_URL` и `KV_REST_API_TOKEN`. Бот п
 
 Если переменной не хватает, функция отвечает `503` и пишет в лог (**Deployments → Functions → Logs**), каких имён нет. Страница прототипа при этом работает.
 
-## 5. Подключить вебхук
+## 5. Подключить бота: одна ссылка
 
-Выполните один раз со своего компьютера (подставьте токен, секрет и адрес):
+Откройте в браузере (подставьте адрес проекта и свой `CRON_SECRET`):
 
-```bash
-export TG_BOT_TOKEN='...'          # из @BotFather
-export TG_WEBHOOK_SECRET='...'     # то же значение, что в Vercel
-export APP='https://<проект>.vercel.app'
-
-curl -s "https://api.telegram.org/bot$TG_BOT_TOKEN/setWebhook" \
-  -H 'content-type: application/json' \
-  -d "{\"url\":\"$APP/api/telegram\",\"secret_token\":\"$TG_WEBHOOK_SECRET\",\"allowed_updates\":[\"message\",\"callback_query\"],\"drop_pending_updates\":true}"
-
-# Проверка: url ваш, last_error_message пустой
-curl -s "https://api.telegram.org/bot$TG_BOT_TOKEN/getWebhookInfo"
+```
+https://<проект>.vercel.app/api/setup?key=<CRON_SECRET>
 ```
 
-Меню команд: напишите боту `/sync_commands` (нужно быть в `TG_ADMIN_IDS`). Он запишет в Telegram все 26 команд из `bot/commands.js`. После любой правки списка команд — снова `/sync_commands`.
+Ответ должен быть таким:
 
-Telegram будет присылать заголовок `X-Telegram-Bot-Api-Secret-Token`. Запрос без него или с чужим секретом получит `401`.
+```
+{"ok":true,"bot":"@VentormeAI_bot","webhook":"https://<проект>.vercel.app/api/telegram","commands":26,"next":"Готово. Откройте бота в Telegram и нажмите «Старт»."}
+```
+
+Ссылка сама ставит вебхук на этот проект (с секретом) и записывает в Telegram меню из 26 команд. Открывать её нужно один раз, а также после смены токена или адреса. После правки списка команд в `bot/commands.js` хватит команды `/sync_commands` в боте.
+
+Telegram присылает в каждом запросе заголовок `X-Telegram-Bot-Api-Secret-Token`. Запрос без него или с чужим секретом получит `401`.
 
 ## 6. Проверка
 
@@ -128,6 +126,7 @@ Telegram будет присылать заголовок `X-Telegram-Bot-Api-Se
 ```bash
 curl -i -X POST "$APP/api/telegram" -d '{}'     # 401: нет секрета
 curl -i "$APP/api/remind"                       # 401: нет CRON_SECRET
+curl -i "$APP/api/setup"                        # 401: нет ключа
 ```
 
 **Бот, с чужого телефона:**
@@ -161,9 +160,10 @@ curl -s -H "Authorization: Bearer $CRON_SECRET" "$APP/api/remind"
 
 | Симптом | Где смотреть |
 |---|---|
-| Бот молчит | `getWebhookInfo` → `last_error_message`; логи функции `api/telegram` в Vercel |
+| Бот молчит | Ещё раз откройте `/api/setup?key=…`; логи функции `api/telegram` в Vercel |
+| `/api/setup` отвечает `502` | В ответе причина от Telegram, чаще всего неверный `TG_BOT_TOKEN` |
 | `503` | В логе перечислены недостающие переменные. После добавления нужен **Redeploy** |
 | Venti отвечает «не на связи» | Нет `ANTHROPIC_API_KEY`, кончился баланс или лимит; в логе строка `[venti] …` |
-| Токен утёк | @BotFather → `/revoke`, новый токен в Vercel, Redeploy, снова `setWebhook` |
+| Токен утёк | @BotFather → `/revoke`, новый токен в Vercel, Redeploy, снова `/api/setup?key=…` |
 
 Локально код проверяется так: `npm install && npm run check` (синтаксис всех функций и модулей бота).
