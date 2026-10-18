@@ -258,7 +258,9 @@
     node.style.fontSize = '';
     var size = parseFloat(getComputedStyle(node).fontSize);
     min = min || 17;
-    while (longestWord(node) > node.clientWidth - 2 && size > min) {
+    var cs = getComputedStyle(node);
+    var room = node.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+    while (longestWord(node) > room && size > min) {
       size -= 1;
       node.style.fontSize = size + 'px';
     }
@@ -274,7 +276,18 @@
     layoutRadar(stage);
   }
 
+  // Арт карты — четырёхлучевая искра из знака Ventorme и две маленькие рядом
+  var STAR = '<svg class="s2-card-glyph" viewBox="0 0 120 120" fill="currentColor">' +
+    '<path class="s2-g-main" d="M56 8C59 42 70 53 104 56C70 59 59 70 56 104C53 70 42 59 8 56C42 53 53 42 56 8Z"/>' +
+    '<path class="s2-g-mini" d="M100 6C101 15 104 18 113 19C104 20 101 23 100 32C99 23 96 20 87 19C96 18 99 15 100 6Z"/>' +
+    '<path class="s2-g-mini s2-g-mini-2" d="M20 88C21 95 23 97 30 98C23 99 21 101 20 108C19 101 17 99 10 98C17 97 19 95 20 88Z"/></svg>';
+
+  // Редкость карточки задаёт её цвет: редкая синяя, эпическая фиолетовая, легендарная с лаймовой рамкой
+  function rarityKey(r) { return /легенд/i.test(r) ? 'legend' : /эпич/i.test(r) ? 'epic' : 'rare'; }
+  function uniWord(n) { var m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? 'вуз' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'вуза' : 'вузов'; }
+
   function renderResult(el, p) {
+    var openUnis = p.unis.filter(function (u) { return !u.locked; }).length;
     var profs = p.professions.map(function (pr, i) {
       return '<li class="s2-prof' + (i === 0 ? ' is-top' : '') + '" title="' + esc(pr[0]) + ': ' + pr[1] + '% совпадения">' +
         '<span class="s2-rank">' + (i + 1) + '</span>' +
@@ -295,12 +308,17 @@
       '<div class="s2-l">' +
         '<div class="s2-hero">' +
           '<span class="s2-rays" aria-hidden="true"></span>' +
-          '<div class="s2-card" role="img" aria-label="Профессия: ' + esc(p.title) + ', совпадение ' + p.match + '%, редкость ' + esc(p.rarity) + '">' +
+          '<div class="s2-card s2-r-' + rarityKey(p.rarity) + '" role="img" aria-label="Профессия: ' + esc(p.title) + ', совпадение ' + p.match + '%, шанс на грант ' + p.grantChance + '%, ' + openUnis + ' ' + uniWord(openUnis) + ', редкость ' + esc(p.rarity) + '">' +
             '<span class="s2-foil" aria-hidden="true"></span><span class="s2-shine" aria-hidden="true"></span>' +
-            '<span class="s2-rarity">' + esc(p.rarity) + '</span>' +
-            '<span class="s2-card-k">Твоя профессия №1</span>' +
+            '<span class="s2-card-top"><span class="s2-rarity">' + esc(p.rarity) + '</span><span class="s2-card-no">№1</span></span>' +
+            '<span class="s2-card-art" aria-hidden="true">' + STAR + '</span>' +
+            '<span class="s2-card-k">Твоя профессия</span>' +
             '<span class="s2-card-t">' + esc(p.title) + '</span>' +
-            '<span class="s2-card-m"><b>' + p.match + '%</b> совпадения</span>' +
+            '<span class="s2-card-stats">' +
+              '<span><b>' + p.match + '%</b>совпадение</span>' +
+              '<span><b>' + p.grantChance + '%</b>шанс гранта</span>' +
+              '<span><b>' + openUnis + '</b>' + uniWord(openUnis) + '</span>' +
+            '</span>' +
           '</div>' +
         '</div>' +
         '<section class="card s2-block s2-grant s2-late" style="--i:7">' +
