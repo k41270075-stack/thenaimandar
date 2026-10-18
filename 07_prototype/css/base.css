@@ -1,0 +1,260 @@
+/* ОБЩЕЕ: токены, рамка телефона, шапка, экраны, кнопки, базовые эффекты.
+   Части не меняют этот файл; свои стили пишут в css/partN.css с префиксом своих экранов (.s0-…, .s3-…). */
+
+:root {
+  --blue: #3b47ff;
+  --blue-dark: #2530c9;
+  --blue-soft: rgba(59, 71, 255, 0.18);
+  --lime: #dfff00;
+  --lime-dark: #a9c200;
+  --fire: #ff9a3c;
+  --green: #2bd67b;
+  --green-dark: #18a35a;
+  --red: #ff4d5e;
+  --red-dark: #c92a3a;
+
+  --bg: #0b0d1f;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.1);
+  --line: rgba(255, 255, 255, 0.12);
+  --ink: #f5f6ff;
+  --muted: rgba(245, 246, 255, 0.68);
+  --faint: rgba(245, 246, 255, 0.45);
+
+  --radius: 20px;
+  --radius-sm: 14px;
+  --hud-h: 56px;
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+
+body {
+  background: #05060f;
+  color: var(--ink);
+  font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+button { font: inherit; color: inherit; }
+
+/* Рамка телефона: на телефоне во весь экран, на ноутбуке по центру */
+.phone {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 0%, #1a1f5c 0%, var(--bg) 60%);
+  isolation: isolate;
+}
+
+@media (min-width: 600px) and (min-height: 700px) {
+  body { display: grid; place-items: center; background: radial-gradient(circle at 50% 30%, #141838, #05060f 70%); }
+  .phone {
+    width: 390px;
+    height: min(844px, 94dvh);
+    border-radius: 44px;
+    border: 10px solid #1d2030;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+#bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Шапка */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: calc(var(--hud-h) + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 14px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: linear-gradient(to bottom, rgba(11, 13, 31, 0.9), rgba(11, 13, 31, 0));
+}
+
+.hud-logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.hud-logo-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--blue);
+  font-size: 15px;
+}
+
+.hud-stats { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+
+.hud-streak, .hud-level, .hud-xp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.hud-streak b { color: var(--fire); }
+.hud-level b { color: var(--lime); }
+
+.hud-xp { position: relative; overflow: hidden; min-width: 76px; justify-content: center; }
+.hud-xp b { position: relative; }
+.hud-xp-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--blue);
+  transition: width 0.5s var(--ease-out);
+}
+
+.hud-bump { animation: hud-bump 0.45s var(--ease-spring); }
+@keyframes hud-bump { 40% { transform: scale(1.18); } }
+
+/* Экраны */
+.screens { position: absolute; inset: 0; z-index: 1; }
+
+.screen {
+  position: absolute;
+  inset: 0;
+  padding: calc(var(--hud-h) + env(safe-area-inset-top, 0px) + 8px) 18px calc(24px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(40px);
+  transition: opacity 0.28s ease, transform 0.28s var(--ease-out), visibility 0s linear 0.28s;
+}
+
+.screen.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.28s ease, transform 0.28s var(--ease-out), visibility 0s;
+}
+
+.screen.is-leaving { transform: translateX(-40px); }
+
+.overlay-root { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+.overlay-root > * { pointer-events: auto; }
+
+/* Типографика */
+.h1 { margin: 0; font-size: 28px; line-height: 1.12; font-weight: 800; letter-spacing: -0.02em; }
+.h2 { margin: 0; font-size: 21px; line-height: 1.2; font-weight: 700; }
+.muted { color: var(--muted); }
+.tag-example { font-size: 11px; color: var(--faint); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+/* Кнопки в стиле Duolingo: толстая нижняя граница, при нажатии проседает */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  user-select: none;
+}
+
+.btn:active { transform: translateY(4px); box-shadow: none !important; }
+.btn:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+
+.btn-primary { background: var(--blue); color: #fff; box-shadow: 0 4px 0 var(--blue-dark); }
+.btn-lime { background: var(--lime); color: #11131f; box-shadow: 0 4px 0 var(--lime-dark); }
+.btn-green { background: var(--green); color: #06210f; box-shadow: 0 4px 0 var(--green-dark); }
+.btn-ghost { background: var(--surface-2); color: var(--ink); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
+
+/* Заглушка экрана */
+.stub { margin: auto 0; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.stub-id { align-self: center; padding: 4px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--lime); font-weight: 800; font-size: 13px; }
+.stub h2 { margin: 0; font-size: 24px; }
+.stub p { margin: 0 0 8px; color: var(--muted); }
+
+/* Общие эффекты */
+.fx-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: #fff;
+  pointer-events: none;
+  animation: fx-flash 0.38s ease-out forwards;
+}
+@keyframes fx-flash { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+
+.fx-shake { animation: fx-shake 0.32s linear; }
+@keyframes fx-shake {
+  15% { transform: translateX(-7px); } 30% { transform: translateX(6px); } 45% { transform: translateX(-5px); }
+  60% { transform: translateX(4px); } 75% { transform: translateX(-2px); } 100% { transform: none; }
+}
+
+.fx-xp-chip {
+  position: absolute;
+  z-index: 35;
+  transform: translate(-50%, -50%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--lime);
+  color: #11131f;
+  font-weight: 800;
+  font-size: 15px;
+  pointer-events: none;
+  transition: transform 0.6s var(--ease-out), opacity 0.6s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
