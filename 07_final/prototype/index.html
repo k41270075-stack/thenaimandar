@@ -155,6 +155,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--blue); outl
   gap: 16px;
   animation: enter .45s var(--ease) both;
 }
+.screen > * { flex-shrink: 0; }
 @keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .screen, .pop, .tick-row { animation: none !important; } }
 
