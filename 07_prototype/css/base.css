@@ -107,6 +107,7 @@ button { font: inherit; color: inherit; }
   max-width: 430px;
   margin: 0 auto;
   overflow: hidden;
+  overflow: clip;            /* как hidden, но без программной прокрутки: телефон не съезжает вбок */
   background: var(--canvas);
   isolation: isolate;
 }
@@ -144,16 +145,7 @@ button { font: inherit; color: inherit; }
 }
 @media (prefers-color-scheme: dark) { .phone::after { opacity: .055; } }
 
-@media (min-width: 600px) and (min-height: 700px) {
-  body { display: grid; place-items: center; background: var(--surface-2); }
-  .phone {
-    width: 390px;
-    height: min(844px, 94dvh);
-    border-radius: 44px;
-    border: 10px solid #15172A;
-    box-shadow: var(--lift), 0 40px 80px -30px rgba(11, 13, 36, .45);
-  }
-}
+
 
 #bg {
   position: absolute;
@@ -434,4 +426,18 @@ button { font: inherit; color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Телефон: во весь экран. Ноутбук (от 900px): во весь экран как сайт, без рамки телефона.
+   Контент экранов по центру колонкой 760px; экраны S0–S5 расширяют её у себя (part1.css, part2.css). */
+@media (min-width: 900px) {
+  .phone { max-width: none; }
+  .hud { padding-inline: max(24px, calc((100% - 1120px) / 2)); }
+  .screen {
+    padding-left: max(24px, calc((100% - 760px) / 2));
+    padding-right: max(24px, calc((100% - 760px) / 2));
+    padding-top: calc(var(--hud-h) + 28px);
+  }
+  .h1 { font-size: clamp(36px, 3.4vw, 48px); }
+  .lead { font-size: 18px; }
 }

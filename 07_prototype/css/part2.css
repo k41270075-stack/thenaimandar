@@ -33,18 +33,16 @@
 .s3-plan { display: flex; flex-direction: column; gap: 10px; }
 .s3-plan-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; font-weight: 650; }
 .s3-plan-v { font-size: 22px; letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
-.s3-plan-track { display: block; height: 10px; border-radius: var(--r-pill); background: var(--surface-2); overflow: hidden; }
-.s3-plan-track i {
-  display: block; height: 100%; border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--violet));
-  transform-origin: left;
-  transform: scaleX(var(--from));
-}
-.s3-plan-steps { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between; }
 .s3-plan-txt { margin: 0; font-size: 15px; color: var(--ink-muted); }
-.s3-plan-steps span { display: block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--hairline-str); background: var(--surface-1); }
-.s3-plan-steps li.is-done span { border-color: var(--accent); background: var(--accent); }
-.s3-plan-steps li.is-next span { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.s3-segs { list-style: none; margin: 0; padding: 0; display: flex; gap: 2px; height: 12px; }
+.s3-segs li { flex: 1; border-radius: 3px; background: color-mix(in srgb, var(--ink) 7%, transparent); position: relative; overflow: hidden; }
+.s3-segs li.is-done, .s3-segs li.is-new { background: var(--chart-base, var(--accent)); }
+.s3-segs li.is-next { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent-line); }
+/* Новый пройденный шаг (на S5) заливается слева направо после закрытия награды */
+.s3-segs li.is-new { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.s3-segs li.is-new::after { content: ""; position: absolute; inset: 0; background: var(--chart-base, var(--accent)); transform-origin: left; transform: scaleX(0); }
+.s5-go .s3-segs li.is-new::after { animation: s5-seg .6s cubic-bezier(.645, .045, .355, 1) both; animation-delay: calc(300ms + var(--k) * 150ms); }
+@keyframes s5-seg { to { transform: scaleX(1); } }
 
 .s3-all { border: 1px solid var(--hairline); border-radius: var(--r-card); background: var(--surface-1); }
 .s3-all summary {
@@ -114,7 +112,7 @@
   font-size: 16px; font-weight: 600; text-align: left;
   cursor: pointer;
   transition: border-color .15s ease, background-color .15s ease, transform .12s var(--ease);
-  animation: s3-rise .35s var(--ease) both;
+  animation: s3-rise .35s var(--ease) backwards;   /* backwards: после появления работает :active */
   animation-delay: calc(var(--i) * 50ms);
 }
 .s4-opt:active { transform: scale(.97); }
@@ -205,9 +203,6 @@
 .s5-go .s5-week li.is-today { background: var(--fire); color: #fff; }
 
 /* План 12% → 25% растёт после закрытия слоя награды */
-.s5-go .s3-plan-track i { animation: s5-plan .8s cubic-bezier(.645, .045, .355, 1) .3s both; }
-@keyframes s5-plan { from { transform: scaleX(var(--from)); } to { transform: scaleX(var(--to)); } }
-.s5-go .s3-plan-track i { transform: scaleX(var(--to)); }
 
 .s5-locked { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; border-style: dashed; border-color: var(--accent-line); background: var(--accent-soft); }
 .s5-locked b { display: block; font-size: 16px; }
@@ -217,6 +212,36 @@
 @keyframes s5-lock { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-8deg); } 90% { transform: rotate(7deg); } 95% { transform: rotate(-4deg); } }
 .s5-cta { margin-top: auto; }
 
+
+/* ---------- Раскладка: на телефоне обёртки прозрачны, на ноутбуке это колонки ---------- */
+.s3-l, .s3-r, .s5-l, .s5-r { display: contents; }
+
+@media (min-width: 900px) {
+  [data-screen="s3"], [data-screen="s5"] {
+    padding-left: max(32px, calc((100% - 1080px) / 2));
+    padding-right: max(32px, calc((100% - 1080px) / 2));
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-content: center;
+  }
+  .s3-l, .s3-r, .s5-l, .s5-r { display: flex; flex-direction: column; gap: 18px; }
+  .s3-l { justify-content: center; }
+  .s3-go { min-height: 96px; font-size: 21px; }
+  .s3-all ul { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+
+  /* Вызов: одна колонка по центру, ответы сеткой 2×2 */
+  [data-screen="s4"] {
+    padding-left: max(32px, calc((100% - 720px) / 2));
+    padding-right: max(32px, calc((100% - 720px) / 2));
+  }
+  .s4-card { padding: 28px; }
+  .s4-q { font-size: 26px; }
+  .s4-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .s4-opt { min-height: 64px; font-size: 17px; }
+  .s4-next .btn { max-width: 360px; margin-left: auto; }
+
+  .s5-cta { margin-top: 0; }
+  .s5-badge { width: 240px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .s3-rise, .s4-card, .s4-opt, .s4-why, .s4-next, .s5-lvl { animation: s3-fade .2s ease-out both; animation-delay: 0s; }
   .s3-go-wrap { animation: none; }
@@ -225,7 +250,7 @@
   .s5-badge { animation: s3-fade .2s ease-out both; }
   .s5-go .s5-fire { animation: none; transform: none; opacity: 1; }
   .s5-flip-in, .s5-week li { transition: none; }
-  .s5-go .s3-plan-track i { animation: none; }
+  .s5-go .s3-segs li.is-new::after { animation: none; transform: none; }
   .s5-lock { animation: none; }
   .s5-badge-rays, .s4-hurry .s4-timer { animation: none; }
   .s4-vignette.is-on { animation: none; }

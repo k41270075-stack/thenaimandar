@@ -3,6 +3,10 @@
    старт со scale(.96), а не с нуля; пружина (--ease-spring) только в «вау»-моментах.
    У каждого анимированного элемента свой блок prefers-reduced-motion. */
 
+/* Цвета графиков: проверены scripts/validate_palette.js из скилла dataviz (светлая и тёмная тема) */
+.phone { --chart-base: #3B47FF; --chart-gain: #8FB800; }
+@media (prefers-color-scheme: dark) { .phone { --chart-base: #5F6CFF; --chart-gain: #7E9E16; } }
+
 /* Общий вход блоков экранов S0–S2: раздельно и по очереди, а не весь контейнер разом */
 .s0-rise {
   animation: s0-rise .5s var(--ease) both;
@@ -95,7 +99,7 @@
   transform: translateY(-60px);
   animation: s1-beam 1.25s cubic-bezier(.645, .045, .355, 1) .15s 2;
 }
-@keyframes s1-beam { to { transform: translateY(260px); } }
+@keyframes s1-beam { to { transform: translateY(var(--s1-scan, 260px)); } }
 
 .s1-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .s1-stats div {
@@ -152,6 +156,7 @@
   cursor: pointer;
 }
 .s2-chest:active { transform: scale(.97); }
+@media (min-width: 900px) { .s2-chest:active { transform: scale(1.21); } }
 .s2-chest-glow {
   position: absolute; left: 50%; bottom: 0;
   width: 220px; height: 60px; margin-left: -110px;
@@ -291,47 +296,121 @@
 }
 .s2-block { display: flex; flex-direction: column; gap: 12px; }
 
-.s2-prof { display: flex; flex-direction: column; gap: 6px; animation: none; opacity: 1; }
-.s2-prof-top { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; }
-.s2-prof-top b { color: var(--accent); font-variant-numeric: tabular-nums; }
-.s2-bar { display: block; height: 8px; border-radius: var(--r-pill); background: var(--surface-2); overflow: hidden; }
+/* Рейтинг профессий: одна серия, один цвет, тонкие полосы со скруглёнными концами,
+   значения прямыми подписями цветом текста (скилл dataviz) */
+.s2-prof-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.s2-prof { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: center; }
+.s2-rank {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 750; font-variant-numeric: tabular-nums;
+  background: var(--surface-2); color: var(--ink-muted);
+}
+.s2-prof.is-top .s2-rank { background: var(--lime); color: var(--lime-ink); }
+.s2-prof-main { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.s2-prof-top { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; font-weight: 600; }
+.s2-prof-top b { font-variant-numeric: tabular-nums; font-weight: 750; }
+.s2-bar { display: block; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 6%, transparent); overflow: hidden; }
 .s2-bar i {
-  display: block; height: 100%; border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--violet));
+  display: block; height: 100%; border-radius: 4px;
+  background: var(--accent);
   transform-origin: left;
   transform: scaleX(var(--w));
   animation: s2-grow .7s var(--ease) both;
   animation-delay: calc(700ms + var(--d));
 }
+.s2-prof:not(.is-top) .s2-bar i { background: color-mix(in srgb, var(--accent) 55%, var(--surface-1)); }
 @keyframes s2-grow { from { transform: scaleX(0); } }
 
 .s2-unis { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .s2-uni {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  min-height: 52px; padding: 8px 0;
+  min-height: 56px; padding: 8px 0;
   border-top: 1px solid var(--hairline);
 }
 .s2-uni:first-child { border-top: 0; }
+.s2-uni-txt { min-width: 0; }
 .s2-uni-name { display: block; font-size: 15px; font-weight: 650; line-height: 1.3; }
 .s2-uni-c { display: block; font-size: 15px; color: var(--ink-subtle); }
-.s2-uni b { flex: none; padding: 3px 9px; border-radius: var(--r-pill); background: var(--good-soft); color: var(--good); font-size: 15px; font-variant-numeric: tabular-nums; }
+/* Мини-кольцо совпадения: то же кольцо, что у гранта, в малом размере */
+.s2-uni-m { flex: none; display: flex; align-items: center; gap: 8px; }
+.s2-uni-m svg { width: 30px; height: 30px; transform: rotate(-90deg); }
+.s2-uni-m b { font-size: 15px; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.s2-mini-t { fill: none; stroke: color-mix(in srgb, var(--ink) 8%, transparent); stroke-width: 4; }
+.s2-mini-f { fill: none; stroke: var(--good); stroke-width: 4; stroke-linecap: round; stroke-dasharray: calc(var(--p) * .942) 94.2; }
 .s2-uni-locked .s2-uni-name { filter: blur(4px); user-select: none; }
-.s2-lock { flex: none; font-size: 15px; font-weight: 650; color: var(--ink-muted); padding: 3px 9px; border-radius: var(--r-pill); background: var(--surface-2); }
+.s2-lock { flex: none; font-size: 15px; font-weight: 650; color: var(--ink-muted); padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-2); }
 
-.s2-grant { flex-direction: row; align-items: center; gap: 16px; }
-.s2-ring { flex: none; width: 108px; height: 108px; transform: rotate(-90deg); filter: drop-shadow(0 0 10px color-mix(in srgb, var(--lime) 55%, transparent)); }
-.s2-ring-track { fill: none; stroke: var(--surface-2); stroke-width: 12; }
-.s2-ring-fill { fill: none; stroke: var(--lime); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.215, .61, .355, 1); }
+/* Шанс на грант: кольцо с числом в центре + сценарий «что если» стопкой */
+.s2-grant { gap: 16px; }
+.s2-grant-row { display: flex; align-items: center; gap: 16px; }
+.s2-ring-wrap { position: relative; flex: none; width: 112px; height: 112px; display: grid; place-items: center; }
+.s2-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.s2-ring-track { fill: none; stroke: color-mix(in srgb, var(--ink) 7%, transparent); stroke-width: 11; }
+.s2-ring-fill { fill: none; stroke: var(--chart-gain); stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.215, .61, .355, 1); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lime) 60%, transparent)); }
+.s2-grant-v { position: relative; font-size: 30px; font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 .s2-grant-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.s2-grant-k { font-size: 15px; color: var(--ink-muted); font-weight: 600; }
-.s2-grant-v { font-size: 34px; font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-.s2-levers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.s2-lever { font-size: 15px; font-weight: 600; padding: 5px 10px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--ink); }
-.s2-lever b { color: var(--accent); }
+.s2-grant-k { font-size: 15px; color: var(--ink-muted); }
+
+.s2-whatif { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--hairline); }
+.s2-whatif-top { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; color: var(--ink-muted); }
+.s2-whatif-top b { color: var(--ink); font-size: 17px; font-variant-numeric: tabular-nums; }
+.s2-stack { display: flex; gap: 2px; height: 14px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 6%, transparent); overflow: hidden; }
+.s2-seg { display: block; height: 100%; flex: 0 0 calc(var(--w) * 1%); transform-origin: left; transform: scaleX(0); transition: transform .6s var(--ease); }
+.s2-seg:first-child { border-radius: 4px 0 0 4px; }
+.s2-seg-base { background: var(--chart-base); }
+.s2-seg-gain { background: var(--chart-gain); transition-delay: calc(var(--d) * 220ms + 200ms); }
+.s2-whatif.is-on .s2-seg { transform: scaleX(1); }
+.s2-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 15px; color: var(--ink-muted); }
+.s2-legend li { display: flex; align-items: center; gap: 7px; }
+.s2-legend b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.s2-key { width: 12px; height: 12px; border-radius: 3px; }
+.s2-key-base { background: var(--chart-base); }
+.s2-key-gain { background: var(--chart-gain); }
 
 /* Пропуск тапом: всё доигрывается мгновенно */
 .s2-skip .s2-late, .s2-skip .s2-card, .s2-skip .s2-bar i, .s2-skip .s2-shine { animation-delay: 0s !important; animation-duration: .01ms !important; }
 .s2-skip .s2-ring-fill { transition-duration: .01ms; }
+
+
+/* ---------- Раскладка: на телефоне обёртки прозрачны, на ноутбуке это колонки ---------- */
+.s0-l, .s0-r, .s1-l, .s2-l, .s2-r { display: contents; }
+.s0-perks { display: none; }
+/* Порядок блоков результата на телефоне: карточка, профессии, вузы, грант, кнопка */
+.s2-hero { order: 1; } .s2-profs { order: 2; } .s2-unis-card { order: 3; } .s2-grant { order: 4; } .s2-tag { order: 5; } .s2-next { order: 6; }
+
+@media (min-width: 900px) {
+  [data-screen="s0"], [data-screen="s1"], [data-screen="s2"] {
+    padding-left: max(32px, calc((100% - 1080px) / 2));
+    padding-right: max(32px, calc((100% - 1080px) / 2));
+  }
+  [data-screen="s0"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-content: center; }
+  .s0-l, .s0-r { display: flex; flex-direction: column; gap: 18px; }
+  .s0-l { justify-content: center; }
+  .s0-perks { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 8px 0 0; padding: 0; }
+  .s0-perks li { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 600; }
+  .s0-perks li::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--lime); box-shadow: 0 0 0 4px color-mix(in srgb, var(--lime) 25%, transparent); }
+  .s0-cta { margin-top: 4px; }
+
+  .s1-l {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    grid-template-areas: "title stage" "stats stage" "lines stage" "skip stage";
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 56px; row-gap: 20px; align-content: center; min-height: 100%;
+  }
+  .s1-title { grid-area: title; align-self: end; }
+  .s1-stage { grid-area: stage; height: 460px; align-self: center; --s1-scan: 470px; }
+  .s1-stats { grid-area: stats; }
+  .s1-lines { grid-area: lines; }
+  .s1-skip { grid-area: skip; text-align: left; margin: 0; }
+
+  .s2-intro { align-items: center; text-align: center; }
+  .s2-chest { transform: scale(1.25); margin: auto; }
+  [data-screen="s2"].s2-open { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; align-content: start; }
+  .s2-l, .s2-r { display: flex; flex-direction: column; gap: 16px; }
+  .s2-l { position: sticky; top: 0; }
+  .s2-hero { min-height: 260px; }
+}
 
 /* ---------- Уменьшенное движение: только появление, без полётов, тряски и вращения ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -346,5 +425,9 @@
   .s2-bar i { animation: none; }
   .s2-ring-fill { transition: none; }
   .s1-wave, .s2-spark, .s2-shine { display: none; }
+  .s2-seg { transition: none; transform: none; }
 }
 @keyframes s0-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Появление не должно «замораживать» transform: иначе не работает нажатие и масштаб на ноутбуке */
+.s2-chest.s0-rise { animation-fill-mode: backwards; }

@@ -11,18 +11,19 @@
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
-  // Полоса плана поступления: 7 шагов-точек и одна строка «пройдено / дальше» вместо мелких подписей
+  // План поступления: 7 сегментов с зазором 2px (скилл dataviz: зазор между заливками),
+  // пройденные залиты, следующий обведён; одна строка «пройдено / дальше» вместо мелких подписей.
+  // from задаёт, сколько сегментов было до анимации (на S5 план растёт 12% → 25%).
   function planBar(pct, from) {
-    // 12% = анкета и результат пройдены, 25% = плюс первый шаг
-    var doneCount = Math.round(pct / 100 * PLAN_STEPS.length) + 1;
-    var nodes = PLAN_STEPS.map(function (s, i) {
-      return '<li class="' + (i < doneCount ? 'is-done' : '') + (i === doneCount ? ' is-next' : '') + '" title="' + s + '"><span></span></li>';
+    function count(v) { return Math.round(v / 100 * PLAN_STEPS.length) + 1; }   // 12% → 2 шага, 25% → 3
+    var doneCount = count(pct), wasCount = count(from == null ? pct : from);
+    var segs = PLAN_STEPS.map(function (st, i) {
+      var cls = i < wasCount ? 'is-done' : i < doneCount ? 'is-new' : i === doneCount ? 'is-next' : '';
+      return '<li class="' + cls + '" title="' + st + (i < doneCount ? ': пройдено' : '') + '" style="--k:' + (i - wasCount) + '"></li>';
     }).join('');
     var next = PLAN_STEPS[doneCount];
     return '<div class="s3-plan"><div class="s3-plan-top"><span>План поступления</span><b class="s3-plan-v">' + pct + '%</b></div>' +
-      '<span class="s3-plan-track" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="План поступления">' +
-        '<i style="--from:' + ((from == null ? pct : from) / 100) + ';--to:' + (pct / 100) + '"></i></span>' +
-      '<ol class="s3-plan-steps" aria-hidden="true">' + nodes + '</ol>' +
+      '<ol class="s3-segs" role="img" aria-label="План поступления: пройдено ' + doneCount + ' шага из ' + PLAN_STEPS.length + '">' + segs + '</ol>' +
       '<p class="s3-plan-txt">Пройдено ' + doneCount + ' из ' + PLAN_STEPS.length + (next ? '. Дальше: ' + next.toLowerCase() : '') + '</p></div>';
   }
 
@@ -32,15 +33,18 @@
   Screens.register('s3', {
     enter: function (el, state) {
       var goal = GOAL_LABEL[state.answers.goal] || 'твоей цели';
-      el.innerHTML = '' +
+      el.innerHTML = '<div class="s3-l">' +
         '<h1 class="h1 s3-rise" style="--i:0">Твой первый <em>шаг</em></h1>' +
         '<p class="lead s3-rise" style="--i:1">Три вопроса по ' + goal + ' за минуту. Узнаешь свой уровень и откроешь ещё один вуз.</p>' +
         '<div class="s3-go-wrap s3-rise" style="--i:2"><button type="button" class="btn btn-lime btn-glow s3-go" data-go="s4">' +
           '<span>Первый шаг за 60 секунд</span><span class="btn-arrow"></span></button></div>' +
+        '</div><div class="s3-r">' +
         '<div class="card s3-rise" style="--i:3">' + planBar(state.plan || 12) + '</div>' +
         '<details class="s3-all s3-rise" style="--i:4"><summary>Все возможности Ventorme</summary><ul>' +
           FEATURES.map(function (f) { return '<li><b>' + f[0] + '</b><span>' + f[1] + '</span></li>'; }).join('') +
-        '</ul></details>';
+        '</ul></details></div>';
+      // На ноутбуке места хватает: «Все возможности» сразу раскрыты
+      if (window.matchMedia('(min-width: 900px)').matches) el.querySelector('.s3-all').open = true;
     }
   });
 
@@ -194,7 +198,7 @@
       // Бейдж всегда доводит до следующего уровня: «после вызова уровень 2»
       var bonus = State.XP_PER_LEVEL - (state.xp % State.XP_PER_LEVEL) + 10;
 
-      el.innerHTML = '' +
+      el.innerHTML = '<div class="s5-l">' +
         '<h1 class="h1 s3-rise" style="--i:0">' + title + '</h1>' +
         '<div class="card s5-streak s3-rise" style="--i:1">' +
           '<span class="s5-fire" aria-hidden="true">🔥</span>' +
@@ -202,11 +206,12 @@
           '<span class="s5-sr">Серия: 1 день подряд</span>' +
           '<ol class="s5-week" aria-hidden="true">' + days.map(function (d, i) { return '<li class="' + (i === today ? 'is-today' : '') + '">' + d + '</li>'; }).join('') + '</ol>' +
         '</div>' +
-        '<div class="card s3-rise" style="--i:2">' + planBar(25, state.plan || 12) + '</div>' +
+        '</div><div class="s5-r">' +
+        '<div class="card s3-rise" style="--i:2">' + planBar(25, 12) + '</div>' +
         '<div class="card s5-locked s3-rise" style="--i:3"><span class="s5-lock" aria-hidden="true">🔒</span>' +
           '<div><b class="s5-locked-name">' + esc(locked.name) + '</b><span>Откроется завтра после задания</span></div></div>' +
         '<p class="tag-example s3-rise" style="--i:4">Пример: цифры в прототипе демонстрационные</p>' +
-        '<div class="s5-cta s3-rise" style="--i:5"><button type="button" class="btn s5-next" data-go="s6"><span>Не потерять серию</span><span class="btn-arrow"></span></button></div>' +
+        '<div class="s5-cta s3-rise" style="--i:5"><button type="button" class="btn s5-next" data-go="s6"><span>Не потерять серию</span><span class="btn-arrow"></span></button></div></div>' +
         // Слой level up поверх экрана
         '<div class="s5-dim" id="s5-dim" role="dialog" aria-modal="true" aria-labelledby="s5-lvl" tabindex="-1">' +
           '<div class="s5-badge-wrap"><span class="s5-badge-rays" aria-hidden="true"></span>' +
