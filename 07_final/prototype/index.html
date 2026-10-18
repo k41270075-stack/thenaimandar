@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Первый шаг Ventorme</title>
+<meta name="theme-color" content="#3B47FF">
+<meta name="robots" content="noindex">
+<style>
+/* ===========================================================================
+   Прототип финала HackNext × Ventorme: «Первые 5 минут».
+   Ученик заканчивает анкету и сразу получает ОДИН шаг, выбранный по его же
+   ответу «что волнует больше всего», делает его за минуту прямо на экране,
+   видит результат, незакрытый вопрос и конкретное обещание на завтра.
+
+   Один файл, ни одного внешнего запроса: открывается на любом Wi-Fi и во
+   встроенном браузере Instagram/Telegram.
+   =========================================================================== */
+:root {
+  color-scheme: light;
+  --blue: #3B47FF;
+  --blue-press: #2B36E0;
+  --navy: #00033E;
+  --lime: #DFFF00;
+  --bg: #F4F5FB;
+  --card: #FFFFFF;
+  --card-2: #F3F4F9;
+  --ink: #0B0D24;
+  --muted: #4A4E66;
+  --faint: #7A7E95;
+  --line: #E4E6EF;
+  --line-2: #D0D3E0;
+  --soft: #EEF0FF;
+  --green: #128A5B;
+  --green-bg: #DDF7EA;
+  --amber: #A15C00;
+  --amber-bg: #FFF1D6;
+  --red: #C8323A;
+  --red-bg: #FDE3E4;
+  --desk: #E9EBF5;
+  --r: 20px;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0B0D18;
+    --card: #151827;
+    --card-2: #1C2033;
+    --ink: #F3F4FA;
+    --muted: #B4B8CC;
+    --faint: #8C90A8;
+    --line: #262A40;
+    --line-2: #343956;
+    --soft: rgba(91, 103, 255, .18);
+    --green: #6FDCA9;
+    --green-bg: rgba(18, 138, 91, .22);
+    --amber: #FFC46B;
+    --amber-bg: rgba(161, 92, 0, .25);
+    --red: #FF9EA3;
+    --red-bg: rgba(200, 50, 58, .22);
+    --desk: #06070E;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B0D18; --card: #151827; --card-2: #1C2033; --ink: #F3F4FA;
+  --muted: #B4B8CC; --faint: #8C90A8; --line: #262A40; --line-2: #343956;
+  --soft: rgba(91, 103, 255, .18); --green: #6FDCA9; --green-bg: rgba(18, 138, 91, .22);
+  --amber: #FFC46B; --amber-bg: rgba(161, 92, 0, .25); --red: #FF9EA3;
+  --red-bg: rgba(200, 50, 58, .22); --desk: #06070E;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Manrope", "Onest", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* --- раскладка: на телефоне приложение во весь экран, на компьютере телефон + заметки для жюри --- */
+.stage { min-height: 100%; }
+.phone {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.notes { display: none; }
+
+@media (min-width: 900px) {
+  body { background: var(--desk); }
+  .stage {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 390px minmax(0, 420px);
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    padding: 32px;
+  }
+  .phone {
+    height: min(844px, calc(100vh - 64px));
+    border-radius: 44px;
+    border: 10px solid #11131F;
+    box-shadow: 0 30px 80px -30px rgba(0, 3, 62, .45);
+  }
+  .notes { display: flex; }
+  .info-btn { display: none !important; }
+}
+
+/* --- верхняя панель приложения --- */
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 10px;
+}
+.logo { display: inline-flex; align-items: flex-start; gap: 2px; font-weight: 800; font-size: 21px; letter-spacing: -.03em; color: var(--blue); }
+.logo svg { width: 12px; height: 12px; margin-top: 1px; }
+.bar-right { display: flex; align-items: center; gap: 8px; }
+.streak {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; font-weight: 800;
+  padding: 5px 10px; border-radius: 999px;
+  background: var(--amber-bg); color: var(--amber);
+}
+.info-btn {
+  width: 32px; height: 32px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: var(--card);
+  font-weight: 800; font-size: 14px; color: var(--muted);
+}
+
+/* --- прокручиваемое тело экрана --- */
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 18px calc(env(safe-area-inset-bottom, 0px) + 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: enter .45s var(--ease) both;
+}
+.screen > * { flex-shrink: 0; }
+@keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .screen, .pop, .tick-row { animation: none !important; } }
+
+.progress { display: flex; gap: 6px; }
+.progress span { flex: 1; height: 4px; border-radius: 999px; background: var(--line); }
+.progress span.on { background: var(--blue); }
+
+.kicker { font-size: 12px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--blue); }
+h1 { margin: 0; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; font-weight: 800; text-wrap: balance; }
+h2 { margin: 0; font-size: 19px; line-height: 1.25; font-weight: 800; letter-spacing: -.01em; }
+p { margin: 0; }
+.sub { color: var(--muted); font-size: 15px; }
+.small { font-size: 13px; color: var(--faint); }
+
+/* --- варианты ответа --- */
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; text-align: left;
+  min-height: 58px; padding: 12px 16px;
+  border-radius: 16px; border: 1.5px solid var(--line);
+  background: var(--card);
+  font-size: 16px; font-weight: 600;
+  transition: border-color .15s, background-color .15s, transform .15s var(--ease);
+}
+.opt:active { transform: scale(.98); }
+.opt .em { font-size: 22px; flex: none; width: 28px; text-align: center; }
+.opt .opt-t { display: flex; flex-direction: column; gap: 2px; }
+.opt .opt-t small { font-size: 13px; font-weight: 500; color: var(--faint); }
+.opt[aria-pressed="true"] { border-color: var(--blue); background: var(--soft); }
+.opt.right { border-color: var(--green); background: var(--green-bg); }
+.opt.wrong { border-color: var(--red); background: var(--red-bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 10px 14px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--card);
+  font-size: 15px; font-weight: 600;
+}
+.chip[aria-pressed="true"] { border-color: var(--blue); background: var(--soft); color: var(--blue); }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.input {
+  height: 52px; border-radius: 14px; border: 1.5px solid var(--line);
+  background: var(--card); color: var(--ink);
+  padding: 0 16px; font: inherit; font-size: 17px; font-weight: 600;
+}
+
+/* --- кнопки --- */
+.cta-wrap { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; min-height: 56px; padding: 0 20px;
+  border-radius: 18px; border: 0;
+  background: var(--blue); color: #fff;
+  font-size: 17px; font-weight: 800;
+  transition: background-color .15s, transform .15s var(--ease), opacity .15s;
+}
+.btn:active { transform: scale(.98); }
+.btn:hover { background: var(--blue-press); }
+.btn[disabled] { opacity: .35; pointer-events: none; }
+.btn.lime { background: var(--lime); color: var(--navy); }
+.btn.lime:hover { background: #D2F000; }
+.btn.ghost { background: transparent; color: var(--muted); min-height: 44px; font-size: 15px; font-weight: 700; }
+.btn.ghost:hover { background: var(--card-2); }
+.btn.outline { background: var(--card); color: var(--ink); border: 1.5px solid var(--line-2); }
+.btn.outline:hover { border-color: var(--blue); }
+
+/* --- карточки --- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+
+.hero-card {
+  position: relative; overflow: hidden;
+  background: var(--blue); color: #fff;
+  border-radius: 24px; padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.hero-card::after {
+  content: ""; position: absolute; right: -40px; top: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(223, 255, 0, .35), transparent 70%);
+  pointer-events: none;
+}
+.hero-card .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.hero-card .pill { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: var(--lime); color: var(--navy); }
+.hero-card .pill.glass { background: rgba(255, 255, 255, .16); color: #fff; }
+.hero-card h2 { font-size: 22px; }
+.hero-card p { color: rgba(255, 255, 255, .88); font-size: 15px; }
+.hero-card .btn { position: relative; z-index: 1; }
+
+/* «Почему этот шаг»: ответ анкеты, на который мы отвечаем */
+.because {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px 14px; border-radius: 16px;
+  background: var(--soft); color: var(--ink); font-size: 14px;
+}
+.because b { font-weight: 800; }
+
+/* план: шаги */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.st {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 12px 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--line);
+}
+.st .n {
+  width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; background: var(--card-2); color: var(--faint);
+}
+.st.now .n { background: var(--blue); color: #fff; }
+.st.done .n { background: var(--green); color: #fff; }
+.st .t { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.st .d { font-size: 13px; color: var(--faint); }
+.st .tag { font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 999px; background: var(--card-2); color: var(--faint); white-space: nowrap; }
+.st.now .tag { background: var(--lime); color: var(--navy); }
+.st.done .tag { background: var(--green-bg); color: var(--green); }
+.st.next .tag { background: var(--amber-bg); color: var(--amber); }
+
+.countdown { display: flex; align-items: baseline; gap: 8px; }
+.countdown b { font-size: 34px; font-weight: 800; letter-spacing: -.03em; color: var(--blue); font-variant-numeric: tabular-nums; }
+
+/* сборка плана */
+.build { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.spinner { width: 56px; height: 56px; border-radius: 50%; border: 5px solid var(--soft); border-top-color: var(--blue); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tick-row { display: flex; align-items: center; gap: 12px; font-weight: 700; opacity: 0; animation: enter .4s var(--ease) both; }
+.tick-row i { width: 26px; height: 26px; border-radius: 50%; background: var(--green-bg); color: var(--green); display: grid; place-items: center; font-style: normal; font-size: 14px; flex: none; }
+
+/* калькулятор гранта */
+.score-box { display: flex; flex-direction: column; gap: 14px; }
+.score-val { display: flex; align-items: baseline; justify-content: space-between; }
+.score-val b { font-size: 44px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--blue); line-height: 1; }
+.score-val span { font-size: 14px; color: var(--faint); font-weight: 600; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; }
+input[type="range"]::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--blue) var(--p, 50%), var(--line) var(--p, 50%)); }
+input[type="range"]::-moz-range-track { height: 8px; border-radius: 999px; background: var(--line); }
+input[type="range"]::-moz-range-progress { height: 8px; border-radius: 999px; background: var(--blue); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -11px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); box-shadow: 0 4px 12px rgba(59, 71, 255, .35); }
+input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); }
+.stepper { display: flex; gap: 8px; }
+.stepper button { flex: 1; height: 40px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); font-weight: 800; font-size: 15px; }
+
+.uni { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+.uni:first-of-type { border-top: 0; padding-top: 4px; }
+.uni .u-t { font-weight: 800; font-size: 15px; line-height: 1.3; }
+.uni .u-d { font-size: 13px; color: var(--faint); grid-column: 1; }
+.chance { align-self: start; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.chance.hi { background: var(--green-bg); color: var(--green); }
+.chance.mid { background: var(--amber-bg); color: var(--amber); }
+.chance.lo { background: var(--red-bg); color: var(--red); }
+.meter { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--card-2); overflow: hidden; margin-top: 4px; }
+.meter i { display: block; height: 100%; border-radius: 999px; transition: width .35s var(--ease); }
+.meter i.hi { background: var(--green); }
+.meter i.mid { background: #E8A33A; }
+.meter i.lo { background: var(--red); }
+
+/* результат */
+.pop { animation: pop .55s var(--ease) both; }
+@keyframes pop { 0% { opacity: 0; transform: scale(.9); } 100% { opacity: 1; transform: none; } }
+.done-badge { width: 64px; height: 64px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: 30px; font-weight: 800; }
+.result-card { background: var(--navy); color: #fff; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.result-card .rk { font-size: 12px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--lime); }
+.result-card .rbig { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.result-card .rrow { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, .14); font-size: 15px; }
+.result-card .rrow b { color: var(--lime); white-space: nowrap; }
+.venti { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; }
+.venti .ava { width: 40px; height: 40px; border-radius: 14px; background: var(--blue); display: grid; place-items: center; color: var(--lime); font-weight: 800; }
+.venti .bubble { background: var(--card); border: 1px solid var(--line); border-radius: 4px 18px 18px 18px; padding: 12px 14px; font-size: 15px; }
+.venti .bubble b { font-weight: 800; }
+.venti .who { font-size: 12px; font-weight: 800; color: var(--blue); margin-bottom: 2px; }
+
+/* крючок на завтра */
+.tomorrow { border: 2px dashed var(--blue); background: var(--soft); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.tomorrow .when { font-size: 13px; font-weight: 800; color: var(--blue); }
+.remind { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.remind button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); font-size: 13px; font-weight: 700; }
+.remind button[aria-pressed="true"] { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.remind .ic { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 16px; font-weight: 800; }
+.ring-row { display: flex; align-items: center; gap: 14px; }
+.ring { width: 64px; height: 64px; flex: none; }
+
+/* карточка для сторис */
+.story {
+  aspect-ratio: 9 / 14; width: min(260px, 70vw); margin: 0 auto;
+  border-radius: 24px; padding: 22px; color: #fff;
+  background: radial-gradient(120% 80% at 100% 0%, rgba(223, 255, 0, .35), transparent 50%), linear-gradient(160deg, #3B47FF, #00033E);
+  display: flex; flex-direction: column; gap: 10px; justify-content: space-between;
+}
+.story .s-big { font-size: 30px; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
+.story .s-big em { font-style: normal; color: var(--lime); }
+.story .s-q { font-size: 18px; font-weight: 800; }
+.story .s-url { font-size: 13px; opacity: .8; font-weight: 700; }
+
+/* нижний лист и тост */
+.sheet-bg { position: absolute; inset: 0; background: rgba(0, 3, 62, .45); display: flex; align-items: flex-end; z-index: 30; animation: fade .2s both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.sheet { width: 100%; max-height: 86%; overflow-y: auto; background: var(--bg); border-radius: 26px 26px 0 0; padding: 10px 18px calc(env(safe-area-inset-bottom, 0px) + 20px); display: flex; flex-direction: column; gap: 14px; animation: up .35s var(--ease) both; }
+@keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.grab { width: 40px; height: 5px; border-radius: 999px; background: var(--line-2); margin: 0 auto 4px; }
+.feat { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+.feat .fi { width: 40px; height: 40px; border-radius: 12px; background: var(--soft); display: grid; place-items: center; font-size: 20px; }
+.feat b { display: block; font-size: 15px; }
+.feat span { font-size: 13px; color: var(--faint); }
+.toast { position: absolute; left: 18px; right: 18px; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 40; background: var(--navy); color: #fff; border-radius: 16px; padding: 14px 16px; font-size: 14px; font-weight: 600; box-shadow: 0 12px 30px -10px rgba(0, 3, 62, .6); animation: up .3s var(--ease) both; }
+
+.note-sheet h3 { margin: 0; font-size: 17px; }
+.note-sheet p { font-size: 14px; color: var(--muted); }
+
+/* --- панель заметок для жюри (только компьютер) --- */
+.notes {
+  flex-direction: column; gap: 16px;
+  color: var(--ink);
+  max-height: calc(100vh - 64px); overflow-y: auto;
+}
+.notes .n-head { display: flex; align-items: center; gap: 10px; }
+.notes .n-badge { font-size: 12px; font-weight: 800; padding: 5px 10px; border-radius: 999px; background: var(--blue); color: #fff; letter-spacing: .04em; }
+.notes .n-step { font-size: 13px; font-weight: 700; color: var(--faint); }
+.notes h3 { margin: 0; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; }
+.n-block { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.n-block .n-k { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.n-block.data { border-left: 4px solid var(--blue); }
+.n-block.metric { border-left: 4px solid var(--green); }
+.n-block code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; background: var(--card-2); padding: 1px 6px; border-radius: 6px; }
+.n-ctrl { display: flex; flex-wrap: wrap; gap: 8px; }
+.n-ctrl button { padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--card); font-size: 13px; font-weight: 700; }
+.n-ctrl button:hover { border-color: var(--blue); color: var(--blue); }
+.log { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; max-height: 150px; overflow-y: auto; }
+.log span b { color: var(--green); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone" id="phone">
+    <header class="bar">
+      <span class="logo" aria-label="Ventorme">ventorme<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#C7E600" d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0z"/></svg></span>
+      <div class="bar-right">
+        <span class="streak" id="streak" hidden></span>
+        <button type="button" class="info-btn" data-act="note" aria-label="Зачем этот экран">i</button>
+      </div>
+    </header>
+    <main class="screen" id="screen" aria-live="polite"></main>
+  </div>
+
+  <aside class="notes" id="notes" aria-label="Пояснения для жюри"></aside>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ======================================================================
+     Данные прототипа.
+     Пороги грантов и специальности ИЛЛЮСТРАТИВНЫЕ: в продукте Ventorme
+     подставляет свои данные калькулятора гранта по ЕНТ.
+     ====================================================================== */
+  var PAIRS = {
+    "mf": { label: "Математика + Физика", items: [
+      { s: "Информационные системы", u: "КазНУ им. аль-Фараби", t: 118 },
+      { s: "Электроэнергетика", u: "Satbayev University", t: 97 },
+      { s: "Строительство", u: "ЕНУ им. Гумилёва", t: 86 } ] },
+    "mi": { label: "Математика + Информатика", items: [
+      { s: "Программная инженерия", u: "Astana IT University", t: 121 },
+      { s: "Кибербезопасность", u: "ЕНУ им. Гумилёва", t: 112 },
+      { s: "Анализ данных", u: "КазНУ им. аль-Фараби", t: 104 } ] },
+    "bc": { label: "Биология + Химия", items: [
+      { s: "Общая медицина", u: "КазНМУ им. Асфендиярова", t: 124 },
+      { s: "Фармация", u: "МУА, Астана", t: 101 },
+      { s: "Биотехнология", u: "КазНУ им. аль-Фараби", t: 89 } ] },
+    "mg": { label: "Математика + География", items: [
+      { s: "Финансы", u: "КазЭУ им. Рыскулова", t: 109 },
+      { s: "Экономика", u: "ЕНУ им. Гумилёва", t: 103 },
+      { s: "Логистика", u: "КазАТК", t: 84 } ] },
+    "hp": { label: "Всемирная история + Право", items: [
+      { s: "Международные отношения", u: "КазУМОиМЯ им. Абылай хана", t: 119 },
+      { s: "Юриспруденция", u: "КазНУ им. аль-Фараби", t: 111 },
+      { s: "Государственное управление", u: "ЕНУ им. Гумилёва", t: 92 } ] }
+  };
+
+  var PROF_Q = [
+    { q: "Что тебе даётся проще всего?", o: [
+      ["🧮", "Математика и логика", { it: 2, eng: 1 }],
+      ["🧪", "Биология и химия", { med: 2 }],
+      ["✍️", "Языки и тексты", { soc: 1, art: 1 }],
+      ["🗣️", "Общаться с людьми", { biz: 2, soc: 1 }] ] },
+    { q: "Какой проект ты бы взял(а) на неделю?", o: [
+      ["🤖", "Сделать Telegram-бота или сайт", { it: 2 }],
+      ["🌉", "Собрать робота или модель моста", { eng: 2 }],
+      ["🩺", "Помогать в клинике или лаборатории", { med: 2 }],
+      ["💼", "Запустить мини-бизнес на ярмарке", { biz: 2 }] ] },
+    { q: "Что раздражает тебя сильнее?", o: [
+      ["🐢", "Когда всё работает медленно и криво", { it: 1, eng: 1 }],
+      ["💔", "Когда людям плохо, а никто не помогает", { med: 1, soc: 2 }],
+      ["🎨", "Скучный и некрасивый дизайн", { art: 2 }],
+      ["📉", "Когда упускают выгоду", { biz: 2 }] ] },
+    { q: "Где ты видишь себя через 10 лет?", o: [
+      ["💻", "В сильной IT-команде", { it: 2 }],
+      ["🏗️", "На проекте масштаба страны", { eng: 2 }],
+      ["🏥", "В белом халате", { med: 2 }],
+      ["🚀", "В своём деле или своей студии", { biz: 1, art: 1 }] ] },
+    { q: "Как тебе лучше работается?", o: [
+      ["🎧", "Одному, в тишине, над задачей", { it: 1, eng: 1 }],
+      ["🛠️", "Руками, в команде", { eng: 2 }],
+      ["🤝", "С людьми, помогая им", { soc: 2, med: 1 }],
+      ["💡", "Придумывая новое", { art: 2, biz: 1 }] ] }
+  ];
+  var PROF = {
+    it:  { p: "Разработчик ПО", s: "Программная инженерия, ИС" },
+    eng: { p: "Инженер-энергетик", s: "Электроэнергетика, робототехника" },
+    med: { p: "Врач", s: "Общая медицина, стоматология" },
+    biz: { p: "Маркетолог / предприниматель", s: "Маркетинг, менеджмент" },
+    art: { p: "UX/UI-дизайнер", s: "Дизайн, digital-медиа" },
+    soc: { p: "Психолог / педагог", s: "Психология, педагогика" }
+  };
+
+  var ENG_Q = [
+    { q: "She ___ to school every day.", o: ["go", "goes", "going", "gone"], a: 1 },
+    { q: "If I ___ more time, I would travel.", o: ["have", "will have", "had", "having"], a: 2 },
+    { q: "The results were ___ than we expected.", o: ["more better", "far better", "most good", "the best"], a: 1 },
+    { q: "Closest meaning of «reluctant»:", o: ["eager", "unwilling", "quick", "proud"], a: 1 },
+    { q: "Hardly ___ the lecture begun when the alarm went off.", o: ["has", "did", "had", "was"], a: 2 }
+  ];
+  var ENG_BAND = ["≈ 4.0 (A2)", "≈ 4.5 (A2+)", "≈ 5.0 (B1)", "≈ 5.5 (B1+)", "≈ 6.0–6.5 (B2)", "≈ 7.0+ (C1)"];
+
+  /* План по главной заботе ученика. Каждый шаг — уже существующая функция
+     Ventorme: мы меняем порядок и подачу, а не придумываем новые разделы. */
+  var PLANS = {
+    grant: {
+      worry: "хватит ли баллов на грант",
+      first: { t: "Узнай свой шанс на грант", d: "Двигай ползунок — сразу увидишь, куда проходишь", time: "1 минута", feat: "Калькулятор гранта по ЕНТ" },
+      steps: [
+        ["Шанс на грант по ЕНТ", "Калькулятор гранта"],
+        ["Пробный ЕНТ: 10 задач", "Подготовка · 15 минут"],
+        ["Вузы с грантом и общежитием", "Подбор вузов"],
+        ["План подготовки на неделю", "Venti"] ],
+      tomorrow: "Пробный ЕНТ по профильной математике: 10 задач, 15 минут. Покажем, на каких темах ты теряешь баллы.",
+      day2q: { q: "Вопрос дня: 15% от 240 = ?", o: ["24", "36", "32", "40"], a: 1, ok: "Верно! Проценты — 2–3 задачи в каждом варианте ЕНТ." }
+    },
+    prof: {
+      worry: "пока не знаю, кем стать",
+      first: { t: "Экспресс-профтест", d: "5 вопросов — и топ-3 профессии, которые тебе подходят", time: "1 минута", feat: "Профтест" },
+      steps: [
+        ["Экспресс-профтест", "Профтест · 5 вопросов"],
+        ["День из жизни профессии", "Venti · 5 минут"],
+        ["Полный профтест", "Профтест · 15 минут"],
+        ["Вузы под твои профессии", "Подбор вузов"] ],
+      tomorrow: "«День из жизни» твоей профессии №1: Venti покажет, как выглядит обычный рабочий день, и задаст 3 вопроса — подходит ли это тебе.",
+      day2q: { q: "Вопрос дня: что разработчик делает чаще всего?", o: ["Пишет код с нуля весь день", "Читает и правит чужой код", "Чинит компьютеры", "Рисует интерфейсы"], a: 1, ok: "Да! Больше половины времени — чтение и доработка существующего кода." }
+    },
+    eng: {
+      worry: "английский: IELTS / SAT",
+      first: { t: "Узнай свой уровень английского", d: "5 вопросов — примерный балл IELTS и вузы, куда с ним проходишь", time: "1 минута", feat: "Подготовка к IELTS" },
+      steps: [
+        ["Экспресс-уровень английского", "IELTS · 5 вопросов"],
+        ["IELTS Reading: 1 текст", "Подготовка · 10 минут"],
+        ["Вузы за рубежом под твой балл", "Подбор вузов"],
+        ["Тема эссе с Venti", "Помощь с эссе"] ],
+      tomorrow: "IELTS Reading: один текст, 10 минут. Уточним твой балл и покажем, какой тип вопросов отнимает больше всего очков.",
+      day2q: { q: "Слово дня: «thorough» значит…", o: ["быстрый", "тщательный", "грубый", "через"], a: 1, ok: "Верно! «A thorough analysis» — частое сочетание в IELTS Writing." }
+    }
+  };
+
+  /* ======================================================================
+     Пояснения для жюри: что решает экран, на какую цифру опирается, какое
+     событие пишем для метрики.
+     ====================================================================== */
+  var NOTES = {
+    a1: { n: "Конец анкеты", h: "Анкета почти та же — добавили один вопрос",
+      what: "Имя, класс и цель у Ventorme уже спрашиваются. Мы добавляем последний вопрос: «Что сейчас волнует больше всего?». Именно ответ на него выбирает первый шаг.",
+      data: "Анкету заполняют 95% зарегистрировавшихся: 1 777 из 1 863 (Т1). Ученики готовы рассказывать о себе. Проблема не в анкете, а в том, что ответы потом ни на что не влияют.",
+      metric: "<code>onboarding_answer_worry</code> — распределение забот подскажет Ventorme, какие функции развивать." },
+    a3: { n: "Конец анкеты", h: "Главный вопрос: что волнует",
+      what: "Три варианта — три главные боли поступающего. Каждой соответствует существующая функция: калькулятор гранта, профтест, подготовка к IELTS.",
+      data: "Платформа умеет 6 вещей (профтест, вузы, IELTS/SAT, грант, эссе, Venti). Выбирать из шести новичку сложно — пусть выберет одну заботу, а не одну функцию.",
+      metric: "<code>onboarding_completed</code>" },
+    build: { n: "Переход", h: "2 секунды: «мы тебя услышали»",
+      what: "Короткая сборка плана показывает, что каждый ответ анкеты учтён. Это мост между «я заполнил форму» и «мне что-то дали».",
+      data: "Сейчас после анкеты 60% учеников не открывают ни одного раздела (Т2): анкета заканчивается, а продолжения не видно.",
+      metric: "—" },
+    plan: { n: "Экран после анкеты", h: "Не меню из 6 разделов, а один шаг на сегодня",
+      what: "Персональный план из 4 шагов, но открыт только первый — крупная карточка с одной кнопкой и временем «1 минута». Под ней явно написано, на какой ответ анкеты мы отвечаем. Остальные функции не спрятаны: ссылка «Все возможности» внизу.",
+      data: "60% после анкеты не открыли ни одного раздела (Т2) ≈ 1 066 учеников. Когда вариантов много и непонятно, с чего начать, уходят, ничего не выбрав. Здесь выбирать не нужно.",
+      metric: "<code>plan_viewed</code> → <code>first_step_started</code>. Цель: доля начавших шаг 1 ≥ 50% (сейчас раздел открывают 40%)." },
+    act: { n: "Первое полезное действие", h: "Функция работает прямо здесь, за минуту",
+      what: "Не переход в раздел, а сама функция внутри онбординга: ползунок баллов ЕНТ с ответом в реальном времени, 5 вопросов профтеста или 5 вопросов на уровень английского.",
+      data: "Раздел открыли 40%, а функцию попробовали только 6% (Т2). Между «открыл» и «попробовал» теряется 34 п.п. ≈ 600 учеников. Поэтому убираем этот разрыв: функция встроена в первый экран.",
+      metric: "<code>first_step_completed</code> — главная метрика №1: доля сделавших полезное действие в первый заход (сейчас 6%)." },
+    result: { n: "Результат", h: "Польза + незакрытый вопрос",
+      what: "Ученик получает личный результат (шанс на грант / топ-3 профессии / примерный балл IELTS) и совет Venti, где назван следующий незакрытый вопрос: «сколько баллов не хватает» или «подходит ли тебе эта профессия».",
+      data: "Это «реальная польза уже при первом посещении» из задания. Незакрытый вопрос — наша гипотеза, почему человек вернётся: он хочет узнать продолжение про себя.",
+      metric: "<code>result_viewed</code>, <code>venti_tip_opened</code>" },
+    hook: { n: "Повод вернуться", h: "Конкретное обещание на завтра + напоминание",
+      what: "Не «заходи ещё», а конкретный шаг 2 с темой и временем. Напоминание в Telegram / WhatsApp одним нажатием. Карточка для сторис — ученик сам зовёт друзей.",
+      data: "Вернулись в другой день только 15% (Т2). Без канала связи у платформы нет способа напомнить о себе. Instagram в 1 туре давал больше половины трафика главной — карточка превращает его в канал рекомендаций от друзей.",
+      metric: "<code>reminder_opt_in</code>, <code>share_card</code>. Метрика №2: доля вернувшихся за 7 дней (сейчас «вернулись в другой день» — 15%)." },
+    day2: { n: "На следующий день", h: "Ученик вернулся: шаг 2 уже ждёт",
+      what: "Серия дней, открытый шаг 2 и вопрос дня на 10 секунд — даже если нет времени на шаг, можно сделать маленькое действие и не потерять серию.",
+      data: "Это проверка гипотезы удержания: возврат D1 и D7 в тестовой группе против контрольной.",
+      metric: "<code>return_d1</code>, <code>return_d7</code>, <code>step2_started</code>" }
+  };
+
+  /* ======================================================================
+     Состояние и журнал событий (в продукте уходит в аналитику Ventorme).
+     ====================================================================== */
+  var S, LOG = [];
+  function fresh() {
+    return { screen: "a1", name: "Айгерим", grade: "", goal: "", pair: "", worry: "",
+      score: 95, profI: 0, prof: {}, engI: 0, eng: 0, engPick: null,
+      result: null, remind: "", day2done: false, streak: 0 };
+  }
+  S = fresh();
+
+  var $screen = document.getElementById("screen");
+  var $notes = document.getElementById("notes");
+  var $phone = document.getElementById("phone");
+  var $streak = document.getElementById("streak");
+  var t0 = Date.now();
+
+  function track(ev) {
+    var sec = Math.round((Date.now() - t0) / 1000);
+    LOG.push("+" + sec + "с <b>" + ev + "</b>");
+    renderNotes();
+  }
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function plan() { return PLANS[S.worry] || PLANS.grant; }
+
+  /* ======================================================================
+     Экраны
+     ====================================================================== */
+  function progress(n) {
+    var h = '<div class="progress" aria-label="Шаг ' + n + ' из 3">';
+    for (var i = 1; i <= 3; i++) h += '<span class="' + (i <= n ? "on" : "") + '"></span>';
+    return h + "</div>";
+  }
+
+  var SCREENS = {
+    a1: function () {
+      var grades = [["8-9", "8–9 класс"], ["10", "10 класс"], ["11", "11 класс"], ["grad", "Уже выпустился"]];
+      var h = progress(1) +
+        '<div class="kicker">Анкета · 1 из 3</div><h1>Давай знакомиться</h1>' +
+        '<div class="field"><label for="nm">Как тебя зовут?</label><input class="input" id="nm" value="' + esc(S.name) + '" autocomplete="given-name"></div>' +
+        '<div class="field"><label>В каком ты классе?</label><div class="chips">';
+      grades.forEach(function (g) { h += '<button type="button" class="chip" data-act="grade" data-v="' + g[0] + '" aria-pressed="' + (S.grade === g[0]) + '">' + g[1] + "</button>"; });
+      h += '</div></div><div class="cta-wrap"><button type="button" class="btn" data-act="go" data-to="a2"' + (S.grade ? "" : " disabled") + ">Дальше</button></div>";
+      return h;
+    },
+    a2: function () {
+      var goals = [["kz", "🇰🇿", "В Казахстане", "Хочу на грант в казахстанский вуз"], ["abroad", "🌍", "За рубежом", "Европа, Азия, США"], ["unsure", "🤔", "Пока не решил(а)", "Помогите разобраться"]];
+      var h = progress(2) + '<div class="kicker">Анкета · 2 из 3</div><h1>Где хочешь учиться?</h1><div class="opts">';
+      goals.forEach(function (g) {
+        h += '<button type="button" class="opt" data-act="goal" data-v="' + g[0] + '" aria-pressed="' + (S.goal === g[0]) + '"><span class="em">' + g[1] + '</span><span class="opt-t">' + g[2] + "<small>" + g[3] + "</small></span></button>";
+      });
+      h += "</div>";
+      if (S.goal === "kz") {
+        h += '<div class="field"><label>Профильные предметы ЕНТ</label><div class="chips">';
+        Object.keys(PAIRS).forEach(function (k) { h += '<button type="button" class="chip" data-act="pair" data-v="' + k + '" aria-pressed="' + (S.pair === k) + '">' + PAIRS[k].label + "</button>"; });
+        h += "</div></div>";
+      }
+      var ok = S.goal && (S.goal !== "kz" || S.pair);
+      h += '<div class="cta-wrap"><button type="button" class="btn" data-act="go" data-to="a3"' + (ok ? "" : " disabled") + '>Дальше</button><button type="button" class="btn ghost" data-act="go" data-to="a1">Назад</button></div>';
+      return h;
+    },
+    a3: function () {
+      var w = [["grant", "🎯", "Хватит ли баллов на грант", "ЕНТ, проходные баллы"], ["prof", "🧭", "Не знаю, кем стать", "Профессия и специальность"], ["eng", "🇬🇧", "Английский: IELTS / SAT", "Для поступления за рубеж"]];
+      var h = progress(3) + '<div class="kicker">Анкета · последний вопрос</div><h1>Что тебя сейчас волнует больше всего?</h1><p class="sub">Выбери одно — с этого и начнём.</p><div class="opts">';
+      w.forEach(function (x) {
+        h += '<button type="button" class="opt" data-act="worry" data-v="' + x[0] + '" aria-pressed="' + (S.worry === x[0]) + '"><span class="em">' + x[1] + '</span><span class="opt-t">' + x[2] + "<small>" + x[3] + "</small></span></button>";
+      });
+      h += '</div><div class="cta-wrap"><button type="button" class="btn" data-act="finish"' + (S.worry ? "" : " disabled") + '>Завершить анкету</button><button type="button" class="btn ghost" data-act="go" data-to="a2">Назад</button></div>';
+      return h;
+    },
+    build: function () {
+      var g = { "8-9": "8–9 класс", "10": "10 класс", "11": "11 класс", grad: "выпускник" }[S.grade];
+      var goal = S.goal === "kz" ? PAIRS[S.pair].label : S.goal === "abroad" ? "учёба за рубежом" : "направление пока ищем";
+      return '<div class="build"><div class="spinner" aria-hidden="true"></div><h1>' + esc(S.name) + ', собираем твой план</h1>' +
+        '<div class="tick-row" style="animation-delay:.2s"><i>✓</i>Учли: ' + g + "</div>" +
+        '<div class="tick-row" style="animation-delay:.7s"><i>✓</i>Учли: ' + goal + "</div>" +
+        '<div class="tick-row" style="animation-delay:1.2s"><i>✓</i>Первый шаг: ' + plan().first.feat + "</div></div>";
+    },
+    plan: function () {
+      var p = plan(), done = !!S.result;
+      var h = '<div><div class="kicker">Твой план поступления</div><h1>' + esc(S.name) + ", начнём с главного</h1></div>";
+      if (S.grade === "11" && S.goal === "kz") {
+        h += '<div class="countdown"><b>' + daysToEnt() + '</b><span class="sub">дней до основного ЕНТ — успеваешь, если начать сейчас</span></div>';
+      }
+      if (!done) {
+        h += '<div class="hero-card"><div class="pill-row"><span class="pill">Шаг 1 · сегодня</span><span class="pill glass">⏱ ' + p.first.time + "</span></div>" +
+          "<h2>" + p.first.t + "</h2><p>" + p.first.d + '</p><button type="button" class="btn lime" data-act="start">Начать</button></div>' +
+          '<div class="because"><span aria-hidden="true">💬</span><span>В анкете ты выбрал(а): <b>«' + p.worry + '»</b>. Поэтому первый шаг — именно этот.</span></div>';
+      }
+      h += '<h2 style="margin-top:4px">Весь план</h2><ol class="steps">';
+      p.steps.forEach(function (st, i) {
+        var cls = "", tag = "";
+        if (i === 0) { cls = done ? "done" : "now"; tag = done ? "Готово" : "Сегодня"; }
+        else if (i === 1) { cls = done ? "next" : ""; tag = done ? "Завтра" : "🔒"; }
+        else tag = "🔒";
+        h += '<li class="st ' + cls + '"><span class="n">' + (cls === "done" ? "✓" : i + 1) + '</span><span><span class="t">' + st[0] + '</span><br><span class="d">' + st[1] + '</span></span><span class="tag">' + tag + "</span></li>";
+      });
+      h += "</ol>";
+      if (done) h += '<div class="cta-wrap"><button type="button" class="btn" data-act="go" data-to="hook">Дальше</button></div>';
+      h += '<button type="button" class="btn ghost" data-act="features">Все возможности Ventorme</button>';
+      return h;
+    },
+    act: function () {
+      if (S.worry === "prof") return profScreen();
+      if (S.worry === "eng") return engScreen();
+      return grantScreen();
+    },
+    result: function () {
+      var r = S.result;
+      var h = '<div class="done-badge pop" aria-hidden="true">✓</div><div><div class="kicker">Шаг 1 выполнен</div><h1>' + r.title + "</h1></div>";
+      h += '<div class="result-card pop"><div class="rk">' + r.kicker + '</div><div class="rbig">' + r.big + "</div>";
+      r.rows.forEach(function (x) { h += '<div class="rrow"><span>' + x[0] + "</span><b>" + x[1] + "</b></div>"; });
+      h += "</div>";
+      h += '<div class="venti"><div class="ava">V</div><div class="bubble"><div class="who">Venti, ИИ-помощник</div>' + r.tip + "</div></div>";
+      h += '<div class="cta-wrap"><button type="button" class="btn" data-act="save">Сохранить в мой план</button><button type="button" class="btn ghost" data-act="redo">Пройти заново</button></div>';
+      return h;
+    },
+    hook: function () {
+      var p = plan();
+      var pct = 25, c = 2 * Math.PI * 26;
+      var h = '<div class="ring-row"><svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" fill="none" stroke="var(--line)" stroke-width="7"/><circle cx="32" cy="32" r="26" fill="none" stroke="var(--blue)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + (c * pct / 100) + " " + c + '" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle" font-size="15" font-weight="800" fill="var(--ink)">1/4</text></svg>' +
+        '<div><div class="kicker">Сохранено в плане</div><h1 style="font-size:22px">Отличное начало, ' + esc(S.name) + "!</h1></div></div>";
+      h += '<div class="tomorrow"><div class="when">🔓 Завтра откроется шаг 2</div><h2>' + p.steps[1][0] + '</h2><p class="sub">' + p.tomorrow + "</p></div>";
+      h += '<div class="card"><h2 style="font-size:17px">Куда напомнить завтра в 19:00?</h2><div class="remind">' +
+        remindBtn("tg", "#229ED9", "✈", "Telegram") + remindBtn("wa", "#25D366", "✆", "WhatsApp") + remindBtn("push", "#3B47FF", "🔔", "Уведомление") +
+        '</div><p class="small">Одно сообщение в день. Отключается одной кнопкой.</p></div>';
+      h += '<div class="cta-wrap"><button type="button" class="btn outline" data-act="share">📸 Поделиться результатом в сторис</button><button type="button" class="btn" data-act="go" data-to="plan">Вернуться в план</button><button type="button" class="btn ghost" data-act="day2demo">👀 Что ученик увидит завтра</button></div>';
+      return h;
+    },
+    day2: function () {
+      var p = plan(), q = p.day2q;
+      var h = '<div><div class="kicker">Следующий день</div><h1>С возвращением, ' + esc(S.name) + "! 🔥</h1></div>";
+      h += '<p class="sub">2 дня подряд. Шаг 2 уже открыт — займёт ' + p.steps[1][1].split("·").pop().trim() + ".</p>";
+      h += '<div class="hero-card"><div class="pill-row"><span class="pill">Шаг 2 · сегодня</span></div><h2>' + p.steps[1][0] + "</h2><p>" + p.tomorrow + '</p><button type="button" class="btn lime" data-act="step2">Начать шаг 2</button></div>';
+      h += '<div class="card"><div class="kicker">⚡ Нет времени? 10 секунд</div><h2 style="font-size:17px">' + q.q + '</h2><div class="opts">';
+      q.o.forEach(function (o, i) {
+        var cls = "";
+        if (S.day2done) cls = i === q.a ? "right" : (i === S.day2pick ? "wrong" : "");
+        h += '<button type="button" class="opt ' + cls + '" data-act="day2q" data-v="' + i + '"' + (S.day2done ? " disabled" : "") + ">" + o + "</button>";
+      });
+      h += "</div>" + (S.day2done ? '<p class="sub">' + (S.day2pick === q.a ? q.ok : "Почти. " + q.ok.replace(/^Верно! |^Да! /, "")) + "</p>" : "") + "</div>";
+      h += '<ol class="steps">';
+      p.steps.forEach(function (st, i) {
+        var cls = i === 0 ? "done" : i === 1 ? "now" : "";
+        h += '<li class="st ' + cls + '"><span class="n">' + (i === 0 ? "✓" : i + 1) + '</span><span><span class="t">' + st[0] + '</span><br><span class="d">' + st[1] + '</span></span><span class="tag">' + (i === 0 ? "Готово" : i === 1 ? "Сегодня" : "🔒") + "</span></li>";
+      });
+      h += "</ol>";
+      return h;
+    }
+  };
+
+  function remindBtn(k, col, ic, label) {
+    return '<button type="button" data-act="remind" data-v="' + k + '" aria-pressed="' + (S.remind === k) + '"><span class="ic" style="background:' + col + '">' + ic + "</span>" + label + "</button>";
+  }
+
+  function daysToEnt() {
+    // Основной период ЕНТ традиционно в мае–июне; для прототипа берём 20 мая.
+    var now = new Date(), y = now.getMonth() > 5 ? now.getFullYear() + 1 : now.getFullYear();
+    return Math.max(1, Math.ceil((new Date(y, 4, 20) - now) / 864e5));
+  }
+
+  /* --- калькулятор гранта --- */
+  function chance(score, t) {
+    var d = score - t;
+    if (d >= 5) return { c: "hi", l: "Высокий", w: Math.min(100, 75 + d) };
+    if (d >= -5) return { c: "mid", l: "Средний", w: 50 + d * 4 };
+    return { c: "lo", l: "Низкий", w: Math.max(6, 30 + d * 2) };
+  }
+  function pairKey() { return S.pair || (S.goal === "abroad" ? "mi" : "mf"); }
+  function grantList() {
+    return PAIRS[pairKey()].items.map(function (it) {
+      var ch = chance(S.score, it.t);
+      var gap = it.t - S.score;
+      return '<div class="uni"><span class="u-t">' + it.s + '</span><span class="chance ' + ch.c + '">' + ch.l + '</span><span class="u-d">' + it.u + " · проходной ≈ " + it.t + (gap > 0 ? " · не хватает " + gap : "") + '</span><span class="meter"><i class="' + ch.c + '" style="width:' + ch.w + '%"></i></span></div>';
+    }).join("");
+  }
+  function grantScreen() {
+    var p = (S.score - 50) / 90 * 100;
+    return '<div><div class="kicker">Шаг 1 · калькулятор гранта</div><h1>Сколько баллов ЕНТ ты ожидаешь?</h1></div>' +
+      '<div class="card score-box"><div class="score-val"><b id="sv">' + S.score + '</b><span>из 140</span></div>' +
+      '<input type="range" id="score" min="50" max="140" step="1" value="' + S.score + '" style="--p:' + p + '%" aria-label="Ожидаемый балл ЕНТ">' +
+      '<div class="stepper"><button type="button" data-act="sc" data-v="-5">−5</button><button type="button" data-act="sc" data-v="-1">−1</button><button type="button" data-act="sc" data-v="1">+1</button><button type="button" data-act="sc" data-v="5">+5</button></div>' +
+      '<p class="small">Не знаешь? Оставь 95 — средний ожидаемый балл. Изменишь потом.</p></div>' +
+      '<div class="card"><h2 style="font-size:17px">' + PAIRS[pairKey()].label + '</h2><div id="unis">' + grantList() + "</div></div>" +
+      '<p class="small">Прототип: проходные баллы условные. В продукте — данные калькулятора гранта Ventorme.</p>' +
+      '<div class="cta-wrap"><button type="button" class="btn" data-act="grantDone">Показать мой результат</button></div>';
+  }
+  function grantResult() {
+    var items = PAIRS[pairKey()].items.map(function (it) { return { it: it, ch: chance(S.score, it.t) }; });
+    var best = items.filter(function (x) { return x.ch.c === "hi"; });
+    var near = items.filter(function (x) { return x.ch.c !== "hi"; }).sort(function (a, b) { return a.it.t - b.it.t; })[0];
+    var gap = near ? near.it.t + 5 - S.score : 0;
+    return {
+      title: best.length ? "Грант реален уже сейчас" : "Грант достижим — есть над чем поработать",
+      kicker: "Твой шанс на грант · " + S.score + " баллов",
+      big: best.length ? best.length + " из 3 специальностей — высокий шанс" : "Высокий шанс пока у 0 из 3",
+      rows: items.map(function (x) { return [x.it.s, x.ch.l]; }),
+      tip: near ? "Чтобы шанс на <b>«" + near.it.s + "»</b> стал высоким, нужно ещё <b>≈ " + gap + " баллов</b>. Обычно это 2–3 темы профильного предмета. Завтра в пробном варианте покажу, какие именно темы у тебя проседают." :
+        "У тебя высокий шанс на все 3 специальности. Следующий вопрос — <b>какой вуз выбрать</b>: завтра сравним их по общежитию, стипендии и трудоустройству.",
+      share: ["Мой шанс на грант:", best.length ? "высокий" : "растёт", "А какой у тебя?"]
+    };
+  }
+
+  /* --- экспресс-профтест --- */
+  function profScreen() {
+    var q = PROF_Q[S.profI];
+    var h = '<div class="progress">';
+    for (var i = 0; i < PROF_Q.length; i++) h += '<span class="' + (i <= S.profI ? "on" : "") + '"></span>';
+    h += '</div><div><div class="kicker">Профтест · вопрос ' + (S.profI + 1) + " из " + PROF_Q.length + "</div><h1>" + q.q + '</h1></div><div class="opts">';
+    q.o.forEach(function (o, i) { h += '<button type="button" class="opt" data-act="prof" data-v="' + i + '"><span class="em">' + o[0] + '</span><span class="opt-t">' + o[1] + "</span></button>"; });
+    h += "</div>";
+    if (S.profI > 0) h += '<div class="cta-wrap"><button type="button" class="btn ghost" data-act="profBack">Назад</button></div>';
+    return h;
+  }
+  function profResult() {
+    var keys = Object.keys(PROF), sc = S.prof, total = 0;
+    keys.forEach(function (k) { total += sc[k] || 0; });
+    var top = keys.sort(function (a, b) { return (sc[b] || 0) - (sc[a] || 0); }).slice(0, 3);
+    var maxv = sc[top[0]] || 1;
+    var rows = top.map(function (k, i) { return [PROF[k].p, Math.round(60 + 35 * (sc[k] || 0) / maxv) - i * 3 + "%"]; });
+    return {
+      title: "Твой топ-3 профессий",
+      kicker: "Экспресс-профтест · 5 вопросов",
+      big: PROF[top[0]].p,
+      rows: rows,
+      tip: "Профессия №1 — <b>" + PROF[top[0]].p + "</b>, специальности: " + PROF[top[0]].s + ". Но 5 вопросов — это только начало. Главный вопрос: <b>понравится ли тебе обычный рабочий день?</b> Завтра покажу его изнутри.",
+      share: ["Мне подходит:", PROF[top[0]].p.toLowerCase(), "А тебе?"]
+    };
+  }
+
+  /* --- уровень английского --- */
+  function engScreen() {
+    var q = ENG_Q[S.engI];
+    var h = '<div class="progress">';
+    for (var i = 0; i < ENG_Q.length; i++) h += '<span class="' + (i <= S.engI ? "on" : "") + '"></span>';
+    h += '</div><div><div class="kicker">Английский · вопрос ' + (S.engI + 1) + " из " + ENG_Q.length + '</div><h1 style="font-size:23px">' + q.q + '</h1></div><div class="opts">';
+    q.o.forEach(function (o, i) {
+      var cls = "";
+      if (S.engPick !== null) cls = i === q.a ? "right" : i === S.engPick ? "wrong" : "";
+      h += '<button type="button" class="opt ' + cls + '" data-act="eng" data-v="' + i + '"' + (S.engPick !== null ? " disabled" : "") + ">" + o + "</button>";
+    });
+    h += "</div>";
+    if (S.engPick !== null) h += '<div class="cta-wrap"><button type="button" class="btn" data-act="engNext">' + (S.engI < ENG_Q.length - 1 ? "Следующий вопрос" : "Показать мой уровень") + "</button></div>";
+    return h;
+  }
+  function engResult() {
+    var band = ENG_BAND[S.eng];
+    var need = S.eng >= 4 ? "Хватает для большинства вузов Европы и Азии" : "Большинство вузов просят 6.0–6.5";
+    return {
+      title: "Твой примерный уровень",
+      kicker: "Экспресс-оценка · " + S.eng + " из 5 верно",
+      big: "IELTS " + band,
+      rows: [["Цель для зарубежных вузов", "6.0–6.5"], ["Где ты сейчас", band.split(" (")[0]], ["Итог", S.eng >= 4 ? "Уже в цели" : "Нужен рост"]],
+      tip: need + ". Экспресс-тест — это грубая оценка. <b>Самые дорогие ошибки обычно в Reading</b> — завтра дам один текст на 10 минут и покажу, какой тип вопросов отнимает у тебя больше всего баллов.",
+      share: ["Мой уровень английского:", "IELTS " + band.split(" (")[0].replace("≈ ", ""), "А твой?"]
+    };
+  }
+
+  /* ======================================================================
+     Нижние листы и тосты
+     ====================================================================== */
+  function sheet(html) {
+    closeSheet();
+    var bg = document.createElement("div");
+    bg.className = "sheet-bg";
+    bg.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>' + html + "</div>";
+    bg.addEventListener("click", function (e) { if (e.target === bg || e.target.closest("[data-close]")) closeSheet(); });
+    $phone.appendChild(bg);
+  }
+  function closeSheet() { var s = $phone.querySelector(".sheet-bg"); if (s) s.remove(); }
+  function toast(msg) {
+    var old = $phone.querySelector(".toast"); if (old) old.remove();
+    var t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg;
+    $phone.appendChild(t);
+    setTimeout(function () { t.remove(); }, 2600);
+  }
+
+  function featuresSheet() {
+    var f = [["🧭", "Профтест", "Какие профессии тебе подходят"], ["🏛️", "Подбор вузов", "Казахстан и зарубеж"], ["🇬🇧", "IELTS и SAT", "Подготовка и пробники"], ["🎯", "Калькулятор гранта", "Шанс на грант по баллам ЕНТ"], ["✍️", "Помощь с эссе", "Мотивационные письма"], ["✨", "Venti", "ИИ-помощник на любой вопрос"]];
+    var h = "<h2>Все возможности Ventorme</h2><p class=\"sub\">Ничего не спрятано — просто начинаем с того, что важно тебе.</p>";
+    f.forEach(function (x) { h += '<div class="feat"><span class="fi">' + x[0] + "</span><span><b>" + x[1] + "</b><span>" + x[2] + "</span></span></div>"; });
+    h += '<button type="button" class="btn" data-close>Вернуться к шагу 1</button>';
+    sheet(h);
+    track("features_opened");
+  }
+
+  function shareSheet() {
+    var s = S.result.share;
+    sheet('<h2>Карточка для сторис</h2><div class="story"><div class="logo" style="color:#fff">ventorme</div><div><div class="s-q">' + s[0] + '</div><div class="s-big"><em>' + s[1] + '</em></div></div><div><div class="s-q">' + s[2] + '</div><div class="s-url">ventorme.ai · пройди за 1 минуту</div></div></div>' +
+      '<p class="small" style="text-align:center">В продукте: картинка 1080×1920 + ссылка с меткой ученика, чтобы видеть, сколько друзей он привёл.</p><button type="button" class="btn" data-close>Поделиться</button>');
+    track("share_card");
+  }
+
+  /* ======================================================================
+     Навигация и обработчики
+     ====================================================================== */
+  function go(name) {
+    S.screen = name;
+    $screen.innerHTML = SCREENS[name]();
+    $screen.scrollTop = 0;
+    $screen.style.animation = "none"; void $screen.offsetWidth; $screen.style.animation = "";
+    if (S.streak) { $streak.hidden = false; $streak.textContent = "🔥 " + S.streak; } else $streak.hidden = true;
+    bindRange();
+    renderNotes();
+  }
+  function rerender() {
+    var top = $screen.scrollTop;
+    $screen.innerHTML = SCREENS[S.screen]();
+    $screen.style.animation = "none";
+    $screen.scrollTop = top;
+    bindRange();
+  }
+
+  function bindRange() {
+    var r = document.getElementById("score");
+    if (!r) return;
+    r.addEventListener("input", function () { setScore(+r.value, true); });
+  }
+  var touchedScore = false;
+  function setScore(v, fromRange) {
+    S.score = Math.max(50, Math.min(140, v));
+    var r = document.getElementById("score");
+    if (r) { if (!fromRange) r.value = S.score; r.style.setProperty("--p", (S.score - 50) / 90 * 100 + "%"); }
+    document.getElementById("sv").textContent = S.score;
+    document.getElementById("unis").innerHTML = grantList();
+    if (!touchedScore) { touchedScore = true; track("grant_calc_used"); }
+  }
+
+  function finishStep(result) {
+    S.result = result;
+    track("first_step_completed");
+    go("result");
+  }
+
+  var ACT = {
+    go: function (el) { go(el.dataset.to); },
+    grade: function (el) { S.grade = el.dataset.v; rerender(); },
+    goal: function (el) { S.goal = el.dataset.v; if (S.goal !== "kz") S.pair = ""; rerender(); },
+    pair: function (el) { S.pair = el.dataset.v; rerender(); },
+    worry: function (el) { S.worry = el.dataset.v; rerender(); track("onboarding_answer_worry=" + S.worry); },
+    finish: function () {
+      track("onboarding_completed");
+      go("build");
+      setTimeout(function () { if (S.screen === "build") { go("plan"); track("plan_viewed"); } }, 2000);
+    },
+    start: function () { track("first_step_started"); go("act"); },
+    sc: function (el) { setScore(S.score + (+el.dataset.v)); },
+    grantDone: function () { finishStep(grantResult()); },
+    prof: function (el) {
+      var o = PROF_Q[S.profI].o[+el.dataset.v][2];
+      Object.keys(o).forEach(function (k) { S.prof[k] = (S.prof[k] || 0) + o[k]; });
+      (S.profHist = S.profHist || []).push(o);
+      if (S.profI < PROF_Q.length - 1) { S.profI++; go("act"); } else finishStep(profResult());
+    },
+    profBack: function () {
+      var o = S.profHist.pop();
+      Object.keys(o).forEach(function (k) { S.prof[k] -= o[k]; });
+      S.profI--; go("act");
+    },
+    eng: function (el) {
+      S.engPick = +el.dataset.v;
+      if (S.engPick === ENG_Q[S.engI].a) S.eng++;
+      rerender();
+    },
+    engNext: function () {
+      S.engPick = null;
+      if (S.engI < ENG_Q.length - 1) { S.engI++; go("act"); } else finishStep(engResult());
+    },
+    redo: function () {
+      S.result = null; S.profI = 0; S.prof = {}; S.profHist = []; S.engI = 0; S.eng = 0; S.engPick = null;
+      go("act");
+    },
+    day2demo: function () { demoDay2(); },
+    save: function () { S.streak = 1; track("result_saved"); go("hook"); },
+    remind: function (el) {
+      S.remind = el.dataset.v; rerender();
+      track("reminder_opt_in=" + S.remind);
+      toast("Готово! Завтра в 19:00 напомним про шаг 2.");
+    },
+    share: function () { shareSheet(); },
+    features: function () { featuresSheet(); },
+    step2: function () { track("step2_started"); toast("В продукте здесь открывается раздел Ventorme сразу на задании шага 2."); },
+    day2q: function (el) { S.day2pick = +el.dataset.v; S.day2done = true; rerender(); track("daily_question_answered"); },
+    note: function () {
+      var n = NOTES[noteKey()];
+      sheet('<div class="note-sheet"><div class="kicker">Для жюри · ' + n.n + "</div><h3>" + n.h + "</h3></div>" +
+        '<div class="n-block"><span class="n-k">Что делает экран</span>' + n.what + '</div><div class="n-block data"><span class="n-k">На какую цифру опираемся</span>' + n.data + '</div><div class="n-block metric"><span class="n-k">Что измеряем</span>' + n.metric + '</div><button type="button" class="btn" data-close>Понятно</button>');
+    }
+  };
+
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]");
+    if (!el || el.disabled) return;
+    var fn = ACT[el.dataset.act];
+    if (fn) fn(el);
+  });
+  document.addEventListener("input", function (e) { if (e.target.id === "nm") S.name = e.target.value.trim() || "Друг"; });
+
+  function demoDay2() {
+    if (!S.result) {
+      S.grade = S.grade || "11"; S.goal = S.goal || "kz"; S.pair = S.pair || "mf"; S.worry = S.worry || "grant";
+      S.result = grantResult();
+    }
+    S.streak = 2; S.day2done = false; S.day2pick = null;
+    track("return_d1");
+    go("day2");
+  }
+  function restart() { S = fresh(); LOG = []; t0 = Date.now(); touchedScore = false; closeSheet(); go("a1"); }
+
+  /* ======================================================================
+     Панель для жюри (компьютер)
+     ====================================================================== */
+  function noteKey() { return S.screen === "a2" ? "a1" : S.screen; }
+  function renderNotes() {
+    if (!window.matchMedia("(min-width: 900px)").matches) return;
+    var n = NOTES[noteKey()];
+    var order = ["a1", "a3", "build", "plan", "act", "result", "hook", "day2"];
+    var idx = order.indexOf(noteKey()) + 1;
+    $notes.innerHTML = '<div class="n-head"><span class="n-badge">ДЛЯ ЖЮРИ</span><span class="n-step">' + idx + " / " + order.length + " · " + n.n + "</span></div>" +
+      "<h3>" + n.h + "</h3>" +
+      '<div class="n-block"><span class="n-k">Что делает экран</span>' + n.what + "</div>" +
+      '<div class="n-block data"><span class="n-k">На какую цифру опираемся</span>' + n.data + "</div>" +
+      '<div class="n-block metric"><span class="n-k">Что измеряем</span>' + n.metric + "</div>" +
+      '<div class="n-block"><span class="n-k">Журнал событий (уходит в аналитику)</span><div class="log">' + (LOG.length ? LOG.slice().reverse().map(function (l) { return "<span>" + l + "</span>"; }).join("") : "<span>пока пусто</span>") + "</div></div>" +
+      '<div class="n-ctrl"><button type="button" id="n-restart">↺ Сначала</button><button type="button" id="n-day2">→ Ученик вернулся завтра</button><button type="button" id="n-theme">◐ Тема</button></div>';
+    document.getElementById("n-restart").onclick = restart;
+    document.getElementById("n-day2").onclick = demoDay2;
+    document.getElementById("n-theme").onclick = function () {
+      var r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+      r.dataset.theme = dark ? "light" : "dark";
+    };
+  }
+  window.addEventListener("resize", renderNotes);
+
+  // Быстрый показ на защите с телефона: ?day2 открывает «следующий день».
+  if (/[?&]day2\b/.test(location.search)) demoDay2(); else go("a1");
+})();
+</script>
+</body>
+</html>

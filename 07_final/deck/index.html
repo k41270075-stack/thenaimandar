@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Первые 5 минут</title>
+<style>
+/* Презентация финала: 7 слайдов 1280×720, масштабируются под экран.
+   Листать: ← → / пробел / клик по правой и левой половине. Печать в PDF — по слайду на страницу. */
+:root {
+  color-scheme: light;
+  --blue: #3B47FF; --navy: #00033E; --lime: #DFFF00;
+  --bg: #F4F5FB; --card: #FFFFFF; --ink: #0B0D24; --muted: #4A4E66; --faint: #7A7E95;
+  --line: #E4E6EF; --soft: #EEF0FF; --green: #128A5B; --green-bg: #DDF7EA; --red: #C8323A; --red-bg: #FDE3E4;
+  --amber: #A15C00; --amber-bg: #FFF1D6;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --desk: #05060C; } }
+:root[data-theme="dark"] { --desk: #05060C; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--desk, #1B1D2B); overflow: hidden; }
+body { font-family: "Manrope", "Onest", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+.deck { position: fixed; inset: 0; display: grid; place-items: center; }
+.slide {
+  position: absolute; width: 1280px; height: 720px; transform-origin: center;
+  background: var(--bg); overflow: hidden; padding: 56px 64px;
+  display: none; flex-direction: column; gap: 24px;
+}
+.slide.on { display: flex; }
+.k { font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+h1 { margin: 0; font-size: 46px; line-height: 1.08; letter-spacing: -.025em; font-weight: 800; }
+h2 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
+p { margin: 0; }
+.lead { font-size: 21px; color: var(--muted); line-height: 1.45; }
+.foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 13px; color: var(--faint); font-weight: 600; }
+.row { display: flex; gap: 24px; }
+.grow { flex: 1; min-width: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; }
+.shot { border-radius: 26px; border: 7px solid #11131F; box-shadow: 0 24px 60px -24px rgba(0, 3, 62, .45); display: block; background: #fff; }
+.tag { display: inline-block; font-size: 13px; font-weight: 800; padding: 5px 11px; border-radius: 999px; background: var(--lime); color: var(--navy); }
+.src { font-size: 13px; color: var(--faint); font-weight: 700; }
+
+/* 1. Титул */
+.s-cover { background: var(--blue); color: #fff; flex-direction: row; align-items: center; gap: 56px; }
+.s-cover::after { content: ""; position: absolute; right: -120px; top: -160px; width: 620px; height: 620px; border-radius: 50%; background: radial-gradient(circle, rgba(223, 255, 0, .32), transparent 65%); }
+.s-cover .k { color: var(--lime); }
+.s-cover h1 { font-size: 76px; }
+.s-cover .lead { color: rgba(255, 255, 255, .9); font-size: 24px; max-width: 17em; }
+.s-cover .shot { position: relative; z-index: 1; width: 300px; transform: rotate(3deg); }
+
+/* 2. Анализ */
+.funnel { display: flex; flex-direction: column; gap: 14px; }
+.fr { display: grid; grid-template-columns: 300px minmax(0, 1fr) 90px; align-items: center; gap: 16px; font-size: 17px; font-weight: 600; }
+.fr .bar { height: 30px; border-radius: 10px; background: #E7E9F4; overflow: hidden; }
+.fr .bar i { display: block; height: 100%; border-radius: 10px; background: var(--blue); }
+.fr.bad .bar i { background: var(--red); }
+.fr b { font-size: 26px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.fr.bad b { color: var(--red); }
+.gaps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.gap { background: var(--card); border: 1px solid var(--line); border-top: 5px solid var(--red); border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.gap .n { font-size: 30px; font-weight: 800; color: var(--red); letter-spacing: -.02em; }
+.gap .t { font-size: 17px; font-weight: 800; }
+.gap p { font-size: 14.5px; color: var(--muted); line-height: 1.4; }
+.caveat { font-size: 14px; color: var(--muted); background: var(--amber-bg); border-radius: 14px; padding: 10px 14px; }
+.caveat b { color: var(--amber); }
+
+/* 3. Идея */
+.big-q { font-size: 54px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+.big-q em { font-style: normal; color: var(--blue); }
+.map { display: flex; flex-direction: column; gap: 12px; }
+.mp { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); align-items: center; gap: 10px; }
+.mp .a, .mp .b { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; font-size: 17px; font-weight: 700; }
+.mp .a small, .mp .b small { display: block; font-size: 13.5px; font-weight: 600; color: var(--faint); margin-top: 2px; }
+.mp .b { background: var(--blue); color: #fff; border-color: var(--blue); }
+.mp .b small { color: rgba(255, 255, 255, .78); }
+.mp .arr { text-align: center; font-size: 24px; color: var(--blue); font-weight: 800; }
+.three { display: flex; gap: 10px; flex-wrap: wrap; }
+.three span { font-size: 17px; font-weight: 800; padding: 10px 16px; border-radius: 999px; background: var(--navy); color: var(--lime); }
+
+/* 4. Путь */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.fl { display: flex; flex-direction: column; gap: 10px; }
+.fl .shot { width: 100%; border-width: 5px; border-radius: 20px; }
+.fl .cap { font-size: 15px; font-weight: 800; line-height: 1.25; }
+.fl .cap small { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+.fl .fix { align-self: flex-start; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 999px; background: var(--green-bg); color: var(--green); }
+
+/* 5. Возврат */
+.mech { display: flex; flex-direction: column; gap: 14px; }
+.m { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 16px; align-items: start; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; }
+.m .ic { width: 52px; height: 52px; border-radius: 16px; background: var(--soft); display: grid; place-items: center; font-size: 26px; }
+.m b { display: block; font-size: 18px; margin-bottom: 2px; }
+.m span { font-size: 15px; color: var(--muted); line-height: 1.4; }
+
+/* 6. Проверка */
+table { width: 100%; border-collapse: collapse; font-size: 16px; background: var(--card); border-radius: 18px; overflow: hidden; }
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); background: #FAFAFD; }
+td.num { font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.pill-g { display: inline-block; font-weight: 800; color: var(--green); background: var(--green-bg); padding: 2px 9px; border-radius: 999px; }
+.mini { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.mini .card { padding: 16px 18px; gap: 6px; }
+.mini .card b { font-size: 16px; }
+.mini .card span { font-size: 14px; color: var(--muted); line-height: 1.4; }
+
+/* 7. Внедрение */
+.s-end { background: var(--navy); color: #fff; }
+.s-end .k { color: var(--lime); }
+.s-end .lead { color: rgba(255, 255, 255, .8); }
+.impl { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.impl div { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: rgba(255, 255, 255, .82); line-height: 1.4; }
+.impl b { color: #fff; font-size: 17px; }
+.impl i { font-style: normal; font-size: 28px; font-weight: 800; color: var(--lime); }
+.feats { display: flex; gap: 10px; flex-wrap: wrap; }
+.feats span { font-size: 15px; font-weight: 700; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(223, 255, 0, .5); color: var(--lime); }
+.closing { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+.closing em { font-style: normal; color: var(--lime); }
+.s-end .foot { color: rgba(255, 255, 255, .5); }
+
+.counter { position: fixed; right: 16px; bottom: 12px; font: 700 13px system-ui; color: rgba(255, 255, 255, .55); }
+
+@media print {
+  @page { size: 1280px 720px; margin: 0; }
+  html, body { overflow: visible; height: auto; background: none; }
+  .deck { position: static; display: block; }
+  .slide { position: relative; display: flex !important; transform: none !important; page-break-after: always; break-after: page; }
+  .counter { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide s-cover">
+    <div class="grow" style="position:relative;z-index:1;display:flex;flex-direction:column;gap:22px">
+      <div class="k">HACKNEXT × Ventorme · финал · team-068</div>
+      <h1>Первый шаг за&nbsp;1&nbsp;минуту</h1>
+      <p class="lead">Анкета, которая наконец отвечает: что ученик видит после анкеты, чтобы сразу получить пользу и вернуться завтра.</p>
+    </div>
+    <img class="shot" src="img/2-plan.png" alt="Экран плана после анкеты">
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="k">Анализ проблемы · Т1, Т2</div>
+    <h1>Учеников теряют не на анкете, а сразу после неё</h1>
+    <div class="funnel">
+      <div class="fr"><span>Заполнили анкету (из 1 863 зарег.)</span><span class="bar"><i style="width:95%"></i></span><b>95%</b></div>
+      <div class="fr bad"><span>Открыли хотя бы один раздел</span><span class="bar"><i style="width:40%"></i></span><b>40%</b></div>
+      <div class="fr bad"><span>Попробовали хотя бы одну функцию</span><span class="bar"><i style="width:6%"></i></span><b>6%</b></div>
+      <div class="fr bad"><span>Вернулись в другой день</span><span class="bar"><i style="width:15%"></i></span><b>15%</b></div>
+    </div>
+    <div class="gaps">
+      <div class="gap"><span class="n">60%</span><span class="t">Анкета ни к чему не ведёт</span><p>Ученик рассказал о себе, а получил меню разделов. Ответы ни на что не повлияли, выбирать из 6 функций нужно самому.</p></div>
+      <div class="gap"><span class="n">−34 п.п.</span><span class="t">«Открыл» ≠ «попробовал»</span><p>40% открыли раздел, 6% дошли до функции. Путь от раздела до первой пользы слишком длинный.</p></div>
+      <div class="gap"><span class="n">15%</span><span class="t">Нет повода вернуться</span><p>Ничего не осталось незаконченным, нет обещания на завтра и канала, чтобы напомнить.</p></div>
+    </div>
+    <div class="caveat"><b>Где цифры могут обманывать:</b> учеников привели команды хакатона, их намерение ниже обычного; «вернулись» посчитано в окне 1–4 дня. Поэтому решение сравниваем с контрольной группой, а не с 6%.</div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="k">Идея</div>
+    <div class="row" style="gap:48px;flex:1;align-items:center">
+      <div class="grow" style="display:flex;flex-direction:column;gap:26px">
+        <p class="big-q">Анкета спрашивает,<br>но <em>ничего не отвечает</em></p>
+        <p class="lead">Добавляем один вопрос: <b>«Что тебя сейчас волнует больше всего?»</b> И сразу отвечаем на него: не меню из шести разделов, а один шаг на сегодня.</p>
+        <div class="three"><span>1 вопрос</span><span>1 шаг</span><span>1 минута</span></div>
+      </div>
+      <div class="map grow">
+        <div class="mp"><div class="a">🎯 Хватит ли баллов на грант<small>ответ в анкете</small></div><div class="arr">→</div><div class="b">Калькулятор гранта<small>ползунок ЕНТ → шансы на 3 специальности</small></div></div>
+        <div class="mp"><div class="a">🧭 Не знаю, кем стать<small>ответ в анкете</small></div><div class="arr">→</div><div class="b">Экспресс-профтест<small>5 вопросов → топ-3 профессии</small></div></div>
+        <div class="mp"><div class="a">🇬🇧 Английский: IELTS / SAT<small>ответ в анкете</small></div><div class="arr">→</div><div class="b">Уровень английского<small>5 вопросов → примерный балл IELTS</small></div></div>
+        <p class="src" style="margin-top:6px">Все функции уже есть в Ventorme. Меняем порядок и подачу, а не продукт.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="k">Прототип · от конца анкеты до пользы ≈ 60 секунд и 3 нажатия</div>
+    <h1 style="font-size:38px">Что видит ученик сразу после анкеты</h1>
+    <div class="flow">
+      <div class="fl"><img class="shot" src="img/1-worry.png" alt=""><span class="cap">1. Последний вопрос<small>одна забота вместо шести функций</small></span></div>
+      <div class="fl"><img class="shot" src="img/2-plan.png" alt=""><span class="cap">2. План: открыт только шаг 1<small>и написано, почему именно он</small></span><span class="fix">−60% «не открыли»</span></div>
+      <div class="fl"><img class="shot" src="img/3-act.png" alt=""><span class="cap">3. Функция прямо на экране<small>без перехода в раздел</small></span><span class="fix">разрыв 40% → 6%</span></div>
+      <div class="fl"><img class="shot" src="img/4-result.png" alt=""><span class="cap">4. Результат + совет Venti<small>и незакрытый вопрос</small></span><span class="fix">польза в 1-й заход</span></div>
+      <div class="fl"><img class="shot" src="img/5-hook.png" alt=""><span class="cap">5. Шаг 2 завтра + напоминание<small>Telegram / WhatsApp / push</small></span><span class="fix">15% вернулись</span></div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="k">Почему вернётся завтра</div>
+    <div class="row" style="gap:44px;flex:1;align-items:center">
+      <div class="grow" style="display:flex;flex-direction:column;gap:22px">
+        <h1 style="font-size:40px">Сейчас у ученика нет ни одной причины прийти снова. Мы даём три</h1>
+        <div class="mech">
+          <div class="m"><span class="ic">❓</span><div><b>Незакрытый вопрос про себя</b><span>«До высокого шанса не хватает ≈ 7 баллов. Завтра покажу, на каких темах ты их теряешь».</span></div></div>
+          <div class="m"><span class="ic">🔓</span><div><b>Конкретный шаг 2 с темой и временем</b><span>Не «заходи ещё», а «пробный ЕНТ, 10 задач, 15 минут», уже открыт на следующий день.</span></div></div>
+          <div class="m"><span class="ic">✈️</span><div><b>Канал, чтобы позвать обратно</b><span>Напоминание в Telegram или WhatsApp одним нажатием, одно в день. Серия 🔥 и вопрос дня на 10 секунд.</span></div></div>
+        </div>
+        <p class="src">+ карточка результата для сторис: Instagram давал больше половины трафика главной (1 тур, Т3)</p>
+      </div>
+      <img class="shot" src="img/6-day2.png" alt="Экран следующего дня" style="width:290px">
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="k">План проверки</div>
+    <h1 style="font-size:38px">A/B-тест: новые ученики после анкеты 50/50 — нынешний экран против «Первого шага»</h1>
+    <table>
+      <thead><tr><th>Метрика</th><th>Сейчас</th><th>Цель</th><th>Учеников на группу*</th></tr></thead>
+      <tbody>
+        <tr><td><b>№1. Полезное действие в первый заход</b><br><span class="src">хотя бы одна функция в первой сессии</span></td><td class="num">6%</td><td class="num"><span class="pill-g">12%</span> · 15%</td><td class="num">356 · 181</td></tr>
+        <tr><td><b>№2. Возврат за 7 дней</b><br><span class="src">зашёл снова в дни 1–7 после регистрации</span></td><td class="num">~15%</td><td class="num"><span class="pill-g">22%</span> · 25%</td><td class="num">482 · 250</td></tr>
+      </tbody>
+    </table>
+    <div class="mini">
+      <div class="card"><b>Защитные метрики</b><span>Анкету дописывают ≥ 95% · до первого действия &lt; 90 с · отписки от напоминаний &lt; 10%</span></div>
+      <div class="card"><b>Где ломается</b><span>plan_viewed → first_step_started → first_step_completed → reminder_opt_in → return_d1. Разрезы: забота, класс, источник</span></div>
+      <div class="card"><b>Сроки</b><span>≥ 2 недели, ≈ 700–1 000 новых учеников. Сравниваем с контролем, а не с цифрами хакатона</span></div>
+    </div>
+    <div class="foot"><span>* α = 0,05, мощность 80%, двусторонний тест для двух долей</span><span>Сегодня на площадке: N участников прошли прототип → [впишите результат]</span></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide s-end">
+    <div class="k">Внедрение</div>
+    <p class="closing">Ventorme не нужен новый продукт.<br>Нужно, чтобы <em>анкета отвечала</em>, а первый шаг занимал минуту.</p>
+    <div class="impl">
+      <div><i>1</i><b>Вопрос в анкету</b>«Что волнует больше всего» + поле в профиле</div>
+      <div><i>2</i><b>Экран плана</b>4 шага на каждую заботу, ссылки на существующие разделы</div>
+      <div><i>3</i><b>Мини-функции</b>калькулятор гранта, короткий профтест, 5 вопросов по английскому</div>
+      <div><i>4</i><b>Напоминания</b>Telegram-бот, WhatsApp, push — только с согласия</div>
+      <div><i>5</i><b>Аналитика</b>события воронки + флаг A/B-теста</div>
+    </div>
+    <div class="feats"><span>Профтест</span><span>Подбор вузов</span><span>IELTS и SAT</span><span>Калькулятор гранта</span><span>Помощь с эссе</span><span>Venti</span></div>
+    <div class="foot"><span>team-068 · HackNext 2026</span><span>Спасибо! Вопросы?</span></div>
+  </section>
+
+</div>
+<div class="counter" id="counter"></div>
+<script>
+(function () {
+  var slides = [].slice.call(document.querySelectorAll(".slide"));
+  var i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  function fit() {
+    var s = Math.min(innerWidth / 1280, innerHeight / 720);
+    slides.forEach(function (el) { el.style.transform = "scale(" + s + ")"; });
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (el, k) { el.classList.toggle("on", k === i); });
+    document.getElementById("counter").textContent = (i + 1) + " / " + slides.length;
+    history.replaceState(null, "", "#" + (i + 1));
+  }
+  addEventListener("keydown", function (e) {
+    if (["ArrowRight", "PageDown", " ", "Enter"].indexOf(e.key) > -1) { e.preventDefault(); show(i + 1); }
+    if (["ArrowLeft", "PageUp", "Backspace"].indexOf(e.key) > -1) { e.preventDefault(); show(i - 1); }
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+  });
+  addEventListener("click", function (e) { show(e.clientX > innerWidth / 2 ? i + 1 : i - 1); });
+  addEventListener("resize", fit);
+  fit(); show(i);
+})();
+</script>
+</body>
+</html>
