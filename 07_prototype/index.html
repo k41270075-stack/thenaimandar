@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0B14" media="(prefers-color-scheme: dark)">
+<title>Ventorme · Первые 5 минут</title>
+<link rel="icon" href="img/ventorme-icon.png">
+<!-- Стиль один с лендингом 03_landing: системный шрифт, без внешних шрифтов -->
+<!-- ОБЩЕЕ: не трогать без договорённости -->
+<link rel="stylesheet" href="css/base.css">
+<!-- Каждая часть правит только свой файл -->
+<link rel="stylesheet" href="css/part1.css">
+<link rel="stylesheet" href="css/part2.css">
+<link rel="stylesheet" href="css/part3.css">
+</head>
+<body>
+<div class="phone" id="app">
+  <!-- Фон: 3D-звёзды как на лендинге, рисует участник 1 -->
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+  <!-- Шапка: серия, XP, уровень. Рисует js/hud.js -->
+  <header class="hud" id="hud">
+    <button class="hud-logo" id="hud-logo" type="button" aria-label="Ventorme">
+      <picture>
+        <source srcset="img/ventorme-logo-white.svg" media="(prefers-color-scheme: dark)">
+        <img src="img/ventorme-logo.svg" alt="Ventorme" width="104" height="23">
+      </picture>
+    </button>
+    <div class="hud-stats">
+      <span class="hud-streak" id="hud-streak" title="Серия дней">🔥 <b>0</b></span>
+      <span class="hud-level" id="hud-level">Ур. <b>1</b></span>
+      <span class="hud-xp" id="hud-xp"><span class="hud-xp-fill"></span><b>0 XP</b></span>
+    </div>
+  </header>
+
+  <main class="screens" id="screens">
+    <!-- Часть 1 -->
+    <section class="screen" data-screen="s0" aria-label="Последний вопрос анкеты"></section>
+    <section class="screen" data-screen="s1" aria-label="Venti анализирует"></section>
+    <section class="screen" data-screen="s2" aria-label="Сундук с результатом"></section>
+    <!-- Часть 2 -->
+    <section class="screen" data-screen="s3" aria-label="Первый шаг"></section>
+    <section class="screen" data-screen="s4" aria-label="Мини-вызов"></section>
+    <section class="screen" data-screen="s5" aria-label="Награда"></section>
+    <!-- Часть 3 -->
+    <section class="screen" data-screen="s6" aria-label="Напоминание"></section>
+    <section class="screen" data-screen="s7" aria-label="Завтра"></section>
+  </main>
+
+  <!-- Сюда часть 3 кладёт демо-меню, уведомления и прочие слои поверх экранов -->
+  <div class="overlay-root" id="overlay-root"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<!-- ОБЩЕЕ -->
+<script src="js/state.js"></script>
+<script src="js/router.js"></script>
+<script src="js/fx-core.js"></script>
+<script src="js/hud.js"></script>
+<!-- Данные: каждая часть правит свой файл -->
+<script src="data/profiles.js"></script>
+<script src="data/questions.js"></script>
+<!-- Экраны -->
+<script src="js/part1.js"></script>
+<script src="js/part2.js"></script>
+<script src="js/part3.js"></script>
+<!-- Запуск -->
+<script src="js/main.js"></script>
+</body>
+</html>
