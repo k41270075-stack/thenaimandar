@@ -33,9 +33,12 @@
 
 .s0-groups { display: flex; flex-direction: column; gap: 18px; }
 .s0-group { display: flex; flex-direction: column; gap: 9px; }
-.s0-label { font-size: 13px; font-weight: 650; color: var(--ink-muted); letter-spacing: .01em; }
+.s0-label { font-size: 15px; font-weight: 650; color: var(--ink-muted); letter-spacing: -.005em; }
 .s0-group .chip { flex: 1 1 auto; }
-.s0-cta { margin-top: auto; padding-top: 4px; }
+.s0-cta { margin-top: auto; padding-top: 4px; display: flex; flex-direction: column; gap: 8px; }
+.s0-hint { margin: 0; min-height: 22px; text-align: center; font-size: 15px; color: var(--ink-subtle); }
+/* Без двойного зума по быстрым тапам (скилл emil-design-engineering) */
+.s0-chip, .s0-done, .s2-chest, [data-screen="s2"] .btn { touch-action: manipulation; }
 
 /* ---------- S1 ---------- */
 .s1-stage {
@@ -103,7 +106,7 @@
   border: 1px solid var(--hairline);
 }
 .s1-stats b { font-size: 28px; font-weight: 750; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--accent); }
-.s1-stats span { font-size: 14px; color: var(--ink-muted); }
+.s1-stats span { font-size: 15px; color: var(--ink-muted); }
 
 .s1-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .s1-lines li {
@@ -121,7 +124,21 @@
   font-size: 13px; font-weight: 800;
   background: var(--good-soft); color: var(--good);
 }
-.s1-skip { text-align: center; margin-top: auto; }
+.s1-skip { margin: auto 0 0; text-align: center; font-size: 15px; color: var(--ink-subtle); }
+
+/* Волны от Venti: показывают, что идёт работа, пока точки летят в центр */
+.s1-wave {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 76px; height: 76px;
+  margin: -38px 0 0 -38px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  animation: s1-wave 1.3s cubic-bezier(.215, .61, .355, 1) infinite;
+}
+.s1-wave-2 { animation-delay: .65s; }
+@keyframes s1-wave { 0% { opacity: .55; transform: scale(1); } 100% { opacity: 0; transform: scale(2.6); } }
 
 /* ---------- S2: сундук ---------- */
 .s2-intro { display: flex; flex-direction: column; gap: 14px; flex: 1; }
@@ -180,6 +197,36 @@
 .s2-chest.is-opening .s2-chest-lid { animation: s2-lid .3s var(--ease) forwards; }
 @keyframes s2-lid { to { transform: translateY(-34px) rotate(-24deg); opacity: 0; } }
 
+
+/* Искры вокруг сундука в ожидании: мигают по очереди, лаймовые, как в знаке Ventorme */
+.s2-spark {
+  position: absolute; left: 50%; top: 45%;
+  width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  background: var(--lime);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  opacity: 0;
+  transform: translate(var(--sx), var(--sy)) scale(.4);
+  animation: s2-spark 2.4s ease-in-out var(--sd) infinite;
+}
+@keyframes s2-spark {
+  0%, 100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(.4) rotate(0); }
+  40% { opacity: 1; transform: translate(var(--sx), var(--sy)) scale(1) rotate(45deg); }
+  70% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(.6) rotate(90deg); }
+}
+.s2-chest.is-opening .s2-spark { animation: none; opacity: 0; }
+.s2-tap { margin: 0 0 8px; text-align: center; font-size: 15px; font-weight: 600; color: var(--accent); }
+
+/* Блик проходит по карточке один раз после переворота: «редкая карта» */
+.s2-card { overflow: hidden; outline: none; }
+.s2-shine {
+  position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 48%, transparent 62%);
+  transform: translateX(-120%);
+  animation: s2-shine .9s cubic-bezier(.645, .045, .355, 1) 1s both;
+  pointer-events: none;
+}
+@keyframes s2-shine { to { transform: translateX(120%); } }
+
 /* ---------- S2: результат ---------- */
 .s2-hero {
   position: relative;
@@ -225,15 +272,15 @@
 }
 .s2-rarity {
   align-self: flex-start;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: var(--r-pill);
   background: var(--lime);
   color: var(--lime-ink);
-  font-size: 12px; font-weight: 800; letter-spacing: .02em;
+  font-size: 15px; font-weight: 800; letter-spacing: -.005em;
 }
-.s2-card-k { font-size: 13px; opacity: .75; margin-top: 6px; }
+.s2-card-k { font-size: 15px; opacity: .78; margin-top: 6px; }
 .s2-card-t { font-size: 26px; font-weight: 750; letter-spacing: -.035em; line-height: 1.1; text-wrap: balance; }
-.s2-card-m { font-size: 15px; opacity: .9; }
+.s2-card-m { font-size: 16px; opacity: .92; }
 .s2-card-m b { color: var(--lime); font-size: 20px; font-variant-numeric: tabular-nums; }
 
 /* Остальные блоки появляются после карточки, по очереди */
@@ -266,24 +313,24 @@
 }
 .s2-uni:first-child { border-top: 0; }
 .s2-uni-name { display: block; font-size: 15px; font-weight: 650; line-height: 1.3; }
-.s2-uni-c { display: block; font-size: 13px; color: var(--ink-subtle); }
-.s2-uni b { flex: none; padding: 3px 9px; border-radius: var(--r-pill); background: var(--good-soft); color: var(--good); font-size: 13px; font-variant-numeric: tabular-nums; }
+.s2-uni-c { display: block; font-size: 15px; color: var(--ink-subtle); }
+.s2-uni b { flex: none; padding: 3px 9px; border-radius: var(--r-pill); background: var(--good-soft); color: var(--good); font-size: 15px; font-variant-numeric: tabular-nums; }
 .s2-uni-locked .s2-uni-name { filter: blur(4px); user-select: none; }
-.s2-lock { flex: none; font-size: 13px; font-weight: 700; color: var(--ink-muted); padding: 3px 9px; border-radius: var(--r-pill); background: var(--surface-2); }
+.s2-lock { flex: none; font-size: 15px; font-weight: 650; color: var(--ink-muted); padding: 3px 9px; border-radius: var(--r-pill); background: var(--surface-2); }
 
 .s2-grant { flex-direction: row; align-items: center; gap: 16px; }
 .s2-ring { flex: none; width: 108px; height: 108px; transform: rotate(-90deg); filter: drop-shadow(0 0 10px color-mix(in srgb, var(--lime) 55%, transparent)); }
 .s2-ring-track { fill: none; stroke: var(--surface-2); stroke-width: 12; }
 .s2-ring-fill { fill: none; stroke: var(--lime); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.215, .61, .355, 1); }
 .s2-grant-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.s2-grant-k { font-size: 14px; color: var(--ink-muted); font-weight: 600; }
+.s2-grant-k { font-size: 15px; color: var(--ink-muted); font-weight: 600; }
 .s2-grant-v { font-size: 34px; font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 .s2-levers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.s2-lever { font-size: 13px; font-weight: 600; padding: 4px 9px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--ink); }
+.s2-lever { font-size: 15px; font-weight: 600; padding: 5px 10px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--ink); }
 .s2-lever b { color: var(--accent); }
 
 /* Пропуск тапом: всё доигрывается мгновенно */
-.s2-skip .s2-late, .s2-skip .s2-card, .s2-skip .s2-bar i { animation-delay: 0s !important; animation-duration: .01ms !important; }
+.s2-skip .s2-late, .s2-skip .s2-card, .s2-skip .s2-bar i, .s2-skip .s2-shine { animation-delay: 0s !important; animation-duration: .01ms !important; }
 .s2-skip .s2-ring-fill { transition-duration: .01ms; }
 
 /* ---------- Уменьшенное движение: только появление, без полётов, тряски и вращения ---------- */
@@ -298,5 +345,6 @@
   .s2-card { animation: s0-fade .2s ease-out both; }
   .s2-bar i { animation: none; }
   .s2-ring-fill { transition: none; }
+  .s1-wave, .s2-spark, .s2-shine { display: none; }
 }
 @keyframes s0-fade { from { opacity: 0; } to { opacity: 1; } }

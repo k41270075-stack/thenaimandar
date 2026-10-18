@@ -40,11 +40,11 @@
   transform-origin: left;
   transform: scaleX(var(--from));
 }
-.s3-plan-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
-.s3-plan-steps li { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
-.s3-plan-steps span { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--hairline-str); background: var(--surface-1); }
+.s3-plan-steps { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between; }
+.s3-plan-txt { margin: 0; font-size: 15px; color: var(--ink-muted); }
+.s3-plan-steps span { display: block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--hairline-str); background: var(--surface-1); }
 .s3-plan-steps li.is-done span { border-color: var(--accent); background: var(--accent); }
-.s3-plan-steps em { font-style: normal; font-size: 11.5px; line-height: 1.15; color: var(--ink-subtle); }
+.s3-plan-steps li.is-next span { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 
 .s3-all { border: 1px solid var(--hairline); border-radius: var(--r-card); background: var(--surface-1); }
 .s3-all summary {
@@ -58,10 +58,16 @@
 .s3-all[open] summary::after { transform: rotate(45deg); }
 .s3-all ul { list-style: none; margin: 0; padding: 0 16px 12px; display: flex; flex-direction: column; gap: 10px; }
 .s3-all li { display: flex; flex-direction: column; font-size: 15px; }
-.s3-all li span { font-size: 13px; color: var(--ink-subtle); }
+.s3-all li span { font-size: 15px; color: var(--ink-subtle); }
 
 /* ---------- S4: мини-вызов ---------- */
-.s4-top { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 650; }
+.s4-top { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 650; }
+.s4-count { margin-right: auto; }
+.s4-dots { list-style: none; margin: 0; padding: 0; display: flex; gap: 5px; }
+.s4-dots li { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); border: 1.5px solid var(--hairline-str); transition: background-color .2s ease, border-color .2s ease, transform .2s var(--ease); }
+.s4-dots li.is-now { border-color: var(--accent); transform: scale(1.2); }
+.s4-dots li.is-ok { background: var(--good); border-color: var(--good); }
+.s4-dots li.is-bad { background: var(--bad); border-color: var(--bad); }
 .s4-time { font-variant-numeric: tabular-nums; padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-1); border: 1px solid var(--hairline); }
 .s4-timer { display: block; height: 10px; border-radius: var(--r-pill); background: var(--surface-2); overflow: hidden; }
 .s4-timer i {
@@ -73,7 +79,9 @@
   transition-timing-function: linear;
 }
 /* Последние 10 секунд: красный и пульс, чтобы чувствовалась ставка */
+.s4-hurry .s4-timer { animation: s4-blink .8s ease-in-out infinite; }
 .s4-hurry .s4-timer i { background: var(--bad); }
+@keyframes s4-blink { 50% { opacity: .55; } }
 .s4-hurry .s4-time { color: var(--bad); border-color: var(--bad); animation: s4-pulse .8s ease-in-out infinite; }
 @keyframes s4-pulse { 50% { transform: scale(1.08); } }
 
@@ -118,6 +126,17 @@
 @keyframes s4-ok { 40% { transform: scale(1.03); } }
 .s4-why { margin: 0; font-size: 15px; color: var(--ink-muted); animation: s3-rise .3s var(--ease) both; }
 .s4-next { animation: s3-rise .3s var(--ease) both; }
+.s4-opt, .s4-next .btn, .s3-go, .s5-next { touch-action: manipulation; }
+
+/* Красная виньетка при ошибке: коротко, по краям экрана, не мешает читать */
+.s4-vignette {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 70px 10px color-mix(in srgb, var(--bad) 55%, transparent);
+  opacity: 0;
+}
+.s4-vignette.is-on { animation: s4-vig .5s ease-out; }
+@keyframes s4-vig { 20% { opacity: 1; } 100% { opacity: 0; } }
 
 /* ---------- S5: награда ---------- */
 .s5-dim {
@@ -147,12 +166,24 @@
   from { opacity: 0; transform: perspective(700px) rotateY(-180deg) scale(.5); }
   to   { opacity: 1; transform: perspective(700px) rotateY(0) scale(1); }
 }
-.s5-badge-k { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .s5-badge-t { font-size: 22px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; max-width: 8em; }
 .s5-badge-xp { font-size: 15px; font-weight: 800; margin-top: 4px; }
 .s5-lvl { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.03em; animation: s3-rise .4s var(--ease) .6s both; }
-.s5-tap { margin: 0; font-size: 14px; opacity: .7; }
+.s5-tap { margin: 0; font-size: 15px; opacity: .75; }
 
+
+/* Лучи за бейджем: тот же язык, что у сундука на S2 */
+.s5-badge-wrap { position: relative; display: grid; place-items: center; }
+.s5-badge-rays {
+  position: absolute; width: 340px; height: 340px; border-radius: 50%;
+  background: repeating-conic-gradient(rgba(198, 244, 50, .35) 0deg 8deg, transparent 8deg 22deg);
+  -webkit-mask: radial-gradient(closest-side, #000 35%, transparent);
+  mask: radial-gradient(closest-side, #000 35%, transparent);
+  animation: s5-rays 10s linear infinite;
+}
+@keyframes s5-rays { to { rotate: 360deg; } }
+.s5-dim:focus { outline: none; }
+.s5-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .s5-streak { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 14px; }
 .s5-fire { font-size: 44px; line-height: 1; transform: scale(.6); opacity: .4; }
 .s5-go .s5-fire { animation: s5-fire .7s var(--ease-spring) both; }
@@ -168,7 +199,7 @@
   height: 36px; display: grid; place-items: center;
   border-radius: 10px;
   background: var(--surface-2);
-  font-size: 13px; font-weight: 650; color: var(--ink-subtle);
+  font-size: 15px; font-weight: 650; color: var(--ink-subtle);
   transition: background-color .3s ease .5s, color .3s ease .5s;
 }
 .s5-go .s5-week li.is-today { background: var(--fire); color: #fff; }
@@ -180,7 +211,7 @@
 
 .s5-locked { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; border-style: dashed; border-color: var(--accent-line); background: var(--accent-soft); }
 .s5-locked b { display: block; font-size: 16px; }
-.s5-locked span { font-size: 14px; color: var(--ink-muted); }
+.s5-locked span { font-size: 15px; color: var(--ink-muted); }
 .s5-lock { font-size: 30px; display: grid; place-items: center; animation: s5-lock 3s ease-in-out infinite; transform-origin: 50% 20%; }
 /* Замок подрагивает раз в 3 секунды: «загляни завтра» */
 @keyframes s5-lock { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-8deg); } 90% { transform: rotate(7deg); } 95% { transform: rotate(-4deg); } }
@@ -196,5 +227,7 @@
   .s5-flip-in, .s5-week li { transition: none; }
   .s5-go .s3-plan-track i { animation: none; }
   .s5-lock { animation: none; }
+  .s5-badge-rays, .s4-hurry .s4-timer { animation: none; }
+  .s4-vignette.is-on { animation: none; }
 }
 @keyframes s3-fade { from { opacity: 0; } to { opacity: 1; } }
