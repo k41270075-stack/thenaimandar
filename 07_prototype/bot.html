@@ -334,7 +334,7 @@ globalThis.process = { env: { VT_LOCAL: "1" } };
   function clearQuiz(chatId) {
     return redis().del("quiz:" + chatId);
   }
-  var EVENTS = ["start", "task", "ai", "stop", "delete", "feedback"];
+  var EVENTS = ["start", "ref", "task", "ai", "stop", "delete", "feedback"];
   async function track(event, day) {
     const dayKey2 = `stat:${day}:${event}`;
     await redis().incr(dayKey2);
@@ -500,6 +500,11 @@ ${g.lines.join("\n")}`).join("\n\n") + "\n\nИли просто напиши в�
 
 Все команды: /help`;
     },
+    helloFriend(name) {
+      return `${hi(name)} Тебя позвал друг 🙌 Я Venti из Ventorme: подбираю профессию и вуз, каждый день присылаю задание на 60 секунд и отвечаю на вопросы про поступление.
+
+К чему готовишься?`;
+    },
     helloNoPayload(name) {
       return `${hi(name)} Я Venti из Ventorme. Каждый день присылаю задание на 60 секунд и отвечаю на вопросы про поступление.
 
@@ -606,7 +611,7 @@ ${tail}`;
       return `Эта команда только для команды Ventorme. Твой Telegram id: ${id}. Добавь его в TG_ADMIN_IDS, если ты из команды.`;
     },
     stats(s) {
-      const row = (x) => `/start ${x.start} · заданий ${x.task} · вопросов Venti ${x.ai} · отписок ${x.stop} · удалений ${x.delete} · отзывов ${x.feedback}`;
+      const row = (x) => `/start ${x.start} · по ссылке друга ${x.ref} · заданий ${x.task} · вопросов Venti ${x.ai} · отписок ${x.stop} · удалений ${x.delete} · отзывов ${x.feedback}`;
       return `Статистика бота
 
 Сегодня: ${row(s.today)}
@@ -1009,9 +1014,12 @@ ${tail}`;
         return send(chatId, T.unknown, MENU);
     }
   }
+  var REF = /^ref_([A-Za-z0-9]{4,16})$/;
   async function onStart(chatId, name, payload) {
     const user = await loadUser(chatId);
     const today = dayKey();
+    const ref = REF.exec(String(payload || "").trim());
+    if (ref) return onRefStart(chatId, name, user, ref[1], today);
     const p = parsePayload(payload);
     user.subscribed = true;
     user.joined = user.joined || today;
@@ -1026,6 +1034,17 @@ ${tail}`;
     }
     await saveUser(chatId, user);
     return send(chatId, T.helloNoPayload(name), GOAL_BUTTONS);
+  }
+  async function onRefStart(chatId, name, user, code, today) {
+    const isNew = !user.joined;
+    user.subscribed = true;
+    user.joined = user.joined || today;
+    if (isNew) user.referredBy = code;
+    if (!user.lastActive) touchStreak(user, today);
+    await saveUser(chatId, user);
+    await track2("start");
+    if (isNew) await track2("ref");
+    return send(chatId, T.helloFriend(name), GOAL_BUTTONS);
   }
   async function onGoal(chatId, goal) {
     if (!Object.hasOwn(GOALS, goal)) return;

@@ -100,9 +100,14 @@ async function onMessage(msg) {
   }
 }
 
+// Вход по ссылке из сторис друга: /start ref_<код>
+const REF = /^ref_([A-Za-z0-9]{4,16})$/;
+
 async function onStart(chatId, name, payload) {
   const user = await loadUser(chatId);
   const today = dayKey();
+  const ref = REF.exec(String(payload || '').trim());
+  if (ref) return onRefStart(chatId, name, user, ref[1], today);
   const p = parsePayload(payload);
   user.subscribed = true;
   user.joined = user.joined || today;
@@ -119,6 +124,18 @@ async function onStart(chatId, name, payload) {
   }
   await store.saveUser(chatId, user);
   return send(chatId, T.helloNoPayload(name), GOAL_BUTTONS);
+}
+
+async function onRefStart(chatId, name, user, code, today) {
+  const isNew = !user.joined;
+  user.subscribed = true;
+  user.joined = user.joined || today;
+  if (isNew) user.referredBy = code;              // считаем только первый вход
+  if (!user.lastActive) touchStreak(user, today);
+  await store.saveUser(chatId, user);
+  await track('start');
+  if (isNew) await track('ref');
+  return send(chatId, T.helloFriend(name), GOAL_BUTTONS);
 }
 
 async function onGoal(chatId, goal) {

@@ -263,6 +263,63 @@
 @keyframes s5-lock { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-8deg); } 90% { transform: rotate(7deg); } 95% { transform: rotate(-4deg); } }
 .s5-cta { margin-top: auto; }
 
+/* Мягкий тизер Pro под наградой: спокойная карточка без замков, ничего не закрывает */
+.s5-pro {
+  display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center;
+  border-color: color-mix(in srgb, var(--violet) 35%, var(--hairline));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--violet) 9%, var(--surface-1)), var(--surface-1) 70%);
+}
+.s5-pro-ico { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: color-mix(in srgb, var(--violet) 14%, transparent); color: var(--violet); font-size: 22px; }
+.s5-pro b { display: block; font-size: 16px; }
+.s5-pro span:not(.s5-pro-ico) { font-size: 15px; color: var(--ink-muted); }
+
+/* Карточка «Поделись результатом»: второстепенная, главная кнопка экрана — «Не потерять серию» */
+.s5-story { display: flex; flex-direction: column; gap: 12px; }
+.s5-story b { display: block; font-size: 16px; }
+.s5-story div span { font-size: 15px; color: var(--ink-muted); }
+.s5-story-btn { min-height: 50px; }
+
+/* Шторка с предпросмотром карточки для сторис: выезжает снизу, на ноутбуке окно по центру */
+.s5-share { position: absolute; inset: 0; z-index: 4; }
+.s5-share-back { position: absolute; inset: 0; background: rgba(11, 13, 36, .55); animation: s5-fade .22s ease-out both; }
+.s5-share-sheet {
+  position: absolute;
+  left: 12px; right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 18px 16px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 22px;
+  background: var(--surface-1);
+  box-shadow: 0 18px 50px -12px rgba(11, 13, 36, .4);
+  animation: s5-sheet-in .28s var(--ease-out) both;
+}
+@keyframes s5-sheet-in { from { transform: translateY(24px); opacity: 0; } }
+.s5-share-t { align-self: flex-start; margin: 4px 0 0; font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+.s5-share-x {
+  position: absolute; top: 8px; right: 8px;
+  width: 48px; height: 48px;
+  border: 0; border-radius: 50%;
+  background: var(--surface-2); color: var(--ink-muted);
+  font-size: 26px; line-height: 1; cursor: pointer;
+}
+.s5-share-x:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+/* Карточка появляется с пружиной: предпросмотр 9:16 */
+.s5-share-img {
+  width: auto; height: min(44dvh, 400px);
+  aspect-ratio: 9 / 16;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px -14px rgba(0, 3, 62, .55);
+  animation: s5-card-in .5s var(--ease-spring) .08s both;
+}
+@keyframes s5-card-in { from { opacity: 0; transform: translateY(14px) scale(.9); } }
+.s5-share-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.s5-share-actions .btn { min-height: 52px; }
+.s5-share-note { margin: 0; font-size: 15px; color: var(--ink-subtle); text-align: center; overflow-wrap: anywhere; }
+.s5-share.is-out .s5-share-back, .s5-share.is-out .s5-share-sheet { animation: s5-fade-out .2s ease-out forwards; }
+
 
 /* ---------- Раскладка: на телефоне обёртки прозрачны, на ноутбуке это колонки ---------- */
 .s3-l, .s3-r, .s5-l, .s5-r { display: contents; }
@@ -291,7 +348,12 @@
 
   html:not([data-view="phone"]) .s5-cta { margin-top: 0; }
   html:not([data-view="phone"]) .s5-badge { width: 240px; }
+  html:not([data-view="phone"]) .s5-story { flex-direction: row; align-items: center; justify-content: space-between; }
+  html:not([data-view="phone"]) .s5-story-btn { width: auto; flex: none; padding: 12px 22px; }
+  html:not([data-view="phone"]) .s5-share-sheet { left: 50%; right: auto; bottom: auto; top: 50%; width: 440px; transform: translate(-50%, -50%); animation-name: s5-sheet-in-center; }
+  html:not([data-view="phone"]) .s5-share-img { height: min(48dvh, 430px); }
 }
+@keyframes s5-sheet-in-center { from { opacity: 0; transform: translate(-50%, calc(-50% + 24px)); } }
 
 @media (prefers-reduced-motion: reduce) {
   .s3-rise, .s4-card, .s4-opt, .s4-why, .s4-next, .s5-lvl { animation: s3-fade .2s ease-out both; animation-delay: 0s; }
@@ -305,6 +367,7 @@
   .s5-go .s3-segs li.is-new::after { animation: none; transform: none; }
   .s5-lock { animation: none; }
   .s5-badge-rays, .s4-hurry .s4-timer { animation: none; }
+  .s5-share-sheet, .s5-share-img { animation: s3-fade .15s ease-out both; }
   .s4-vignette.is-on { animation: none; }
 }
 @keyframes s3-fade { from { opacity: 0; } to { opacity: 1; } }

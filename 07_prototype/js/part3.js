@@ -1,6 +1,6 @@
-// Участник 2: S6, S7, демо-меню. Бот Ventorme AI живёт в api/ и bot/.
-// Этап 1 (статика): экраны работают без анимаций. Эффекты этапа 2 (перемотка часов, падение уведомления,
-// осколки замка, «печатает» в пузыре, выезд шторки) добавляются после вызова скилла моушн-дизайна.
+// Участник 2: S6, S7, демо-меню и сцена серии StreakFX. Бот Ventorme AI живёт в api/ и bot/.
+// Движение по правилам DEV_PLAN (раздел 0) и раскадровке StreakFX (раздел 3.5): только transform и opacity,
+// пропуск тапом, при «уменьшить движение» — сразу итог.
 (function () {
   // Юзернейм бота из @BotFather, без @ (см. DEPLOY.md)
   var BOT_USERNAME = 'VentormeAI_bot';
@@ -126,6 +126,15 @@
     return unis[3] || FALLBACK_UNI;
   }
 
+  // 8 осколков замка: угол разлёта, дальность и поворот у каждого свои
+  function shards() {
+    var h = '';
+    for (var i = 0; i < 8; i++) {
+      h += '<span class="s7-shard" style="--a:' + (i * 45 + (i % 2 ? 12 : -8)) + 'deg;--d:' + (34 + (i * 7) % 20) + 'px;--r:' + (i % 2 ? 140 : -120) + 'deg"></span>';
+    }
+    return h;
+  }
+
   function tomorrowDate() {
     var d = new Date(Date.now() + 86400000);
     try { return d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }); }
@@ -173,7 +182,11 @@
           '<div><b class="s7-streak-num"></b><span>Серия растёт, план поступления тоже</span></div>' +
         '</div></div>' +
         '<div class="card s7-uni">' +
-          '<span class="s7-uni-icon" aria-hidden="true">' + Icon.svg('unlock') + '</span>' +
+          '<span class="s7-uni-icon" aria-hidden="true">' +
+            '<span class="s7-uni-lock">' + Icon.svg('lock') + '</span>' +
+            '<span class="s7-uni-open">' + Icon.svg('unlock') + '</span>' +
+            shards() +
+          '</span>' +
           '<div class="s7-uni-name"><b>' + esc(uni.name) + '</b><span>' + esc(uni.country) + ' · открыт после задания</span></div>' +
           '<b class="s7-uni-match">' + uni.match + '%</b>' +
         '</div>' +
@@ -183,22 +196,34 @@
 
     var notif = el.querySelector('.s7-notif');
 
-    function open() {
+    // burst: замок 4-го вуза разлетается на осколки (только сразу после тапа, не при повторном заходе)
+    function open(burst) {
       var st = State.get();
       el.querySelector('.s7-streak-num').textContent = streakText(Math.max(2, st.streak)) + ' подряд';
       el.querySelector('.s7-hint').hidden = true;
       el.querySelector('.s7-result').hidden = false;
       notif.setAttribute('aria-disabled', 'true');
       notif.classList.add('is-read');
+      if (burst && !FX.reduced) {
+        el.querySelector('.s7-uni').classList.add('s7-burst');
+        setTimeout(function () { if (Screens.current() === 's7') FX.sound('pop'); }, 520);
+      }
     }
 
     notif.addEventListener('click', function () {
       if (notif.classList.contains('is-read')) return;
       FX.vibrate([30, 50, 80]);
       FX.sound('ding');
-      State.set({ streak: Math.max(2, State.get().streak + 1), lockedUni: false, tomorrow: true });
-      open();
-      el.querySelector('.s7-restart').focus({ preventScroll: true });
+      var from = Math.max(1, State.get().streak);
+      State.set({ streak: from + 1, lockedUni: false, tomorrow: true });
+      notif.setAttribute('aria-disabled', 'true');
+      notif.classList.add('is-read');
+      // Сначала сцена серии 1 → 2, потом итог и открытый вуз
+      playStreak(from, from + 1).then(function () {
+        if (Screens.current() !== 's7') return;
+        open(true);
+        el.querySelector('.s7-restart').focus({ preventScroll: true });
+      });
     });
 
     el.querySelector('.s7-restart').addEventListener('click', function () {
@@ -221,6 +246,153 @@
 
   Screens.register('s7', { enter: renderS7 });
 
+  // ---------- StreakFX: мощная сцена серии (DEV_PLAN 3.5) ----------
+  // StreakFX.play(from, to) → Promise, который выполняется, когда сцена закрыта. Рисуется в #overlay-root.
+  // Раскадровка ~2,4 с: затемнение и свечение → огонь с ударными волнами → искры → барабан числа →
+  // дни недели → конфетти и вздрагивание → текст → кнопка «Продолжить». Тап до кнопки — сразу финальный кадр.
+
+  var WEEK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  var SPARKS = 22;
+  var streakActive = null;
+
+  function dayWord(n) { return streakText(n).split('\u00A0')[1]; }
+
+  // Барабан: старое число, 6 «пролетающих» и новое. Пролетающие не совпадают с итогом, чтобы «щелчок» был виден
+  function reelNumbers(from, to) {
+    var list = [from], top = Math.max(9, to + 5), seed = to * 7 + from * 3 + 1;
+    for (var i = 0; i < 6; i++) {
+      seed = (seed * 37 + 11) % 101;
+      var n = seed % (top + 1);
+      list.push(n === to ? (n + 3) % (top + 1) : n);
+    }
+    list.push(to);
+    return list;
+  }
+
+  function sparks() {
+    var h = '';
+    for (var i = 0; i < SPARKS; i++) {
+      var a = Math.round(i * 360 / SPARKS + (i % 3) * 5);
+      var d = 80 + (i * 53) % 140;                    // 80–220 px
+      var s = 6 + (i % 3) * 2;
+      h += '<span class="streakfx-spark' + (i % 4 === 0 ? ' is-lime' : '') + '" style="--a:' + a + 'deg;--d:' + d + 'px;--s:' + s + 'px;--t:' + (300 + (i % 5) * 20) + 'ms"></span>';
+    }
+    return h;
+  }
+
+  function week(to) {
+    var today = (new Date().getDay() + 6) % 7;
+    var first = Math.max(0, today - (to - 1));        // дни серии на этой неделе, заканчиваются сегодня
+    return WEEK.map(function (d, i) {
+      var on = i >= first && i <= today;
+      return '<li class="' + (on ? 'is-on' : '') + (i === today ? ' is-today' : '') + '" style="--k:' + (i - first) + '">' +
+        '<span class="streakfx-dot">' + (on ? Icon.svg('fire') : '') + '</span><span>' + d + '</span></li>';
+    }).join('');
+  }
+
+  function playStreak(from, to) {
+    if (streakActive) return streakActive;
+    from = Math.max(0, Math.floor(from) || 0);
+    to = Math.max(from + 1, Math.floor(to) || 0);
+    var root = document.getElementById('overlay-root');
+    var prevFocus = document.activeElement;
+    var reel = reelNumbers(from, to);
+    var title = to === 1 ? 'Первый день серии! 🔥' : 'Серия ' + streakText(to) + '! 🔥';
+
+    var node = document.createElement('div');
+    node.className = 'streakfx';
+    node.setAttribute('role', 'dialog');
+    node.setAttribute('aria-modal', 'true');
+    node.setAttribute('aria-labelledby', 'streakfx-title');
+    node.tabIndex = -1;
+    node.style.setProperty('--n', reel.length - 1);
+    node.innerHTML =
+      '<div class="streakfx-bg"></div>' +
+      '<div class="streakfx-body">' +
+        '<div class="streakfx-stage" aria-hidden="true">' +
+          '<span class="streakfx-glow"></span>' +
+          '<span class="streakfx-ring"></span><span class="streakfx-ring is-2"></span>' +
+          sparks() +
+          '<span class="streakfx-fire"><span class="streakfx-fire-in">' + Icon.svg('fire') + '</span></span>' +
+        '</div>' +
+        '<div class="streakfx-count" aria-hidden="true"><span class="streakfx-reel">' +
+          reel.map(function (n) { return '<b>' + n + '</b>'; }).join('') +
+        '</span></div>' +
+        '<p class="streakfx-unit" aria-hidden="true">' + dayWord(to) + ' подряд</p>' +
+        '<ol class="streakfx-week" aria-hidden="true">' + week(to) + '</ol>' +
+        '<p class="streakfx-title" id="streakfx-title">' + title + '</p>' +
+        '<p class="streakfx-sub">Завтра 3 вопроса за минуту — не потеряй серию</p>' +
+        '<button class="btn btn-lime streakfx-go" type="button"><span>Продолжить</span><span class="btn-arrow"></span></button>' +
+      '</div>';
+    root.appendChild(node);
+
+    var timers = [], sounded = false, closed = false, done;
+    var promise = new Promise(function (r) { done = r; });
+    streakActive = promise;
+    var btn = node.querySelector('.streakfx-go');
+
+    function sound() {
+      if (sounded) return;
+      sounded = true;
+      FX.sound('levelup');
+      FX.vibrate([30, 40, 90]);
+    }
+    function final() {
+      if (node.classList.contains('is-final')) return;
+      timers.forEach(clearTimeout);
+      node.classList.add('is-final');
+      sound();
+      btn.focus({ preventScroll: true });
+    }
+    function close() {
+      if (closed) return;
+      closed = true;
+      timers.forEach(clearTimeout);
+      node.classList.add('is-out');
+      setTimeout(function () {
+        node.remove();
+        streakActive = null;
+        if (prevFocus && prevFocus.focus && document.contains(prevFocus)) prevFocus.focus({ preventScroll: true });
+        done();
+      }, FX.reduced ? 0 : 220);
+    }
+
+    btn.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+    node.addEventListener('click', final);
+    node.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); if (node.classList.contains('is-final')) close(); else final(); }
+      if (e.key === 'Tab') { e.preventDefault(); btn.focus(); }   // фокус не уходит из сцены
+    });
+
+    if (FX.reduced) {
+      node.classList.add('is-final');
+      sound();
+      btn.focus({ preventScroll: true });
+    } else {
+      node.focus({ preventScroll: true });
+      timers.push(setTimeout(sound, 1150));
+      timers.push(setTimeout(function () {
+        FX.confetti({ colors: ['#FF8A3D', '#C6F432', '#FFFFFF'], particleCount: 60 });
+      }, 1400));
+      timers.push(setTimeout(function () { node.classList.add('is-final'); btn.focus({ preventScroll: true }); }, 2600));
+    }
+    return promise;
+  }
+
+  window.StreakFX = { play: playStreak };
+
+  // Заход в новый день: вчера была серия — до любого экрана показываем n → n+1.
+  // Дата в том же виде, что пишет S5 (toISOString), иначе дни не совпадут.
+  (function newDay() {
+    var s = State.get();
+    var today = new Date().toISOString().slice(0, 10);
+    var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (!s.streak || s.lastActive !== yesterday) return;
+    var from = s.streak;
+    State.set({ streak: from + 1, lastActive: today });
+    requestAnimationFrame(function () { playStreak(from, from + 1); });
+  })();
+
   // ---------- Демо-меню: тройной тап по логотипу ----------
 
   var root = document.getElementById('overlay-root');
@@ -239,6 +411,7 @@
     '<div class="demo-actions">' +
       '<button class="btn btn-ghost" type="button" data-demo="reset"><span>Сбросить демо</span></button>' +
       '<button class="btn btn-ghost" type="button" data-demo="tomorrow"><span>Перейти в «Завтра»</span></button>' +
+      '<button class="btn btn-ghost" type="button" data-demo="streak"><span>Показать серию</span></button>' +
       '<button class="btn btn-ghost" type="button" data-demo="skip"><span>Пропустить анкету</span></button>' +
       '<button class="btn" type="button" data-demo="close"><span>Закрыть</span></button>' +
     '</div>';
@@ -277,6 +450,12 @@
       var el = document.querySelector('[data-screen="s7"]');
       if (Screens.current() === 's7') renderS7(el, State.get());
       else go('s7');
+    },
+    // Только показ сцены для защиты: состояние не меняется
+    streak: function () {
+      closeMenu();
+      var n = Math.max(1, State.get().streak);
+      playStreak(n, n + 1);
     },
     skip: function () {
       State.set({ answers: DEMO_ANSWERS, profileId: 'it' });

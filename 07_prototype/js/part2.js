@@ -176,6 +176,290 @@
   });
 
   /* ======================================================================
+     Карточка для сторис (S5): картинка 1080×1920 на canvas, отправка через navigator.share
+     с файлом, запасной вариант — скачать PNG. Дизайн как на слайде «Сторис = реклама».
+     Реферальная ссылка ведёт в бота: t.me/VentormeAI_bot?start=ref_<код> («Тебя позвал друг»).
+     ====================================================================== */
+  var BOT_USERNAME = 'VentormeAI_bot';
+  var SANS = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+  var DISPLAY = '"Unbounded", ' + SANS;
+  var shareSheet = null;
+
+  // Код ученика: 6 знаков без похожих букв (O/0, I/1). Живёт в State до сброса демо
+  function refCode() {
+    var s = State.get();
+    if (s.refCode) return s.refCode;
+    var abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', code = '', rnd = new Uint32Array(6), i;
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(rnd);
+    else for (i = 0; i < 6; i++) rnd[i] = Math.floor(Math.random() * 1e9);
+    for (i = 0; i < 6; i++) code += abc[rnd[i] % abc.length];
+    State.set({ refCode: code });
+    return code;
+  }
+  function botRefLink(code) { return 'https://t.me/' + BOT_USERNAME + '?start=ref_' + code; }
+
+  function dayWord(n) {
+    var m10 = n % 10, m100 = n % 100;
+    return m10 === 1 && m100 !== 11 ? 'день' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'дня' : 'дней';
+  }
+
+  // Шрифт цифр (Unbounded) должен успеть загрузиться до рисования; ждём не дольше 1,5 с
+  function fontsReady() {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    return Promise.race([
+      document.fonts.load('800 200px Unbounded', '0123456789%'),
+      new Promise(function (r) { setTimeout(r, 1500); })
+    ]).catch(function () {});
+  }
+
+  function rrect(x, X, Y, W, H, R) {
+    x.beginPath();
+    x.moveTo(X + R, Y);
+    x.arcTo(X + W, Y, X + W, Y + H, R);
+    x.arcTo(X + W, Y + H, X, Y + H, R);
+    x.arcTo(X, Y + H, X, Y, R);
+    x.arcTo(X, Y, X + W, Y, R);
+    x.closePath();
+  }
+
+  function glow(x, cx, cy, r, color) {
+    var g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, color);
+    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    x.fillStyle = g;
+    x.fillRect(cx - r, cy - r, r * 2, r * 2);
+  }
+
+  // Перенос по пробелам и дефисам («Врач-исследователь» → «Врач-» / «исследователь»)
+  function wrapLines(x, text, maxW) {
+    var parts = String(text).replace(/-/g, '-\u0000').split(/\s+|\u0000/).filter(Boolean);
+    var lines = [], line = '';
+    parts.forEach(function (w) {
+      var sep = line && !/-$/.test(line) ? ' ' : '';
+      if (line && x.measureText(line + sep + w).width > maxW) { lines.push(line); line = w; }
+      else line += sep + w;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  // Плашка «Уровень 2» / «Серия 1 день» с огоньком; возвращает правый край
+  function pill(x, X, Y, text, icon) {
+    x.font = '700 50px ' + SANS;
+    var padL = icon ? 104 : 40, w = padL + x.measureText(text).width + 40, h = 100;
+    rrect(x, X, Y, w, h, 50);
+    x.fillStyle = 'rgba(255, 255, 255, 0.14)';
+    x.fill();
+    x.lineWidth = 3;
+    x.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+    x.stroke();
+    if (icon) {
+      x.save();
+      x.translate(X + 32, Y + 22);
+      x.scale(56 / 256, 56 / 256);
+      x.fillStyle = '#FF8A3D';
+      x.fill(icon);
+      x.restore();
+    }
+    x.fillStyle = '#F4F5FF';
+    x.fillText(text, X + padL, Y + 67);
+    return X + w;
+  }
+
+  function firePath() {
+    var m = /d="([^"]+)"/.exec(Icon.svg('fire'));
+    try { return m && window.Path2D ? new Path2D(m[1]) : null; } catch (e) { return null; }
+  }
+
+  // d: { title, match, level, streak, code } → Promise<Blob> (PNG 1080×1920)
+  function drawStory(d) {
+    var W = 1080, H = 1920, PAD = 96, c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    var x = c.getContext('2d');
+
+    // Фон: синий Ventorme уходит в ночной, лаймовое и фиолетовое свечение, звёзды
+    var g = x.createLinearGradient(0, 0, W * 0.6, H);
+    g.addColorStop(0, '#3B47FF');
+    g.addColorStop(0.75, '#00033E');
+    g.addColorStop(1, '#00033E');
+    x.fillStyle = g;
+    x.fillRect(0, 0, W, H);
+    glow(x, 930, 380, 620, 'rgba(198, 244, 50, 0.20)');
+    glow(x, 140, 1700, 760, 'rgba(123, 92, 255, 0.38)');
+    var seed = 7;
+    x.fillStyle = '#FFFFFF';
+    for (var i = 0; i < 70; i++) {
+      seed = (seed * 9301 + 49297) % 233280;
+      var sx = seed / 233280 * W;
+      seed = (seed * 9301 + 49297) % 233280;
+      var sy = seed / 233280 * H;
+      if (sy > 560 && sy < 1720) continue;            // звёзды только сверху и снизу, не под текстом
+      x.globalAlpha = 0.2 + (i % 5) * 0.12;
+      x.beginPath();
+      x.arc(sx, sy, 1.5 + (i % 3), 0, Math.PI * 2);
+      x.fill();
+    }
+    x.globalAlpha = 1;
+
+    // Верх и низ оставляем свободными: там интерфейс сторис
+    x.fillStyle = '#C6F432';
+    x.font = '700 64px ' + SANS;
+    x.fillText('ventorme.ai', PAD, 300);
+
+    var y = 700;
+    x.fillStyle = '#C9CCF5';
+    x.font = '500 60px ' + SANS;
+    x.fillText('Моя профессия будущего', PAD, y);
+
+    var size = 120, lines;
+    do {
+      x.font = '800 ' + size + 'px ' + SANS;
+      lines = wrapLines(x, d.title, W - PAD * 2);
+      size -= 6;
+    } while (lines.length > 2 && size > 60);
+    var two = lines.length > 1;
+    x.fillStyle = '#F4F5FF';
+    lines.slice(0, 2).forEach(function (l) { y += two ? 118 : 140; x.fillText(l, PAD, y); });
+
+    y += two ? 250 : 290;
+    x.fillStyle = '#C6F432';
+    x.font = '800 ' + (two ? 220 : 260) + 'px ' + DISPLAY;
+    x.fillText(d.match + '%', PAD - 10, y);
+    y += 80;
+    x.fillStyle = '#C9CCF5';
+    x.font = '600 52px ' + SANS;
+    x.fillText('совпадения по тесту Ventorme', PAD, y);
+
+    y += 64;
+    var right = pill(x, PAD, y, 'Уровень ' + d.level, null);
+    pill(x, right + 20, y, 'Серия ' + d.streak + ' ' + dayWord(d.streak), firePath());
+
+    var qy = Math.max(1560, y + 100 + 150);
+    x.fillStyle = '#FFFFFF';
+    x.font = '800 96px ' + SANS;
+    x.fillText('А какая у тебя?', PAD, qy);
+    x.fillStyle = '#C9CCF5';
+    x.font = '600 48px ' + SANS;
+    x.fillText('ventorme.ai/register?ref=' + d.code, PAD, qy + 80);
+
+    return new Promise(function (res, rej) {
+      c.toBlob(function (b) { if (b) res(b); else rej(new Error('toBlob')); }, 'image/png');
+    });
+  }
+
+  function storyData(state) {
+    var p = window.PROFILES[state.profileId] || window.PROFILES.it;
+    return { title: p.title, match: p.match, level: state.level, streak: Math.max(1, state.streak), code: refCode() };
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise(function (res, rej) {
+      var t = document.createElement('textarea');
+      t.value = text;
+      t.setAttribute('readonly', '');
+      t.style.position = 'fixed';
+      t.style.opacity = '0';
+      document.body.appendChild(t);
+      t.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      t.remove();
+      if (ok) res(); else rej(new Error('copy'));
+    });
+  }
+
+  function closeShare(instant) {
+    if (!shareSheet) return;
+    var s = shareSheet;
+    shareSheet = null;
+    s.node.classList.add('is-out');
+    setTimeout(function () {
+      s.node.remove();
+      URL.revokeObjectURL(s.url);
+      if (!instant && s.opener && document.contains(s.opener)) s.opener.focus({ preventScroll: true });
+    }, instant || FX.reduced ? 0 : 220);
+  }
+
+  // Шторка с предпросмотром: «Поделиться» (если телефон умеет делиться файлами), «Скачать», «Скопировать ссылку»
+  function showShare(opener, d, blob) {
+    var url = URL.createObjectURL(blob);
+    var file = null;
+    try { file = new File([blob], 'ventorme-' + d.code + '.png', { type: 'image/png' }); } catch (e) {}
+    var canShare = false;
+    try { canShare = !!(file && navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) {}
+    var link = botRefLink(d.code);
+    var text = 'Моя профессия будущего — ' + d.title + ', ' + d.match + '% совпадения. А какая у тебя? Пройди тест за 5 минут: ' + link;
+
+    var node = document.createElement('div');
+    node.className = 's5-share';
+    node.innerHTML =
+      '<div class="s5-share-back"></div>' +
+      '<div class="s5-share-sheet" role="dialog" aria-modal="true" aria-labelledby="s5-share-t">' +
+        '<p class="s5-share-t" id="s5-share-t">Карточка для сторис</p>' +
+        '<button type="button" class="s5-share-x" data-share="close" aria-label="Закрыть">×</button>' +
+        '<img class="s5-share-img" src="' + url + '" width="1080" height="1920" alt="Карточка: ' + esc(d.title) + ', ' + d.match + '% совпадения">' +
+        '<div class="s5-share-actions">' +
+          (canShare ? '<button type="button" class="btn btn-lime" data-share="go"><span>Поделиться</span><span class="btn-arrow"></span></button>' : '') +
+          '<button type="button" class="btn ' + (canShare ? 'btn-ghost' : 'btn-lime') + '" data-share="png"><span>Скачать картинку</span></button>' +
+          '<button type="button" class="btn btn-ghost" data-share="copy"><span>Скопировать ссылку</span></button>' +
+        '</div>' +
+        '<p class="s5-share-note">Ссылка для друзей ведёт в Venti: t.me/' + BOT_USERNAME + '?start=ref_' + esc(d.code) + '</p>' +
+      '</div>';
+    document.getElementById('overlay-root').appendChild(node);
+    shareSheet = { node: node, url: url, opener: opener };
+
+    node.addEventListener('click', function (e) {
+      if (e.target.classList.contains('s5-share-back')) { closeShare(); return; }
+      var b = e.target.closest('[data-share]');
+      if (!b) return;
+      var what = b.getAttribute('data-share');
+      if (what === 'close') closeShare();
+      if (what === 'go') navigator.share({ files: [file], title: 'Ventorme', text: text }).catch(function () {});
+      if (what === 'png') {
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'ventorme-story.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      if (what === 'copy') {
+        var label = b.querySelector('span');
+        copyText(link).then(function () { label.textContent = 'Ссылка скопирована'; }, function () { label.textContent = link; });
+        setTimeout(function () { label.textContent = 'Скопировать ссылку'; }, 2200);
+      }
+    });
+    node.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeShare(); return; }
+      if (e.key !== 'Tab') return;
+      var items = node.querySelectorAll('button');
+      var first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    node.querySelector('.s5-share-actions .btn').focus({ preventScroll: true });
+  }
+
+  function openShare(btn, state) {
+    if (shareSheet || btn.disabled) return;
+    var label = btn.querySelector('span');
+    var was = label.textContent;
+    btn.disabled = true;
+    label.textContent = 'Готовлю карточку…';
+    var d = storyData(state);
+    fontsReady().then(function () { return drawStory(d); }).then(function (blob) {
+      btn.disabled = false;
+      label.textContent = was;
+      if (Screens.current() === 's5') showShare(btn, d, blob);
+    }, function () {
+      btn.disabled = false;
+      label.textContent = 'Не получилось, попробуй ещё раз';
+    });
+  }
+
+  /* ======================================================================
      S5. Награда: level up, серия, замок на 4-м вузе
      ====================================================================== */
   var s5Timers = [];
@@ -212,12 +496,17 @@
           '<span class="s5-sr">Серия: 1 день подряд</span>' +
           '<ol class="s5-week" aria-hidden="true">' + days.map(function (d, i) { return '<li class="' + (i === today ? 'is-today' : '') + '">' + d + '</li>'; }).join('') + '</ol>' +
         '</div>' +
+        // Мягкий тизер Pro под наградой: ничего не закрывает, первые 5 минут бесплатны
+        '<div class="card s5-pro s3-rise" style="--i:2"><span class="s5-pro-ico" aria-hidden="true">' + Icon.svg('sparkle') + '</span>' +
+          '<div><b>Хочешь глубже? Ventorme Pro</b><span>Полный профтест и AI Match с вузами. Всё, что ты прошёл сейчас, бесплатно.</span></div></div>' +
         '</div><div class="s5-r">' +
-        '<div class="card s3-rise" style="--i:2">' + planBar(25, 12) + '</div>' +
-        '<div class="card s5-locked s3-rise" style="--i:3"><span class="s5-lock" aria-hidden="true">' + Icon.svg('lock') + '</span>' +
+        '<div class="card s3-rise" style="--i:3">' + planBar(25, 12) + '</div>' +
+        '<div class="card s5-locked s3-rise" style="--i:4"><span class="s5-lock" aria-hidden="true">' + Icon.svg('lock') + '</span>' +
           '<div><b class="s5-locked-name">' + esc(locked.name) + '</b><span>Откроется завтра после задания</span></div></div>' +
-        '<p class="tag-example s3-rise" style="--i:4">Пример: цифры в прототипе демонстрационные</p>' +
-        '<div class="s5-cta s3-rise" style="--i:5"><button type="button" class="btn s5-next" data-go="s6"><span>Не потерять серию</span><span class="btn-arrow"></span></button></div></div>' +
+        '<div class="card s5-story s3-rise" style="--i:5"><div><b>Поделись результатом</b><span>Карточка для сторис со ссылкой: друзья пройдут тест по ней</span></div>' +
+          '<button type="button" class="btn btn-ghost s5-story-btn"><span>Поделиться в сторис</span></button></div>' +
+        '<p class="tag-example s3-rise" style="--i:6">Пример: цифры в прототипе демонстрационные</p>' +
+        '<div class="s5-cta s3-rise" style="--i:7"><button type="button" class="btn s5-next" data-go="s6"><span>Не потерять серию</span><span class="btn-arrow"></span></button></div></div>' +
         // Слой level up поверх экрана
         '<div class="s5-dim" id="s5-dim" role="dialog" aria-modal="true" aria-labelledby="s5-lvl" tabindex="-1">' +
           '<div class="s5-badge-wrap"><span class="s5-badge-rays" aria-hidden="true"></span>' +
@@ -230,6 +519,9 @@
         '</div>';
 
       State.set({ streak: 1, lastActive: new Date().toISOString().slice(0, 10), plan: 25, badge5min: true });
+
+      var storyBtn = el.querySelector('.s5-story-btn');
+      storyBtn.addEventListener('click', function () { openShare(storyBtn, State.get()); });
 
       var dim = el.querySelector('#s5-dim');
       dim.focus({ preventScroll: true });
@@ -270,6 +562,7 @@
       s5Timers.forEach(clearTimeout);
       s5Timers = [];
       el.classList.remove('s5-go');
+      closeShare(true);
     }
   });
 })();
