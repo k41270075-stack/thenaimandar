@@ -11,13 +11,18 @@
 // Личных данных не храним: ни имени, ни телефона, только chat_id и прогресс.
 import { Redis } from '@upstash/redis';
 import { redisConfig } from './env.js';
+import { memoryRedis } from './memory.js';
 
 const HISTORY_TURNS = 6;
 const HISTORY_TTL = 7 * 86400;
 
+// На Vercel — Upstash. При запуске на компьютере (npm start) без ключей Upstash — память процесса.
 let client = null;
 function redis() {
-  if (!client) client = new Redis(redisConfig());
+  if (!client) {
+    const config = redisConfig();
+    client = !config.url && process.env.VT_LOCAL === '1' ? memoryRedis : new Redis(config);
+  }
   return client;
 }
 

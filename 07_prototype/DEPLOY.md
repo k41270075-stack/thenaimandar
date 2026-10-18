@@ -1,4 +1,41 @@
-# Деплой: прототип и бот Ventorme AI на Vercel
+# Запуск и деплой: прототип и бот Ventorme AI
+
+Два способа: **на своём компьютере** (localhost, 5 минут, без Vercel) и **на Vercel** (ссылка для чужих телефонов и QR на слайде).
+
+## 0. На своём компьютере (localhost)
+
+Нужны [Node.js 20+](https://nodejs.org) и [Git](https://git-scm.com). Без Git: на GitHub **Code → Download ZIP** и распаковать.
+
+```bash
+git clone https://github.com/k41270075-stack/thenaimandar.git
+cd thenaimandar/07_prototype
+npm install
+```
+
+Скопируйте `.env.example` в `.env` (Windows: `copy .env.example .env`, macOS/Linux: `cp .env.example .env`) и впишите в `.env`:
+- `TG_BOT_TOKEN` — токен из @BotFather (без него запустится только сайт);
+- `ANTHROPIC_API_KEY` — ключ Claude API (без него Venti отвечает заготовкой);
+- `TG_ADMIN_IDS` — свой Telegram id для `/stats`, `/demo_tomorrow`, `/sync_commands`.
+
+Файл `.env` в git не попадает. Запуск:
+
+```bash
+npm start
+```
+
+| Что | Адрес |
+|---|---|
+| Демо целиком: лендинг → регистрация → прототип | http://localhost:5173/landing/ |
+| Прототип с первого экрана | http://localhost:5173/ |
+| Бот | @VentormeAI_bot в Telegram, пока окно `npm start` открыто |
+
+Как это работает: `bot/local.js` раздаёт сайт и сам забирает сообщения бота из Telegram (long polling), поэтому вебхук, Vercel и Upstash не нужны. Данные бота живут в памяти и сбрасываются при остановке (`Ctrl+C`). Напоминание в 19:00 по Астане тоже уходит, если компьютер включён. Меню команд: один раз отправьте боту `/sync_commands`.
+
+Локальный запуск снимает вебхук Vercel. Чтобы вернуть бота на Vercel, снова откройте `/api/setup?key=…` (раздел 5). Две копии бота одновременно не работают.
+
+---
+
+## Vercel
 
 Один проект Vercel отдаёт всё сразу:
 
