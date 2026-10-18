@@ -1,5 +1,5 @@
 // Хранилище бота в Upstash Redis.
-//   user:<chat_id>        → {field, goal, grade, streak, xp, lastActive, lastTaskDay, tasksDone, subscribed, lastSent, joined}
+//   user:<chat_id>        → {field, goal, grade, streak, xp, lastActive, lastTaskDay, tasksDone, subscribed, lastSent, joined, referredBy}
 //   users                 → множество всех chat_id (для /stats)
 //   subs                  → множество chat_id, кому слать напоминание в 19:00
 //   hist:<chat_id>        → последние 6 реплик диалога с Venti (живут 7 дней)
@@ -106,7 +106,7 @@ export function clearQuiz(chatId) {
 
 // ---------- Метрики бота (без привязки к ученику) ----------
 
-const EVENTS = ['start', 'task', 'ai', 'stop', 'delete', 'feedback'];
+const EVENTS = ['start', 'ref', 'task', 'ai', 'stop', 'delete', 'feedback'];
 
 export async function track(event, day) {
   const dayKey = `stat:${day}:${event}`;

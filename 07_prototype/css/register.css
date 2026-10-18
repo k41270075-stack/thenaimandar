@@ -11,6 +11,8 @@
 .rg-back { display: flex; align-items: center; min-height: 44px; }
 .rg-back img { display: block; width: 104px; height: auto; }
 .rg-demo { font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent); }
+/* Пришёл по ссылке друга из сторис */
+.rg-friend { align-self: flex-start; margin: 0; padding: 6px 14px; border-radius: var(--r-pill); background: var(--lime); color: var(--lime-ink); font-size: 15px; font-weight: 700; }
 
 .rg-main {
   position: relative; z-index: 1;

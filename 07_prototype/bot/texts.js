@@ -88,6 +88,10 @@ export const T = {
       'Завтра в 19:00 пришлю задание на 60 секунд. А вопросы про поступление можно задавать прямо сейчас.\n\nВсе команды: /help';
   },
 
+  helloFriend(name) {
+    return `${hi(name)} Тебя позвал друг 🙌 Я Venti из Ventorme: подбираю профессию и вуз, каждый день присылаю задание на 60 секунд и отвечаю на вопросы про поступление.\n\nК чему готовишься?`;
+  },
+
   helloNoPayload(name) {
     return `${hi(name)} Я Venti из Ventorme. Каждый день присылаю задание на 60 секунд и отвечаю на вопросы про поступление.\n\nК чему готовишься?`;
   },
@@ -188,7 +192,7 @@ export const T = {
   notAdmin(id) { return `Эта команда только для команды Ventorme. Твой Telegram id: ${id}. Добавь его в TG_ADMIN_IDS, если ты из команды.`; },
 
   stats(s) {
-    const row = (x) => `/start ${x.start} · заданий ${x.task} · вопросов Venti ${x.ai} · отписок ${x.stop} · удалений ${x.delete} · отзывов ${x.feedback}`;
+    const row = (x) => `/start ${x.start} · по ссылке друга ${x.ref} · заданий ${x.task} · вопросов Venti ${x.ai} · отписок ${x.stop} · удалений ${x.delete} · отзывов ${x.feedback}`;
     return 'Статистика бота\n\n' +
       `Сегодня: ${row(s.today)}\n\n` +
       `За всё время: ${row(s.all)}\n\n` +
