@@ -3,7 +3,8 @@
 // Вызывать после каждого деплоя не нужно: только первый раз и после смены токена. Повторный вызов безопасен.
 // Без ключа вебхук ставится только на домен, который сообщает сам Vercel (VERCEL_PROJECT_PRODUCTION_URL),
 // а не на Host из запроса: так через эту ссылку нельзя увести бота на чужой сервер.
-import { refuseIfMissing, safeEqual, webhookSecret } from '../bot/env.js';
+import { refuseIfMissing } from '../bot/env.js';
+import { safeEqual, webhookSecret } from '../bot/secret.js';
 import { tg } from '../bot/tg.js';
 import { COMMANDS } from '../bot/commands.js';
 

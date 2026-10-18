@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ventorme AI · бот для демо</title>
+<!-- Шаблон. Готовая страница — ../bot.html, собирается командой npm run build:demo -->
+<style>
+  :root {
+    color-scheme: light dark;
+    --canvas: #FBFBFD; --surface: #FFFFFF; --surface-2: #F3F4F9; --hairline: #E4E6EF;
+    --ink: #0B0D24; --muted: #4A4E66; --accent: #3B47FF; --on-accent: #FFFFFF;
+    --good: #1F9D6C; --good-soft: #E3F7EE; --bad: #E5484D; --bad-soft: #FDECEC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas: #0A0B14; --surface: #12141F; --surface-2: #181B28; --hairline: #23263A;
+      --ink: #F2F3F8; --muted: #ADB0C4; --accent: #8C94FF; --on-accent: #0A0B14;
+      --good: #4FD39A; --good-soft: #0F2A20; --bad: #FF7A7E; --bad-soft: #2E1416;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 24px 16px;
+    background: var(--canvas); color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em; }
+  h1 span { color: var(--accent); }
+  .lead { margin: 0; color: var(--muted); }
+  .card { padding: 18px; border: 1px solid var(--hairline); border-radius: 18px; background: var(--surface); }
+  ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+  label { display: block; margin-bottom: 6px; font-weight: 600; }
+  input[type="password"] {
+    width: 100%; min-height: 50px; padding: 0 14px;
+    border: 1px solid var(--hairline); border-radius: 12px;
+    background: var(--surface-2); color: var(--ink); font: inherit;
+  }
+  input[type="password"]:focus { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+  .check { display: flex; align-items: center; gap: 8px; margin: 10px 0 14px; font-weight: 400; color: var(--muted); }
+  .check input { width: 20px; height: 20px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54px;
+    border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+    font-family: inherit; font-size: 17px; font-weight: 600; text-decoration: none; cursor: pointer;
+  }
+  .btn[disabled] { opacity: .5; cursor: default; }
+  .btn-ghost { background: var(--surface-2); color: var(--ink); border: 1px solid var(--hairline); }
+  .running-only { display: none; }
+  .is-running .running-only { display: flex; }
+  .is-running .idle-only { display: none; }
+  .actions { display: flex; flex-direction: column; gap: 10px; }
+  .status { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); color: var(--muted); }
+  .status.is-good { background: var(--good-soft); color: var(--good); font-weight: 600; }
+  .status.is-bad { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+  .note { margin: 0; font-size: 14px; color: var(--muted); }
+  h2 { margin: 0 0 8px; font-size: 17px; }
+  #log { margin: 0; padding: 0; list-style: none; font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; max-height: 320px; overflow: auto; }
+  #log li { padding: 4px 0; border-bottom: 1px solid var(--hairline); white-space: pre-wrap; word-break: break-word; }
+  #log li.good { color: var(--good); }
+  #log li.bad { color: var(--bad); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ventorme AI · <span>бот для демо</span></h1>
+  <p class="lead">Бот работает прямо из этой страницы: без сервера, без установки и бесплатно. Пока вкладка открыта, @VentormeAI_bot отвечает в Telegram.</p>
+
+  <div class="card">
+    <ol>
+      <li>Вставь токен бота из @BotFather.</li>
+      <li>Нажми «Запустить бота».</li>
+      <li>Открой бота в Telegram и нажми «Старт».</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <label for="token">Токен бота</label>
+    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="123456789:AAH…">
+    <label class="check"><input id="remember" type="checkbox"> Запомнить на этом компьютере</label>
+    <div class="actions">
+      <button id="start" class="btn idle-only" type="button">Запустить бота</button>
+      <a id="open" class="btn running-only" href="https://t.me/VentormeAI_bot" target="_blank" rel="noopener">Открыть бота</a>
+      <button id="stop" class="btn btn-ghost running-only" type="button">Остановить</button>
+    </div>
+  </div>
+
+  <p id="status" class="status">Бот не запущен.</p>
+
+  <div class="card">
+    <h2>Что происходит</h2>
+    <ul id="log"></ul>
+  </div>
+
+  <p class="note">Токен хранится только в этом браузере и отправляется только на api.telegram.org. Данные бота живут, пока открыта вкладка. Venti отвечает готовыми ответами на частые вопросы, задания и все команды работают. Не запускай бота одновременно здесь, через npm start и на Vercel.</p>
+</main>
+<!-- BOT_BUNDLE -->
+</body>
+</html>

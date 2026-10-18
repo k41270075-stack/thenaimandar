@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ventorme AI · бот для демо</title>
+<!-- Собрано из bot/demo.html и bot/demo.js командой npm run build:demo. Не править вручную. -->
+<style>
+  :root {
+    color-scheme: light dark;
+    --canvas: #FBFBFD; --surface: #FFFFFF; --surface-2: #F3F4F9; --hairline: #E4E6EF;
+    --ink: #0B0D24; --muted: #4A4E66; --accent: #3B47FF; --on-accent: #FFFFFF;
+    --good: #1F9D6C; --good-soft: #E3F7EE; --bad: #E5484D; --bad-soft: #FDECEC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas: #0A0B14; --surface: #12141F; --surface-2: #181B28; --hairline: #23263A;
+      --ink: #F2F3F8; --muted: #ADB0C4; --accent: #8C94FF; --on-accent: #0A0B14;
+      --good: #4FD39A; --good-soft: #0F2A20; --bad: #FF7A7E; --bad-soft: #2E1416;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 24px 16px;
+    background: var(--canvas); color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em; }
+  h1 span { color: var(--accent); }
+  .lead { margin: 0; color: var(--muted); }
+  .card { padding: 18px; border: 1px solid var(--hairline); border-radius: 18px; background: var(--surface); }
+  ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+  label { display: block; margin-bottom: 6px; font-weight: 600; }
+  input[type="password"] {
+    width: 100%; min-height: 50px; padding: 0 14px;
+    border: 1px solid var(--hairline); border-radius: 12px;
+    background: var(--surface-2); color: var(--ink); font: inherit;
+  }
+  input[type="password"]:focus { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+  .check { display: flex; align-items: center; gap: 8px; margin: 10px 0 14px; font-weight: 400; color: var(--muted); }
+  .check input { width: 20px; height: 20px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54px;
+    border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+    font-family: inherit; font-size: 17px; font-weight: 600; text-decoration: none; cursor: pointer;
+  }
+  .btn[disabled] { opacity: .5; cursor: default; }
+  .btn-ghost { background: var(--surface-2); color: var(--ink); border: 1px solid var(--hairline); }
+  .running-only { display: none; }
+  .is-running .running-only { display: flex; }
+  .is-running .idle-only { display: none; }
+  .actions { display: flex; flex-direction: column; gap: 10px; }
+  .status { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); color: var(--muted); }
+  .status.is-good { background: var(--good-soft); color: var(--good); font-weight: 600; }
+  .status.is-bad { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+  .note { margin: 0; font-size: 14px; color: var(--muted); }
+  h2 { margin: 0 0 8px; font-size: 17px; }
+  #log { margin: 0; padding: 0; list-style: none; font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; max-height: 320px; overflow: auto; }
+  #log li { padding: 4px 0; border-bottom: 1px solid var(--hairline); white-space: pre-wrap; word-break: break-word; }
+  #log li.good { color: var(--good); }
+  #log li.bad { color: var(--bad); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ventorme AI · <span>бот для демо</span></h1>
+  <p class="lead">Бот работает прямо из этой страницы: без сервера, без установки и бесплатно. Пока вкладка открыта, @VentormeAI_bot отвечает в Telegram.</p>
+
+  <div class="card">
+    <ol>
+      <li>Вставь токен бота из @BotFather.</li>
+      <li>Нажми «Запустить бота».</li>
+      <li>Открой бота в Telegram и нажми «Старт».</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <label for="token">Токен бота</label>
+    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="123456789:AAH…">
+    <label class="check"><input id="remember" type="checkbox"> Запомнить на этом компьютере</label>
+    <div class="actions">
+      <button id="start" class="btn idle-only" type="button">Запустить бота</button>
+      <a id="open" class="btn running-only" href="https://t.me/VentormeAI_bot" target="_blank" rel="noopener">Открыть бота</a>
+      <button id="stop" class="btn btn-ghost running-only" type="button">Остановить</button>
+    </div>
+  </div>
+
+  <p id="status" class="status">Бот не запущен.</p>
+
+  <div class="card">
+    <h2>Что происходит</h2>
+    <ul id="log"></ul>
+  </div>
+
+  <p class="note">Токен хранится только в этом браузере и отправляется только на api.telegram.org. Данные бота живут, пока открыта вкладка. Venti отвечает готовыми ответами на частые вопросы, задания и все команды работают. Не запускай бота одновременно здесь, через npm start и на Vercel.</p>
+</main>
+<script>
+globalThis.process = { env: { VT_LOCAL: "1" } };
+(() => {
+  // bot/tg.js
+  var API = "https://api.telegram.org/bot";
+  var IN_BROWSER = typeof window !== "undefined";
+  function asForm(params) {
+    const form = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== void 0) form.append(k, typeof v === "object" ? JSON.stringify(v) : String(v));
+    });
+    return form;
+  }
+  async function tg(method, params) {
+    const res = await fetch(API + process.env.TG_BOT_TOKEN + "/" + method, IN_BROWSER ? { method: "POST", body: asForm(params) } : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(params) });
+    let data2;
+    try {
+      data2 = await res.json();
+    } catch (e) {
+      data2 = { ok: false, description: "HTTP " + res.status };
+    }
+    if (!data2.ok) {
+      const err = new Error(`Telegram ${method}: ${data2.description || "error"}`);
+      err.code = data2.error_code || res.status;
+      throw err;
+    }
+    return data2.result;
+  }
+  function keyboard(rows) {
+    return {
+      inline_keyboard: rows.map((row) => row.map(([text, data2]) => data2.startsWith("https://") ? { text, url: data2 } : { text, callback_data: data2 }))
+    };
+  }
+  function send(chatId, text, rows) {
+    const params = { chat_id: chatId, text, link_preview_options: { is_disabled: true } };
+    if (rows && rows.length) params.reply_markup = keyboard(rows);
+    return tg("sendMessage", params);
+  }
+
+  // bot/demo-stubs.js
+  var Redis = class {
+    constructor() {
+      throw new Error("Upstash недоступен на странице bot.html");
+    }
+  };
+  var Anthropic = class {
+    constructor() {
+      throw new Error("Claude API недоступен на странице bot.html");
+    }
+  };
+  Anthropic.RateLimitError = class extends Error {
+  };
+  Anthropic.APIConnectionError = class extends Error {
+  };
+  Anthropic.APIError = class extends Error {
+  };
+
+  // bot/env.js
+  function redisConfig() {
+    return {
+      url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || "",
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || ""
+    };
+  }
+  function adminIds() {
+    return String(process.env.TG_ADMIN_IDS || "").split(/[\s,]+/).filter(Boolean);
+  }
+
+  // bot/memory.js
+  var data = /* @__PURE__ */ new Map();
+  var expires = /* @__PURE__ */ new Map();
+  function alive(key) {
+    const t = expires.get(key);
+    if (t && t <= Date.now()) {
+      data.delete(key);
+      expires.delete(key);
+    }
+    return data.has(key);
+  }
+  var pack = (v) => JSON.stringify(v);
+  var unpack = (v) => v === void 0 ? null : JSON.parse(v);
+  function setOf(key) {
+    if (!alive(key)) data.set(key, /* @__PURE__ */ new Set());
+    return data.get(key);
+  }
+  function listOf(key) {
+    if (!alive(key)) data.set(key, []);
+    return data.get(key);
+  }
+  function range(list, start2, stop2) {
+    const n = list.length;
+    const s = start2 < 0 ? Math.max(0, n + start2) : start2;
+    const e = stop2 < 0 ? n + stop2 : stop2;
+    return list.slice(s, e + 1);
+  }
+  var memoryRedis = {
+    async get(key) {
+      return alive(key) ? unpack(data.get(key)) : null;
+    },
+    async set(key, value, opts = {}) {
+      if (opts.nx && alive(key)) return null;
+      data.set(key, pack(value));
+      if (opts.ex) expires.set(key, Date.now() + opts.ex * 1e3);
+      else expires.delete(key);
+      return "OK";
+    },
+    async mget(...keys) {
+      return keys.map((k) => alive(k) ? unpack(data.get(k)) : null);
+    },
+    async del(...keys) {
+      let n = 0;
+      keys.forEach((k) => {
+        if (alive(k)) n++;
+        data.delete(k);
+        expires.delete(k);
+      });
+      return n;
+    },
+    async incr(key) {
+      const v = (alive(key) ? Number(unpack(data.get(key))) : 0) + 1;
+      data.set(key, pack(v));
+      return v;
+    },
+    async expire(key, seconds) {
+      if (!alive(key)) return 0;
+      expires.set(key, Date.now() + seconds * 1e3);
+      return 1;
+    },
+    async sadd(key, ...members) {
+      const s = setOf(key);
+      const before = s.size;
+      members.forEach((m) => s.add(String(m)));
+      return s.size - before;
+    },
+    async srem(key, ...members) {
+      const s = setOf(key);
+      return members.filter((m) => s.delete(String(m))).length;
+    },
+    async smembers(key) {
+      return [...setOf(key)];
+    },
+    async scard(key) {
+      return setOf(key).size;
+    },
+    async rpush(key, ...values) {
+      const l = listOf(key);
+      l.push(...values.map(pack));
+      return l.length;
+    },
+    async lpush(key, ...values) {
+      const l = listOf(key);
+      values.forEach((v) => l.unshift(pack(v)));
+      return l.length;
+    },
+    async ltrim(key, start2, stop2) {
+      data.set(key, range(listOf(key), start2, stop2));
+      return "OK";
+    },
+    async lrange(key, start2, stop2) {
+      return range(listOf(key), start2, stop2).map(unpack);
+    }
+  };
+
+  // bot/store.js
+  var HISTORY_TURNS = 6;
+  var HISTORY_TTL = 7 * 86400;
+  var client = null;
+  function redis() {
+    if (!client) {
+      const config = redisConfig();
+      if (config.url && config.token) {
+        client = new Redis(config);
+      } else {
+        if (process.env.VT_LOCAL !== "1") console.warn("[store] нет ключей Upstash: данные бота в памяти, для демо этого хватит");
+        client = memoryRedis;
+      }
+    }
+    return client;
+  }
+  function newUser() {
+    return {
+      field: null,
+      goal: null,
+      grade: null,
+      streak: 0,
+      xp: 0,
+      lastActive: null,
+      lastTaskDay: null,
+      tasksDone: 0,
+      subscribed: true,
+      lastSent: null,
+      joined: null
+    };
+  }
+  async function getUser(chatId) {
+    return await redis().get("user:" + chatId) || null;
+  }
+  async function saveUser(chatId, user) {
+    await redis().set("user:" + chatId, user);
+    await redis().sadd("users", String(chatId));
+    if (user.subscribed) await redis().sadd("subs", String(chatId));
+    else await redis().srem("subs", String(chatId));
+  }
+  async function deleteUser(chatId, day) {
+    const id = String(chatId);
+    await redis().del("user:" + id, "hist:" + id, "quiz:" + id, `ai:${id}:${day}`);
+    await redis().srem("subs", id);
+    await redis().srem("users", id);
+  }
+  async function firstDelivery(updateId) {
+    return await redis().set("upd:" + updateId, 1, { nx: true, ex: 600 }) === "OK";
+  }
+  async function getHistory(chatId) {
+    return await redis().lrange("hist:" + chatId, 0, -1) || [];
+  }
+  async function pushHistory(chatId, question, answer) {
+    const key = "hist:" + chatId;
+    await redis().rpush(key, { role: "user", content: question }, { role: "assistant", content: answer });
+    await redis().ltrim(key, -HISTORY_TURNS, -1);
+    await redis().expire(key, HISTORY_TTL);
+  }
+  function clearHistory(chatId) {
+    return redis().del("hist:" + chatId);
+  }
+  async function countAiAnswer(chatId, day) {
+    const key = `ai:${chatId}:${day}`;
+    const n = await redis().incr(key);
+    if (n === 1) await redis().expire(key, 2 * 86400);
+    return n;
+  }
+  async function getQuiz(chatId) {
+    return await redis().get("quiz:" + chatId) || null;
+  }
+  function saveQuiz(chatId, quiz) {
+    return redis().set("quiz:" + chatId, quiz, { ex: 86400 });
+  }
+  function clearQuiz(chatId) {
+    return redis().del("quiz:" + chatId);
+  }
+  var EVENTS = ["start", "task", "ai", "stop", "delete", "feedback"];
+  async function track(event, day) {
+    const dayKey2 = `stat:${day}:${event}`;
+    await redis().incr(dayKey2);
+    await redis().expire(dayKey2, 60 * 86400);
+    await redis().incr("stat:all:" + event);
+  }
+  async function stats(day) {
+    const keys = EVENTS.flatMap((e) => [`stat:${day}:${e}`, "stat:all:" + e]);
+    const values = await redis().mget(...keys);
+    const today = {}, all = {};
+    EVENTS.forEach((e, i) => {
+      today[e] = Number(values[2 * i]) || 0;
+      all[e] = Number(values[2 * i + 1]) || 0;
+    });
+    return { today, all, users: await redis().scard("users"), subs: await redis().scard("subs") };
+  }
+  async function pushFeedback(text, day) {
+    await redis().lpush("feedback", { day, text });
+    await redis().ltrim("feedback", 0, 199);
+  }
+
+  // bot/util.js
+  var TZ_OFFSET_MIN = 5 * 60;
+  function dayKey(date = /* @__PURE__ */ new Date()) {
+    return new Date(date.getTime() + TZ_OFFSET_MIN * 6e4).toISOString().slice(0, 10);
+  }
+  function prevDay(key) {
+    const d = /* @__PURE__ */ new Date(key + "T00:00:00Z");
+    d.setUTCDate(d.getUTCDate() - 1);
+    return d.toISOString().slice(0, 10);
+  }
+  function dayNumber(key) {
+    return Math.floor((/* @__PURE__ */ new Date(key + "T00:00:00Z")).getTime() / 864e5);
+  }
+  function liveStreak(user, today = dayKey()) {
+    if (!user || !user.lastActive) return 0;
+    return user.lastActive === today || user.lastActive === prevDay(today) ? user.streak || 0 : 0;
+  }
+  function touchStreak(user, today = dayKey()) {
+    if (user.lastActive === today) return false;
+    user.streak = user.lastActive === prevDay(today) ? (user.streak || 0) + 1 : 1;
+    user.lastActive = today;
+    return true;
+  }
+  function plural(n, one, few, many) {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return one;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+    return many;
+  }
+  function days(n) {
+    return `${n} ${plural(n, "день", "дня", "дней")}`;
+  }
+
+  // bot/commands.js
+  var COMMANDS = [
+    { command: "task", description: "Задание дня за 60 секунд", group: "Задания" },
+    { command: "ent", description: "3 вопроса ЕНТ", group: "Задания" },
+    { command: "sat", description: "3 вопроса SAT Math", group: "Задания" },
+    { command: "ielts", description: "3 вопроса IELTS", group: "Задания" },
+    { command: "proftest", description: "Профтест: какое направление тебе ближе", group: "Задания" },
+    { command: "tip", description: "Совет дня", group: "Задания" },
+    { command: "ask", description: "Задать вопрос Venti", group: "Спросить Venti" },
+    { command: "grant", description: "Как поднять шанс на грант", group: "Спросить Venti" },
+    { command: "unis", description: "Какие вузы мне подходят", group: "Спросить Venti" },
+    { command: "professions", description: "Профессии под моё направление", group: "Спросить Venti" },
+    { command: "essay", description: "Как написать мотивационное эссе", group: "Спросить Venti" },
+    { command: "week", description: "План подготовки на неделю", group: "Спросить Venti" },
+    { command: "new", description: "Начать новый диалог с Venti", group: "Спросить Venti" },
+    { command: "plan", description: "Мой план поступления", group: "Прогресс и профиль" },
+    { command: "me", description: "Мой профиль, серия и XP", group: "Прогресс и профиль" },
+    { command: "goal", description: "Сменить цель: ЕНТ, SAT, IELTS", group: "Прогресс и профиль" },
+    { command: "field", description: "Сменить направление", group: "Прогресс и профиль" },
+    { command: "grade", description: "Указать класс", group: "Прогресс и профиль" },
+    { command: "remind", description: "Включить напоминания в 19:00", group: "Напоминания" },
+    { command: "stop", description: "Отключить напоминания", group: "Напоминания" },
+    { command: "privacy", description: "Какие данные хранит бот", group: "Данные и связь" },
+    { command: "delete", description: "Удалить мои данные", group: "Данные и связь" },
+    { command: "feedback", description: "Написать команде Ventorme", group: "Данные и связь" },
+    { command: "site", description: "Открыть ventorme.ai", group: "Данные и связь" },
+    { command: "start", description: "Начать сначала", group: "Данные и связь" },
+    { command: "help", description: "Все команды", group: "Данные и связь" }
+  ];
+  var AI_SHORTCUTS = {
+    grant: "Как мне поднять шанс на грант? Дай 3 конкретных шага под мой профиль.",
+    unis: "Какие вузы мне стоит рассмотреть под мой профиль и цель? Назови 3–5 вариантов и что у них проверить.",
+    professions: "Какие профессии подходят под моё направление? Назови 3–4 и что для них сдавать.",
+    essay: "Как написать сильное мотивационное эссе для поступления? Дай структуру и 3 ошибки, которых стоит избегать.",
+    week: "Составь мне план подготовки на эту неделю: по 20–30 минут в день, под мою цель."
+  };
+
+  // bot/texts.js
+  var HELPLINE = "150";
+  var SITE = "https://ventorme.ai";
+  var GOALS = { ent: "ЕНТ", sat: "SAT", ielts: "IELTS", unknown: "профтест" };
+  var FIELDS = { it: "IT", med: "медицина", biz: "бизнес" };
+  var RESULTS = {
+    it: { title: "AI-аналитик", match: 96 },
+    med: { title: "Врач-исследователь", match: 93 },
+    biz: { title: "Продакт-менеджер", match: 94 }
+  };
+  var NEXT_STEP = {
+    ent: "пробный ЕНТ по математической грамотности",
+    sat: "пробный SAT Math, модуль 1",
+    ielts: "IELTS Reading: один текст на время",
+    unknown: "профтест целиком на Ventorme"
+  };
+  var BTN = {
+    task: ["Задание сейчас", "task"],
+    start: ["Начать", "task"],
+    ask: ["Спросить Venti", "ask"],
+    more: ["Ещё вопрос", "ask"],
+    plan: ["Мой план", "plan"],
+    taskShort: ["Задание", "task"],
+    deleteData: ["Удалить мои данные", "delete:ask"],
+    professions: ["Какие профессии", "ai:professions"],
+    unis: ["Какие вузы", "ai:unis"],
+    goal: ["Цель", "menu:goal"],
+    field: ["Направление", "menu:field"],
+    grade: ["Класс", "menu:grade"]
+  };
+  var MENU = [[BTN.task], [BTN.ask, BTN.plan]];
+  var TOPIC_BUTTONS = [
+    [["Гранты", "ai:grant"], ["Вузы", "ai:unis"]],
+    [["Профессии", "ai:professions"], ["Эссе", "ai:essay"]],
+    [["План на неделю", "ai:week"], ["Задание", "task"]]
+  ];
+  var TIPS = [
+    "Решай по 3 задачи каждый день вместо 20 в воскресенье: так запоминается лучше.",
+    "Ошибки выписывай в отдельную заметку и возвращайся к ним через 3 дня. Это самый быстрый способ поднять балл.",
+    "Раз в неделю пиши пробный тест на время: он показывает реальный уровень лучше, чем десять задач без таймера.",
+    "Дедлайны вузов и стипендий проверяй только на официальных сайтах и ставь напоминание за 2 недели.",
+    "В эссе начни с истории из своей жизни, а не с «С детства я мечтал…».",
+    "Английские слова учи целыми фразами, а не по одному: так они сами всплывают на экзамене.",
+    "Если тема не идёт, объясни её вслух другу или Venti: сразу видно, где пробел.",
+    "Портфолио собирай заранее: олимпиады, проекты, волонтёрство. Записывай сразу, пока помнишь детали.",
+    "Сравнивай вузы по трём вещам: программа, стоимость с учётом гранта и где работают выпускники.",
+    "Перед пробником лучше выспаться, чем повторять до ночи: свежая голова решает быстрее."
+  ];
+  function hi(name) {
+    return name ? `Привет, ${name}!` : "Привет!";
+  }
+  function helpText() {
+    const groups = [];
+    COMMANDS.forEach((c) => {
+      let g = groups.find((x) => x.name === c.group);
+      if (!g) groups.push(g = { name: c.group, lines: [] });
+      g.lines.push(`/${c.command} — ${c.description}`);
+    });
+    return "Что я умею:\n\n" + groups.map((g) => `${g.name}
+${g.lines.join("\n")}`).join("\n\n") + "\n\nИли просто напиши вопрос про поступление, отвечу.";
+  }
+  function orDash(v) {
+    return v || "не указано";
+  }
+  var T = {
+    helloWithResult(name, user, streak) {
+      const r = RESULTS[user.field];
+      const result = r ? `Твой результат: ${r.title}, ${r.match}% совпадения.` : `Твоя цель: ${GOALS[user.goal] || "поступление"}.`;
+      return `${hi(name)} Я Venti из Ventorme. ${result} Серия: ${days(streak)} 🔥
+
+Завтра в 19:00 пришлю задание на 60 секунд. А вопросы про поступление можно задавать прямо сейчас.
+
+Все команды: /help`;
+    },
+    helloNoPayload(name) {
+      return `${hi(name)} Я Venti из Ventorme. Каждый день присылаю задание на 60 секунд и отвечаю на вопросы про поступление.
+
+К чему готовишься?`;
+    },
+    goalSaved(goal, streak) {
+      const head = goal === "unknown" ? "Не страшно, начнём с профтеста: он подскажет направление." : `Записал: ${GOALS[goal]}.`;
+      return `${head} Серия: ${days(streak)} 🔥
+
+Каждый день в 19:00 пришлю задание на 60 секунд.`;
+    },
+    ask: "Спрашивай про поступление: вузы, гранты, ЕНТ, SAT, IELTS, эссе, план подготовки.\n\nНапример: «Как поднять шанс на грант?»",
+    plan(user, streak) {
+      const progress = Math.min(100, 25 + 5 * (user.tasksDone || 0));
+      return `Твой план поступления: ${progress}%
+Следующий шаг: ${NEXT_STEP[user.goal] || NEXT_STEP.unknown}
+Серия: ${days(streak)} 🔥 · ${user.xp || 0} XP
+
+Весь план на ${SITE}`;
+    },
+    help: helpText(),
+    unknown: "Такой команды я не знаю. Все команды: /help",
+    me(user, streak) {
+      const r = RESULTS[user.field];
+      return `Твой профиль
+Класс: ${orDash(user.grade && String(user.grade).replace("-", "–"))}
+Цель: ${orDash(GOALS[user.goal])}
+Направление: ${orDash(FIELDS[user.field])}
+` + (r ? `Результат теста: ${r.title}, ${r.match}%
+` : "") + `
+Серия: ${days(streak)} 🔥 · ${user.xp || 0} XP · заданий: ${user.tasksDone || 0}
+Напоминания: ${user.subscribed ? "включены, каждый день в 19:00" : "выключены, включить: /remind"}`;
+    },
+    chooseGoal: "К чему готовишься?",
+    chooseField: "Какое направление тебе ближе?",
+    chooseGrade: "В каком ты классе?",
+    fieldSaved(field2) {
+      return `Записал направление: ${FIELDS[field2]}. Спроси меня, какие профессии и вузы есть под него.`;
+    },
+    gradeSaved(grade) {
+      return `Записал: ${String(grade).replace("-", "–")} класс. Буду советовать с учётом этого.`;
+    },
+    tip(day) {
+      return `Совет дня 💡
+
+${TIPS[dayNumber(day) % TIPS.length]}`;
+    },
+    remindOn: "Напоминания включены: каждый день в 19:00, одно сообщение. Отключить: /stop",
+    stop: "Готово, больше не пишу. Включить снова: /remind",
+    newDialog: "Начали с чистого листа: прошлый диалог я забыл. О чём спросишь?",
+    privacy: "Что я храню:\n— номер чата в Telegram, чтобы присылать задания\n— класс, цель и направление\n— серию, XP и выполненные задания\n— последние 6 сообщений диалога с Venti, они удаляются через 7 дней\n\nНе храню: имя, телефон, фото, контакты.\n\nЕсли подключён ИИ, вопросы Venti обрабатывает Claude API (Anthropic). Отзывы из /feedback хранятся без привязки к тебе.\n\nУдалить всё о себе: /delete",
+    deleteConfirm: "Удалить все твои данные: профиль, серию, XP и историю диалога? Отменить это нельзя.",
+    deleted: "Готово, всё удалено. Напоминаний больше не будет. Вернуться: /start",
+    deleteCancelled: "Ок, ничего не удаляю.",
+    feedbackHow: "Напиши после команды, что улучшить или что понравилось. Например:\n/feedback хочу больше вопросов по физике",
+    feedbackThanks: "Спасибо! Передал команде Ventorme.",
+    feedbackForAdmins(text) {
+      return `Отзыв о боте:
+${text}`;
+    },
+    site: "Тест, план поступления, вузы и гранты — на сайте Ventorme.",
+    // Задание дня
+    question(n, total, q) {
+      return `Вопрос ${n} из ${total}
+
+${q}`;
+    },
+    right(why) {
+      return `✅ Верно! ${why}`;
+    },
+    wrong(answer, why) {
+      return `❌ Мимо. Правильно: ${answer}. ${why}`;
+    },
+    picked(answer) {
+      return `Записал: ${answer}`;
+    },
+    stale: "Этот вопрос уже позади",
+    quizDone(score, total, xp, streak, again) {
+      const head = `${score} из ${total}` + (xp ? `, +${xp} XP` : "");
+      const tail = again ? "Это тренировка: XP за сегодня уже начислены." : "Следующее задание завтра в 19:00.";
+      return `${head}. Серия: ${days(streak)} 🔥
+
+${tail}`;
+    },
+    profTestDone(field2, xp, streak, again) {
+      return `Похоже, тебе ближе ${FIELDS[field2] || "IT"}.` + (xp ? ` +${xp} XP.` : "") + ` Серия: ${days(streak)} 🔥
+
+` + (again ? "Это тренировка: XP за сегодня уже начислены.\n\n" : "") + "Спроси меня, какие профессии и вузы есть под это направление.";
+    },
+    // Напоминание в 19:00 (и /demo_tomorrow)
+    reminder(user, streak) {
+      const what = user.goal === "unknown" ? "3 вопроса профтеста" : `3 вопроса ${GOALS[user.goal] || "ЕНТ"}`;
+      const head = streak > 0 ? `Серия ${days(streak)} 🔥 Не дай ей сгореть.` : "Начнём новую серию 🔥";
+      return `${head}
+Сегодня: ${what} за 60 секунд, до +40 XP.`;
+    },
+    // ИИ-помощник
+    aiLimit: "На сегодня вопросов хватит 🙂 Давай продолжим завтра. А задание дня можно пройти прямо сейчас.",
+    aiRefusal: "С этим я не помогу. Давай про учёбу и поступление: вузы, гранты, экзамены, эссе.",
+    aiDown: "Venti сейчас не на связи. Попробуй через пару минут, а пока пройди задание дня.",
+    faqMenu: "Пока я отвечаю на частые вопросы про поступление: гранты, ЕНТ, SAT, IELTS, эссе, вузы, профессии, сроки, план подготовки. Выбери тему или спроси по-другому:",
+    textOnly: "Я пока понимаю только текст. Напиши вопрос словами.",
+    notAdmin(id) {
+      return `Эта команда только для команды Ventorme. Твой Telegram id: ${id}. Добавь его в TG_ADMIN_IDS, если ты из команды.`;
+    },
+    stats(s) {
+      const row = (x) => `/start ${x.start} · заданий ${x.task} · вопросов Venti ${x.ai} · отписок ${x.stop} · удалений ${x.delete} · отзывов ${x.feedback}`;
+      return `Статистика бота
+
+Сегодня: ${row(s.today)}
+
+За всё время: ${row(s.all)}
+
+Учеников: ${s.users}, с напоминаниями: ${s.subs}`;
+    },
+    synced(n) {
+      return `Меню команд обновлено: ${n} команд.`;
+    }
+  };
+
+  // bot/tasks.js
+  var POOL = {
+    ent: [
+      { q: "Чему равно 15% от 240?", options: ["24", "36", "32", "40"], correct: 1, why: "240 × 0,15 = 36." },
+      { q: "Футболка стоила 8 000 ₸, её уценили на 25%. Сколько она стоит теперь?", options: ["6 000 ₸", "6 500 ₸", "7 000 ₸", "2 000 ₸"], correct: 0, why: "25% от 8 000 — это 2 000, значит 8 000 − 2 000 = 6 000." },
+      { q: "Реши уравнение: 3x − 7 = 11", options: ["x = 4", "x = 6", "x = 18", "x = 3"], correct: 1, why: "3x = 18, значит x = 6." },
+      { q: "Поезд проехал 240 км за 3 часа. Какая у него скорость?", options: ["60 км/ч", "72 км/ч", "80 км/ч", "90 км/ч"], correct: 2, why: "240 : 3 = 80 км/ч." },
+      { q: "Среднее арифметическое чисел 4, 7, 10 и 15?", options: ["8", "9", "10", "36"], correct: 1, why: "(4 + 7 + 10 + 15) : 4 = 36 : 4 = 9." },
+      { q: "Сколько будет 2⁵?", options: ["10", "16", "25", "32"], correct: 3, why: "2 · 2 · 2 · 2 · 2 = 32." }
+    ],
+    sat: [
+      { q: "If 2x + 5 = 17, what is the value of x?", options: ["5", "6", "7", "11"], correct: 1, why: "2x = 12, значит x = 6." },
+      { q: "A $40 shirt is on sale for 15% off. What is the sale price?", options: ["$34", "$36", "$25", "$6"], correct: 0, why: "15% от 40 — это 6, значит 40 − 6 = 34." },
+      { q: "What is the slope of the line y = −3x + 4?", options: ["4", "3", "−3", "−4"], correct: 2, why: "В y = kx + b наклон равен k, то есть −3." },
+      { q: "If f(x) = x² − 1, what is f(3)?", options: ["5", "8", "9", "10"], correct: 1, why: "3² − 1 = 9 − 1 = 8." },
+      { q: "The ratio of boys to girls is 3 : 5. There are 40 students. How many are girls?", options: ["15", "24", "25", "30"], correct: 2, why: "40 : 8 = 5 на часть, девочек 5 × 5 = 25." },
+      { q: "What is 30% of 50?", options: ["12", "15", "20", "35"], correct: 1, why: "50 × 0,3 = 15." }
+    ],
+    ielts: [
+      { q: "She has lived here ___ 2019.", options: ["for", "since", "from", "during"], correct: 1, why: "since + момент времени, for + период." },
+      { q: "Which word is closest in meaning to “significant”?", options: ["minor", "important", "similar", "silent"], correct: 1, why: "significant = important, «значимый»." },
+      { q: "If I ___ more time, I would travel.", options: ["have", "had", "will have", "would have"], correct: 1, why: "Второй тип условных: if + Past Simple, would + глагол." },
+      { q: "Writing Task 1: which phrase describes a sharp rise?", options: ["levelled off", "soared", "fluctuated", "dipped slightly"], correct: 1, why: "soared — резко вырос; levelled off — выровнялся." },
+      { q: "The number of students ___ increased.", options: ["have", "has", "are", "were"], correct: 1, why: "«The number of…» — единственное число, поэтому has." },
+      { q: "The city is expensive; ___, many students move there.", options: ["therefore", "moreover", "nevertheless", "for example"], correct: 2, why: "nevertheless = «тем не менее», это противопоставление." }
+    ],
+    // «Пока не знаю»: мини-профтест без правильных ответов
+    unknown: [
+      { q: "Что интереснее сделать за выходные?", options: ["Собрать свой сайт или бота", "Разобраться, как работает иммунитет", "Продать что-то на маркетплейсе"], fields: ["it", "med", "biz"], correct: null },
+      { q: "Какой школьный проект возьмёшь?", options: ["Игра на Python", "Опрос о здоровье класса", "Ярмарка с бюджетом и прибылью"], fields: ["it", "med", "biz"], correct: null },
+      { q: "Что звучит как ты?", options: ["Люблю логику и задачи", "Хочу помогать людям", "Люблю договариваться и вести за собой"], fields: ["it", "med", "biz"], correct: null }
+    ]
+  };
+  var PER_DAY = 3;
+  function poolFor(goal) {
+    return POOL[goal] || POOL.ent;
+  }
+  function pickForDay(goal, day) {
+    const pool = poolFor(goal);
+    const start2 = dayNumber(day) * PER_DAY % pool.length;
+    return Array.from({ length: Math.min(PER_DAY, pool.length) }, (_, i) => (start2 + i) % pool.length);
+  }
+
+  // bot/faq.js
+  var BY_FIELD = {
+    it: {
+      unis: ["Nazarbayev University (Казахстан)", "HKU (Гонконг)", "UCL (Великобритания)", "Bocconi (Италия)"],
+      professions: ["AI-аналитик", "продуктовый дизайнер", "Data Engineer"],
+      subjects: "математика и информатика"
+    },
+    med: {
+      unis: ["КазНМУ им. Асфендиярова (Казахстан)", "Nazarbayev University, School of Medicine (Казахстан)", "Charles University (Чехия)", "Semmelweis University (Венгрия)"],
+      professions: ["врач-исследователь", "биоинженер", "фармацевт"],
+      subjects: "биология и химия"
+    },
+    biz: {
+      unis: ["KIMEP University (Казахстан)", "Narxoz University (Казахстан)", "Erasmus University Rotterdam (Нидерланды)", "Bocconi (Италия)"],
+      professions: ["продакт-менеджер", "финансовый аналитик", "маркетолог"],
+      subjects: "математика и география или иностранный язык — зависит от программы"
+    }
+  };
+  var WEEK = {
+    ent: ["Пн — математическая грамотность", "Вт — первый профильный предмет", "Ср — история Казахстана", "Чт — второй профильный предмет", "Пт — грамотность чтения", "Сб — пробный ЕНТ на время", "Вс — разбор ошибок за неделю"],
+    sat: ["Пн — Math: алгебра", "Вт — Reading and Writing: грамматика", "Ср — Math: задачи на проценты и данные", "Чт — Reading and Writing: тексты", "Пт — повтор слабой темы", "Сб — пробный тест в Bluebook", "Вс — разбор ошибок"],
+    ielts: ["Пн — Listening", "Вт — Reading", "Ср — Writing Task 1", "Чт — Speaking: запиши себя на 2 минуты", "Пт — Writing Task 2", "Сб — полный пробный тест", "Вс — разбор ошибок и новые слова"],
+    unknown: ["Пн — пройди профтест на Ventorme", "Вт — прочитай про 3 профессии из результата", "Ср — посмотри видео «день из жизни» по каждой", "Чт — узнай, какие предметы сдавать", "Пт — выбери 2 направления", "Сб — спроси знакомого из этой сферы", "Вс — реши, к какому экзамену готовиться"]
+  };
+  function field(user) {
+    return BY_FIELD[user.field] || BY_FIELD.it;
+  }
+  function goalName(user) {
+    return GOALS[user.goal] && user.goal !== "unknown" ? GOALS[user.goal] : null;
+  }
+  var TOPICS = [
+    {
+      id: "help",
+      re: /суицид|убить себя|покончить с собой|не хочу жить|жить не хочу|хочу умереть|навредить себе|режу себя|самоповрежд|бьют|избива|избил|насили|травл|травят|издевают|буллинг|домога|угрожа|мне очень плохо|мне плохо|депресс/,
+      answer: () => `Мне жаль, что тебе сейчас тяжело. Ты не один, и с этим не нужно справляться в одиночку.
+
+Расскажи прямо сейчас взрослому, которому доверяешь: родителю, учителю, школьному психологу. Можно позвонить на детскую линию доверия Казахстана: ${HELPLINE}. Если есть опасность для жизни — звони 112.`
+    },
+    {
+      id: "grant",
+      re: /грант|стипенди|бесплатн[а-я]* (обучен|учеб)|бюджет|оплатить учебу/,
+      answer: (user) => goalName(user) === "ЕНТ" || !goalName(user) ? "Как поднять шанс на грант в Казахстане:\n— Подними балл ЕНТ: гранты распределяют по конкурсу баллов. Больше всего баллов дают профильные предметы.\n— Выбери в заявке несколько специальностей и вузов, а не одну.\n— Ищи гранты самих вузов и фондов: у многих есть свои конкурсы.\n\nПороговые баллы и сроки меняются каждый год, проверяй их на testcenter.kz и на сайте вуза.\n\nСледующий шаг: пройди /ent и посмотри, какая тема проседает." : `Как поднять шанс на грант за рубежом (${goalName(user)}):
+— Подними балл экзамена: сильный результат открывает стипендии за успехи (merit-based).
+— Подай на финансовую помощь (need-based), если её даёт вуз.
+— Сильное эссе и внеучебка: олимпиады, проекты, волонтёрство.
+— Подавай в несколько вузов разного уровня.
+
+Условия и сроки смотри в разделе Admissions или Financial Aid на сайте вуза.
+
+Следующий шаг: /${user.goal} — 3 вопроса за минуту.`
+    },
+    {
+      id: "ent",
+      re: /(?<![а-яa-z])ент(?![а-яa-z])|ұбт|единое национальное|национальн[а-я]* тест|пробник|проходн[а-я]* балл/,
+      answer: () => "ЕНТ: 3 обязательных предмета (история Казахстана, математическая грамотность, грамотность чтения) и 2 профильных под твою специальность.\n\nКак готовиться:\n— Каждый день понемногу: 3–5 задач лучше, чем 30 в выходной.\n— Раз в неделю пробник на время.\n— Ошибки выписывай и повторяй через пару дней.\n\nФормат и даты проверяй на testcenter.kz.\n\nСледующий шаг: /ent"
+    },
+    {
+      id: "sat",
+      re: /\bsat\b|(?<![а-яa-z])сат(?![а-яa-z])|bluebook|college board/,
+      answer: () => "SAT сейчас цифровой: две части, Reading and Writing и Math. Сдают в приложении Bluebook.\n\nКак готовиться бесплатно:\n— Официальные пробные тесты есть в самом Bluebook.\n— Задания по темам есть на Khan Academy.\n— После каждого пробника разбирай ошибки, а не просто смотри балл.\n\nКакой балл нужен, смотри на сайте вуза.\n\nСледующий шаг: /sat"
+    },
+    {
+      id: "ielts",
+      re: /ielts|айелтс|toefl|английск/,
+      answer: () => "IELTS: 4 части — Listening, Reading, Writing и Speaking, итог в баллах от 0 до 9.\n\nКак готовиться:\n— Каждый день 15 минут слушай английский: подкасты, видео.\n— Для Writing выучи структуру Task 1 и Task 2 и пиши по эссе в неделю.\n— Speaking: записывай себя на 2 минуты и переслушивай.\n\nКакой балл нужен, смотри на сайте вуза.\n\nСледующий шаг: /ielts"
+    },
+    {
+      id: "essay",
+      re: /эссе|мотивационн|personal statement|motivation letter|сочинени/,
+      answer: () => "Сильное мотивационное эссе:\n— Начни с короткой истории из своей жизни.\n— Покажи, почему тебе интересна эта специальность: что ты уже сделал сам.\n— Объясни, почему именно этот вуз.\n— Закончи тем, что ты дашь вузу и людям.\n\nЧего избегать: пересказа оценок, общих фраз вроде «с детства мечтал» и текста, который написал не ты.\n\nСледующий шаг: напиши первый абзац за 10 минут, не исправляя."
+    },
+    {
+      id: "deadline",
+      re: /дедлайн|срок|когда подавать|до какого числа|когда сдавать|когда экзамен/,
+      answer: () => "Сроки меняются каждый год, поэтому я не называю их наизусть, чтобы не подвести тебя.\n\n— ЕНТ и гранты в Казахстане: testcenter.kz.\n— Зарубежные вузы: раздел Admissions на сайте вуза.\n\nСовет: поставь напоминание за 2 недели до каждого дедлайна."
+    },
+    {
+      id: "abroad",
+      re: /за ?границ|зарубеж|за рубеж|европ|сша|америк|англи[юи]|чехи|коре|китай|турци|германи/,
+      answer: (user) => `Поступление за рубеж обычно выглядит так:
+— экзамен: SAT или ACT и IELTS или TOEFL — что именно, зависит от вуза;
+— мотивационное эссе и рекомендации учителей;
+— портфолио: олимпиады, проекты, волонтёрство;
+— заявка на стипендию или финансовую помощь.
+
+Под твоё направление можно посмотреть: ${field(user).unis.slice(1).join(", ")}.
+
+Требования и сроки — на сайте вуза. Подбор по профилю — на ` + SITE + "."
+    },
+    {
+      id: "unis",
+      re: /вуз|университет|универ|институт|куда поступ|назарбаев|\bnu\b/,
+      answer: (user) => `Под твоё направление (${FIELDS[user.field] || "IT"}) стоит посмотреть:
+` + field(user).unis.map((u) => "— " + u).join("\n") + `
+
+Сравнивай по трём вещам: программа, стоимость с учётом гранта и где работают выпускники.
+
+Подбор вузов под твой профиль — на ${SITE}. Сменить направление: /field`
+    },
+    {
+      id: "professions",
+      re: /професси|кем стать|кем быть|специальност|направлени|карьер|работ(а|ать) кем/,
+      answer: (user) => {
+        const r = RESULTS[user.field];
+        return (r ? `По тесту тебе ближе всего: ${r.title}.
+
+` : "") + `Профессии под направление «${FIELDS[user.field] || "IT"}»:
+` + field(user).professions.map((p) => "— " + p).join("\n") + `
+
+Что обычно сдавать: ${field(user).subjects}. Точный список предметов смотри у выбранной специальности на сайте вуза.
+
+Не уверен в направлении? Пройди /proftest.`;
+      }
+    },
+    {
+      id: "week",
+      re: /план|расписани|неделю|с чего начать|как начать|как готовиться|подготов/,
+      answer: (user) => {
+        const goal = WEEK[user.goal] ? user.goal : "ent";
+        return `План на неделю${goalName(user) ? ` (${goalName(user)})` : ""}, по 20–30 минут в день:
+` + WEEK[goal].map((d) => "— " + d).join("\n") + "\n\nКаждый вечер в 19:00 я пришлю задание на 60 секунд, чтобы держать серию.";
+      }
+    },
+    {
+      id: "motivation",
+      re: /лень|не могу заставить|мотиваци|устал|выгоран|стресс|волну|боюсь|не успеваю/,
+      answer: () => "Это нормально, так бывает почти у всех.\n— Начни с одного маленького шага: 1 задача или 5 минут.\n— Занимайся в одно и то же время каждый день.\n— Отмечай серию: каждый день подряд — уже победа.\n— Спи нормально: свежая голова решает быстрее.\n\nСледующий шаг: /task — всего 60 секунд."
+    },
+    {
+      id: "about",
+      re: /кто ты|что ты умеешь|ты бот|ты ии|ты человек/,
+      answer: () => "Я Venti, помощник Ventorme. Присылаю задание на 60 секунд каждый день и отвечаю на частые вопросы про поступление: гранты, ЕНТ, SAT, IELTS, эссе, вузы, профессии. Все команды: /help"
+    },
+    {
+      id: "hello",
+      re: /^(привет|салам|сәлем|здравству|добрый|hi\b|hello)/,
+      answer: () => "Привет! Спроси про гранты, ЕНТ, SAT, IELTS, эссе, вузы или профессии. Или пройди задание дня: /task"
+    },
+    {
+      id: "thanks",
+      re: /спасибо|рахмет|благодар|thanks|thank you/,
+      answer: () => "Рад помочь! Не забудь про задание дня в 19:00 🔥"
+    }
+  ];
+  function faqAnswer(question, user) {
+    const q = String(question || "").toLowerCase().replace(/ё/g, "е");
+    const topic = TOPICS.find((t) => t.re.test(q));
+    return topic ? topic.answer(user || {}) : null;
+  }
+  function isCrisis(question) {
+    return TOPICS[0].re.test(String(question || "").toLowerCase().replace(/ё/g, "е"));
+  }
+
+  // bot/venti.js
+  var MODEL = process.env.VENTI_MODEL || "claude-opus-5-5";
+  var MAX_CHARS = 3500;
+  var SYSTEM = `Ты Venti, ИИ-помощник Ventorme (${SITE}) в Telegram. Ты помогаешь школьникам 13–18 лет из Казахстана, которые готовятся к поступлению: выбор профессии и вуза, ЕНТ, SAT, IELTS, гранты и стипендии, эссе, план подготовки.
+
+Как отвечать:
+- Коротко: до 600 символов, 2–4 абзаца. Это чат в телефоне.
+- На «ты», дружелюбно и по делу, без канцелярита.
+- На языке ученика: пишет по-русски — отвечай по-русски, пишет по-казахски — по-казахски.
+- Обычным текстом без Markdown: без звёздочек, решёток и таблиц. Список — короткими строками с «—».
+- Заканчивай одним конкретным следующим шагом.
+
+Правила:
+- Не выдумывай цифры, проходные баллы, суммы грантов и дедлайны. Если не уверен, скажи об этом и подскажи, где проверить: на ${SITE} или на официальном сайте вуза или экзамена.
+- Не спрашивай и не собирай личные данные: ФИО, телефон, адрес, школу, документы. Если ученик прислал их сам, не повторяй их.
+- Домашку и задания целиком не решай: объясни ход решения и дай попробовать самому.
+- Вопросы не про учёбу и поступление мягко возвращай к теме одной фразой.
+- Если ученик пишет о беде, опасности, насилии, мыслях навредить себе или о плохом самочувствии, ответь бережно и без нотаций: посоветуй прямо сейчас поговорить со взрослым, которому доверяет, и дай номер детской линии доверия Казахстана ${HELPLINE}. Если есть угроза жизни — 112.`;
+  function profileText(user, streak) {
+    const parts = [];
+    if (user.grade) parts.push(`класс — ${String(user.grade).replace("-", "–")}`);
+    if (user.goal) parts.push(`цель — ${GOALS[user.goal]}`);
+    if (user.field) parts.push(`направление — ${FIELDS[user.field]}`);
+    const r = RESULTS[user.field];
+    if (r) parts.push(`результат теста на сайте — ${r.title}, ${r.match}% совпадения (демо-цифра)`);
+    parts.push(`серия — ${streak} дн.`);
+    return "Профиль ученика из анкеты Ventorme: " + parts.join("; ") + ".";
+  }
+  var client2 = null;
+  function anthropic() {
+    if (!client2) client2 = new Anthropic({ timeout: 15e3 });
+    return client2;
+  }
+  function offline(question, user, fallbackText) {
+    const text = faqAnswer(question, user);
+    if (text) return { ok: true, text, faq: true, rows: isCrisis(question) ? [] : void 0 };
+    return fallbackText ? { ok: false, text: fallbackText } : { ok: false, text: T.faqMenu, rows: TOPIC_BUTTONS };
+  }
+  var warnedNoKey = false;
+  async function askVenti(user, streak, history, question) {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      if (!warnedNoKey) console.log("[venti] нет ANTHROPIC_API_KEY: Venti отвечает готовыми ответами из bot/faq.js");
+      warnedNoKey = true;
+      return offline(question, user);
+    }
+    try {
+      const response = await anthropic().beta.messages.create({
+        model: MODEL,
+        max_tokens: 1e3,
+        output_config: { effort: "low" },
+        // Если модель откажет по политике, сервер сам повторит запрос на рекомендованной модели
+        betas: ["server-side-fallback-2026-07-01"],
+        fallbacks: "default",
+        system: [
+          { type: "text", text: SYSTEM },
+          { type: "text", text: profileText(user, streak) }
+        ],
+        messages: [...history, { role: "user", content: question }]
+      });
+      if (response.stop_reason === "refusal") {
+        console.warn("[venti] отказ модели, категория:", response.stop_details?.category ?? "нет");
+        return isCrisis(question) ? { ok: false, text: faqAnswer(question, user), rows: [] } : { ok: false, text: T.aiRefusal };
+      }
+      let text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+      if (!text) {
+        console.warn("[venti] пустой ответ, stop_reason:", response.stop_reason);
+        return offline(question, user, T.aiDown);
+      }
+      if (text.length > MAX_CHARS) text = text.slice(0, MAX_CHARS).trimEnd() + "…";
+      else if (response.stop_reason === "max_tokens") text += "…";
+      return { ok: true, text };
+    } catch (err) {
+      if (err instanceof Anthropic.RateLimitError) {
+        console.error("[venti] лимит запросов Claude API (429)");
+      } else if (err instanceof Anthropic.APIConnectionError) {
+        console.error("[venti] нет связи с Claude API:", err.message);
+      } else if (err instanceof Anthropic.APIError) {
+        console.error(`[venti] ошибка Claude API ${err.status}:`, err.message);
+      } else {
+        console.error("[venti] неожиданная ошибка:", err);
+      }
+      return offline(question, user, T.aiDown);
+    }
+  }
+
+  // bot/handlers.js
+  var AI_PER_DAY = 20;
+  var MAX_QUESTION = 1e3;
+  var FIELDS2 = ["it", "med", "biz"];
+  var GOAL_BUTTONS = [
+    [["ЕНТ", "goal:ent"], ["SAT", "goal:sat"], ["IELTS", "goal:ielts"]],
+    [["Пока не знаю", "goal:unknown"]]
+  ];
+  var FIELD_BUTTONS = [[["IT", "field:it"], ["Медицина", "field:med"], ["Бизнес", "field:biz"]]];
+  var GRADE_BUTTONS = [[["8–9", "grade:8-9"], ["10", "grade:10"], ["11–12", "grade:11-12"]]];
+  var DELETE_BUTTONS = [[["Да, удалить всё", "delete:yes"]], [["Отмена", "delete:no"]]];
+  function logError(where) {
+    return (err) => console.error(`[bot] ${where}:`, err.message || err);
+  }
+  async function track2(event) {
+    try {
+      await track(event, dayKey());
+    } catch (err) {
+      logError("track")(err);
+    }
+  }
+  function isAdmin(fromId) {
+    return adminIds().includes(String(fromId));
+  }
+  function parsePayload(payload) {
+    const [field2, goal, grade] = String(payload || "").trim().split("_");
+    return {
+      field: FIELDS2.includes(field2) ? field2 : null,
+      goal: Object.hasOwn(GOALS, goal || "") ? goal : null,
+      grade: /^\d{1,2}(-\d{1,2})?$/.test(grade || "") ? grade : null
+    };
+  }
+  async function loadUser(chatId) {
+    return await getUser(chatId) || newUser();
+  }
+  async function handleUpdate(update) {
+    if (!update || typeof update.update_id !== "number") return;
+    if (!await firstDelivery(update.update_id)) return;
+    if (update.message) return onMessage(update.message);
+    if (update.callback_query) return onCallback(update.callback_query);
+  }
+  async function onMessage(msg) {
+    if (msg.chat?.type !== "private") return;
+    const chatId = msg.chat.id;
+    const text = (msg.text || "").trim();
+    if (!text) return send(chatId, T.textOnly);
+    const cmd = text.match(/^\/([a-z_]+)(?:@\w+)?(?:\s+([\s\S]*))?$/i);
+    if (!cmd) return onQuestion(chatId, text);
+    const name = cmd[1].toLowerCase();
+    const arg = (cmd[2] || "").trim();
+    if (Object.hasOwn(AI_SHORTCUTS, name)) return onQuestion(chatId, AI_SHORTCUTS[name]);
+    switch (name) {
+      case "start":
+        return onStart(chatId, msg.from?.first_name, arg);
+      case "help":
+        return send(chatId, T.help, MENU);
+      // Задания
+      case "task":
+        return startQuiz(chatId);
+      case "ent":
+      case "sat":
+      case "ielts":
+        return startQuiz(chatId, name);
+      case "proftest":
+        return startQuiz(chatId, "unknown");
+      case "tip":
+        return send(chatId, T.tip(dayKey()), [[BTN.taskShort, BTN.more]]);
+      // Venti
+      case "ask":
+        return arg ? onQuestion(chatId, arg) : send(chatId, T.ask);
+      case "new":
+        return onNewDialog(chatId);
+      // Прогресс и профиль
+      case "plan":
+        return showPlan(chatId);
+      case "me":
+        return showMe(chatId);
+      case "goal":
+        return send(chatId, T.chooseGoal, GOAL_BUTTONS);
+      case "field":
+        return send(chatId, T.chooseField, FIELD_BUTTONS);
+      case "grade":
+        return send(chatId, T.chooseGrade, GRADE_BUTTONS);
+      // Напоминания
+      case "remind":
+        return onRemind(chatId);
+      case "stop":
+        return onStop(chatId);
+      // Данные и связь
+      case "privacy":
+        return send(chatId, T.privacy, [[BTN.deleteData]]);
+      case "delete":
+        return send(chatId, T.deleteConfirm, DELETE_BUTTONS);
+      case "feedback":
+        return onFeedback(chatId, arg);
+      case "site":
+        return send(chatId, T.site, [[["Открыть ventorme.ai", SITE]]]);
+      // Для команды Ventorme
+      case "demo_tomorrow":
+        return onDemoTomorrow(chatId);
+      case "stats":
+        return onStats(chatId, msg.from?.id);
+      case "sync_commands":
+        return onSyncCommands(chatId, msg.from?.id);
+      default:
+        return send(chatId, T.unknown, MENU);
+    }
+  }
+  async function onStart(chatId, name, payload) {
+    const user = await loadUser(chatId);
+    const today = dayKey();
+    const p = parsePayload(payload);
+    user.subscribed = true;
+    user.joined = user.joined || today;
+    if (!user.lastActive) touchStreak(user, today);
+    await track2("start");
+    if (p.goal || p.field) {
+      user.field = p.field || user.field;
+      user.goal = p.goal || user.goal;
+      user.grade = p.grade || user.grade;
+      await saveUser(chatId, user);
+      return send(chatId, T.helloWithResult(name, user, liveStreak(user, today)), MENU);
+    }
+    await saveUser(chatId, user);
+    return send(chatId, T.helloNoPayload(name), GOAL_BUTTONS);
+  }
+  async function onGoal(chatId, goal) {
+    if (!Object.hasOwn(GOALS, goal)) return;
+    const user = await loadUser(chatId);
+    user.goal = goal;
+    user.joined = user.joined || dayKey();
+    if (!user.lastActive) touchStreak(user);
+    await saveUser(chatId, user);
+    return send(chatId, T.goalSaved(goal, liveStreak(user)), MENU);
+  }
+  async function onField(chatId, field2) {
+    if (!FIELDS2.includes(field2)) return;
+    const user = await loadUser(chatId);
+    user.field = field2;
+    user.joined = user.joined || dayKey();
+    await saveUser(chatId, user);
+    return send(chatId, T.fieldSaved(field2), [[BTN.professions, BTN.unis]]);
+  }
+  async function onGrade(chatId, grade) {
+    if (!/^\d{1,2}(-\d{1,2})?$/.test(grade)) return;
+    const user = await loadUser(chatId);
+    user.grade = grade;
+    user.joined = user.joined || dayKey();
+    await saveUser(chatId, user);
+    return send(chatId, T.gradeSaved(grade), MENU);
+  }
+  async function showPlan(chatId) {
+    const user = await loadUser(chatId);
+    return send(chatId, T.plan(user, liveStreak(user)), [[BTN.task], [BTN.ask]]);
+  }
+  async function showMe(chatId) {
+    const user = await loadUser(chatId);
+    return send(chatId, T.me(user, liveStreak(user)), [[BTN.goal, BTN.field, BTN.grade]]);
+  }
+  async function onRemind(chatId) {
+    const user = await loadUser(chatId);
+    user.subscribed = true;
+    user.joined = user.joined || dayKey();
+    await saveUser(chatId, user);
+    return send(chatId, T.remindOn, MENU);
+  }
+  async function onStop(chatId) {
+    const user = await getUser(chatId);
+    if (user) {
+      user.subscribed = false;
+      await saveUser(chatId, user);
+    }
+    await track2("stop");
+    return send(chatId, T.stop);
+  }
+  async function onNewDialog(chatId) {
+    await clearHistory(chatId);
+    return send(chatId, T.newDialog);
+  }
+  async function onDelete(chatId) {
+    await deleteUser(chatId, dayKey());
+    await track2("delete");
+    return send(chatId, T.deleted);
+  }
+  async function onFeedback(chatId, text) {
+    if (!text) return send(chatId, T.feedbackHow);
+    const clean = text.slice(0, MAX_QUESTION);
+    await pushFeedback(clean, dayKey());
+    await track2("feedback");
+    for (const admin of adminIds()) {
+      await send(admin, T.feedbackForAdmins(clean)).catch(logError("feedback"));
+    }
+    return send(chatId, T.feedbackThanks);
+  }
+  async function onDemoTomorrow(chatId) {
+    return sendReminder(chatId, await loadUser(chatId));
+  }
+  async function onStats(chatId, fromId) {
+    if (!isAdmin(fromId)) return send(chatId, T.notAdmin(fromId));
+    return send(chatId, T.stats(await stats(dayKey())));
+  }
+  async function onSyncCommands(chatId, fromId) {
+    if (!isAdmin(fromId)) return send(chatId, T.notAdmin(fromId));
+    await tg("setMyCommands", { commands: COMMANDS.map(({ command, description }) => ({ command, description })) });
+    return send(chatId, T.synced(COMMANDS.length));
+  }
+  async function onQuestion(chatId, text) {
+    const user = await loadUser(chatId);
+    const n = await countAiAnswer(chatId, dayKey());
+    if (n > AI_PER_DAY) return send(chatId, T.aiLimit, [[BTN.taskShort]]);
+    tg("sendChatAction", { chat_id: chatId, action: "typing" }).catch(logError("typing"));
+    const question = text.slice(0, MAX_QUESTION);
+    const history = await getHistory(chatId);
+    const answer = await askVenti(user, liveStreak(user), history, question);
+    if (answer.ok) {
+      await pushHistory(chatId, question, answer.text);
+      await track2("ai");
+    }
+    return send(chatId, answer.text, answer.rows || [[BTN.taskShort, BTN.more]]);
+  }
+  async function startQuiz(chatId, goalOverride) {
+    const user = await loadUser(chatId);
+    const goal = goalOverride || user.goal || "ent";
+    const day = dayKey();
+    const quiz = {
+      id: Date.now().toString(36),
+      goal,
+      day,
+      ids: pickForDay(goal, day),
+      i: 0,
+      score: 0,
+      picks: []
+    };
+    await saveQuiz(chatId, quiz);
+    return sendQuestion(chatId, quiz);
+  }
+  function questionText(quiz, k) {
+    return T.question(k + 1, quiz.ids.length, poolFor(quiz.goal)[quiz.ids[k]].q);
+  }
+  function sendQuestion(chatId, quiz) {
+    const q = poolFor(quiz.goal)[quiz.ids[quiz.i]];
+    const rows = q.options.map((opt, j) => [[opt, `a:${quiz.id}:${quiz.i}:${j}`]]);
+    return send(chatId, questionText(quiz, quiz.i), rows);
+  }
+  async function onAnswer(chatId, cq, ack) {
+    const [, qid, iStr, jStr] = cq.data.split(":");
+    const i = Number(iStr), j = Number(jStr);
+    const quiz = await getQuiz(chatId);
+    if (!quiz || quiz.id !== qid || quiz.i !== i) return ack(T.stale);
+    const q = poolFor(quiz.goal)[quiz.ids[i]];
+    if (!q || !(j >= 0 && j < q.options.length)) return ack(T.stale);
+    let verdict;
+    if (q.correct === null) {
+      quiz.picks.push(q.fields[j]);
+      quiz.score++;
+      verdict = T.picked(q.options[j]);
+    } else if (j === q.correct) {
+      quiz.score++;
+      verdict = T.right(q.why);
+    } else {
+      verdict = T.wrong(q.options[q.correct], q.why);
+    }
+    quiz.i++;
+    await saveQuiz(chatId, quiz);
+    await ack(q.correct === null ? "" : j === q.correct ? "✅ Верно" : "❌ Мимо");
+    await tg("editMessageText", {
+      chat_id: chatId,
+      message_id: cq.message.message_id,
+      text: questionText(quiz, i) + "\n\n" + verdict
+    }).catch(logError("editMessageText"));
+    if (quiz.i < quiz.ids.length) return sendQuestion(chatId, quiz);
+    return finishQuiz(chatId, quiz);
+  }
+  function topField(picks) {
+    const count = {};
+    picks.forEach((f) => {
+      count[f] = (count[f] || 0) + 1;
+    });
+    return FIELDS2.reduce((best, f) => (count[f] || 0) > (count[best] || 0) ? f : best, picks[0] || "it");
+  }
+  async function finishQuiz(chatId, quiz) {
+    await clearQuiz(chatId);
+    const user = await loadUser(chatId);
+    const again = user.lastTaskDay === quiz.day;
+    let xp = 0;
+    if (!again) {
+      xp = 10 * quiz.score + 10;
+      user.xp = (user.xp || 0) + xp;
+      user.tasksDone = (user.tasksDone || 0) + 1;
+      user.lastTaskDay = quiz.day;
+      touchStreak(user, quiz.day);
+    }
+    const field2 = quiz.goal === "unknown" ? topField(quiz.picks) : null;
+    if (field2 && !user.field) user.field = field2;
+    await saveUser(chatId, user);
+    await track2("task");
+    const streak = liveStreak(user);
+    const text = field2 ? T.profTestDone(field2, xp, streak, again) : T.quizDone(quiz.score, quiz.ids.length, xp, streak, again);
+    return send(chatId, text, [[BTN.ask, BTN.plan]]);
+  }
+  async function onCallback(cq) {
+    const chatId = cq.message?.chat?.id;
+    const data2 = cq.data || "";
+    const ack = (text) => tg("answerCallbackQuery", text ? { callback_query_id: cq.id, text } : { callback_query_id: cq.id }).catch(logError("answerCallbackQuery"));
+    if (!chatId || cq.message.chat.type !== "private") return ack();
+    if (data2.startsWith("a:")) return onAnswer(chatId, cq, ack);
+    await ack();
+    const [kind, value] = data2.split(":");
+    if (data2 === "task") return startQuiz(chatId);
+    if (data2 === "ask") return send(chatId, T.ask);
+    if (data2 === "plan") return showPlan(chatId);
+    if (kind === "goal") return onGoal(chatId, value);
+    if (kind === "field") return onField(chatId, value);
+    if (kind === "grade") return onGrade(chatId, value);
+    if (kind === "ai" && Object.hasOwn(AI_SHORTCUTS, value)) return onQuestion(chatId, AI_SHORTCUTS[value]);
+    if (data2 === "menu:goal") return send(chatId, T.chooseGoal, GOAL_BUTTONS);
+    if (data2 === "menu:field") return send(chatId, T.chooseField, FIELD_BUTTONS);
+    if (data2 === "menu:grade") return send(chatId, T.chooseGrade, GRADE_BUTTONS);
+    if (data2 === "delete:ask") return send(chatId, T.deleteConfirm, DELETE_BUTTONS);
+    if (data2 === "delete:yes") return onDelete(chatId);
+    if (data2 === "delete:no") return send(chatId, T.deleteCancelled);
+  }
+  function sendReminder(chatId, user) {
+    return send(chatId, T.reminder(user, liveStreak(user)), [[BTN.start], [BTN.ask]]);
+  }
+
+  // bot/demo.js
+  var TOKEN_KEY = "vt-demo-token";
+  var $ = (id) => document.getElementById(id);
+  var running = false;
+  var loop = Promise.resolve();
+  var wakeLock = null;
+  function time() {
+    return (/* @__PURE__ */ new Date()).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+  function log(text, kind) {
+    const li = document.createElement("li");
+    if (kind) li.className = kind;
+    li.textContent = time() + "  " + text;
+    $("log").prepend(li);
+    while ($("log").children.length > 60) $("log").lastChild.remove();
+  }
+  function status(text, kind) {
+    $("status").textContent = text;
+    $("status").className = "status" + (kind ? " is-" + kind : "");
+  }
+  function describe(update) {
+    if (update.message) return "📩 " + (update.message.text || "[не текст]").slice(0, 80);
+    if (update.callback_query) return "👆 нажата кнопка";
+    return "• событие";
+  }
+  async function keepAwake() {
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+    } catch (e) {
+      wakeLock = null;
+    }
+  }
+  async function poll() {
+    let offset = 0;
+    while (running) {
+      try {
+        const updates = await tg("getUpdates", { offset, timeout: 25, allowed_updates: ["message", "callback_query"] });
+        for (const update of updates) {
+          offset = update.update_id + 1;
+          log(describe(update));
+          try {
+            await handleUpdate(update);
+          } catch (err) {
+            log("Не удалось ответить: " + err.message, "bad");
+          }
+        }
+      } catch (err) {
+        if (!running) break;
+        log(err.code === 409 ? "Бота уже слушает другая вкладка, npm start или Vercel. Закрой лишнее." : "Нет связи с Telegram, пробую снова…", "bad");
+        await new Promise((r) => setTimeout(r, 3e3));
+      }
+    }
+  }
+  async function start() {
+    const token = $("token").value.trim();
+    if (!/^\d+:[A-Za-z0-9_-]{30,}$/.test(token)) {
+      status("Это не похоже на токен из @BotFather. Он выглядит так: 123456789:AAH…", "bad");
+      return;
+    }
+    await loop;
+    process.env.TG_BOT_TOKEN = token;
+    try {
+      if ($("remember").checked) localStorage.setItem(TOKEN_KEY, token);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch (e) {
+    }
+    $("start").disabled = true;
+    status("Подключаюсь к Telegram…");
+    let me;
+    try {
+      me = await tg("getMe", {});
+    } catch (err) {
+      $("start").disabled = false;
+      status(err.code === 401 || err.code === 404 ? "Telegram не принял токен. Скопируй его из @BotFather целиком." : "Нет связи с Telegram: " + err.message, "bad");
+      return;
+    }
+    await tg("deleteWebhook", { drop_pending_updates: true }).catch(() => {
+    });
+    await tg("setMyCommands", { commands: COMMANDS.map(({ command, description }) => ({ command, description })) }).catch(() => {
+    });
+    running = true;
+    document.body.classList.add("is-running");
+    $("open").href = "https://t.me/" + me.username;
+    $("open").textContent = "Открыть @" + me.username;
+    status(`Бот @${me.username} работает. Не закрывай вкладку и не давай ноутбуку уснуть.`, "good");
+    log("Бот запущен, жду сообщений", "good");
+    keepAwake();
+    loop = poll();
+  }
+  function stop() {
+    running = false;
+    document.body.classList.remove("is-running");
+    $("start").disabled = false;
+    if (wakeLock) wakeLock.release().catch(() => {
+    });
+    wakeLock = null;
+    status("Бот остановлен. Он молчит, пока страница не запущена снова.");
+    log("Бот остановлен");
+  }
+  try {
+    $("token").value = localStorage.getItem(TOKEN_KEY) || "";
+  } catch (e) {
+  }
+  $("remember").checked = Boolean($("token").value);
+  $("start").addEventListener("click", start);
+  $("stop").addEventListener("click", stop);
+  $("token").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") start();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (running && document.visibilityState === "visible") keepAwake();
+  });
+})();
+</script>
+</body>
+</html>
