@@ -1,1 +1,187 @@
-/* Участник 2: S6, S7, демо-меню. Только классы с префиксом своих экранов. */
+/* Участник 2: S6, S7, демо-меню. Только классы с префиксом своих экранов (.s6-, .s7-) и меню (.demo-).
+   Этап 1: статика. Анимации этапа 2 добавляются после вызова скилла моушн-дизайна. */
+
+/* ---------- S6. Подключи Venti ---------- */
+
+.s6-chat .panel-core { display: flex; flex-direction: column; gap: 12px; }
+
+.s6-chat-head { display: flex; align-items: center; gap: 10px; }
+.s6-avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--accent-soft); }
+.s6-chat-name { display: flex; flex-direction: column; line-height: 1.25; }
+.s6-chat-name b { font-size: 16px; letter-spacing: -0.015em; }
+.s6-chat-name span { font-size: 15px; color: var(--ink-subtle); }
+
+/* Пузырь сообщения, как входящее в Telegram */
+.s6-bubble {
+  align-self: flex-start;
+  max-width: 92%;
+  padding: 12px 14px;
+  border-radius: 6px 18px 18px 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+.s6-bubble p { margin: 0; }
+.s6-bubble p + p { margin-top: 6px; }
+
+.s6-time { display: flex; align-items: center; gap: 12px; }
+.s6-time-icon { flex: none; font-size: 24px; line-height: 1; }
+.s6-time div { display: flex; flex-direction: column; line-height: 1.35; }
+.s6-time b { font-size: 16px; }
+.s6-time span { font-size: 15px; color: var(--ink-muted); }
+
+.s6-connect { text-decoration: none; }
+
+/* Запасной канал: почта, свёрнута */
+.s6-mail {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+}
+.s6-mail summary {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 16px;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  list-style: none;
+}
+.s6-mail summary::-webkit-details-marker { display: none; }
+.s6-mail summary::after {
+  content: "";
+  margin-left: auto;
+  width: 8px; height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+}
+.s6-mail[open] summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+.s6-mail summary:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; border-radius: var(--r-card); }
+
+.s6-mail-form { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; }
+.s6-label { font-size: 15px; font-weight: 600; }
+.s6-input {
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-chip);
+  background: var(--surface-1);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px; /* меньше 16px iPhone приближает поле */
+}
+.s6-input:focus { outline: 3px solid var(--accent-line); outline-offset: 1px; border-color: var(--accent); }
+.s6-input[aria-invalid="true"] { border-color: var(--bad); }
+.s6-mail-note { margin: 0; font-size: 15px; color: var(--ink-muted); }
+
+.s6-done { margin-top: auto; }
+
+/* ---------- S7. Завтра ---------- */
+
+/* Экран блокировки вечером: тёмный в обеих темах */
+.s7-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 22px 14px 16px;
+  border-radius: var(--r-panel);
+  color: #F2F3F8;
+  background:
+    radial-gradient(70% 50% at 50% 0%, rgba(123, 92, 255, .35), transparent 70%),
+    linear-gradient(180deg, #0E1240 0%, #00033E 55%, #0A0B14 100%);
+  box-shadow: var(--lift);
+}
+
+.s7-clock { width: 76px; height: 76px; margin-bottom: 6px; }
+.s7-clock-face { fill: rgba(255, 255, 255, .06); stroke: rgba(255, 255, 255, .35); stroke-width: 2; }
+.s7-clock-ticks line { stroke: rgba(255, 255, 255, .45); stroke-width: 2; stroke-linecap: round; }
+.s7-hand-h { stroke: var(--lime); stroke-width: 4.5; stroke-linecap: round; }
+.s7-hand-m { stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round; }
+.s7-clock-pin { fill: #FFFFFF; }
+
+.s7-time { margin: 0; font-size: 52px; line-height: 1; font-weight: 700; letter-spacing: -0.04em; }
+.s7-date { margin: 0 0 14px; font-size: 16px; color: rgba(242, 243, 248, .75); }
+.s7-date::first-letter { text-transform: uppercase; }
+
+/* Уведомление в стиле iOS */
+.s7-notif {
+  appearance: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .13);
+  color: #F2F3F8;
+  text-align: left;
+  cursor: pointer;
+}
+.s7-notif:active { transform: scale(.98); }
+.s7-notif:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+.s7-notif.is-read { cursor: default; background: rgba(255, 255, 255, .07); }
+.s7-notif.is-read:active { transform: none; }
+
+.s7-notif-icon { flex: none; width: 38px; height: 38px; border-radius: 9px; background: #FFFFFF; }
+.s7-notif-body { display: flex; flex-direction: column; min-width: 0; line-height: 1.35; }
+.s7-notif-top { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; color: rgba(242, 243, 248, .7); }
+.s7-notif-top b { color: #F2F3F8; font-weight: 650; }
+.s7-notif-title { font-size: 15.5px; font-weight: 650; }
+.s7-notif-text { font-size: 15px; color: rgba(242, 243, 248, .85); }
+
+.s7-hint { margin: 10px 0 0; font-size: 15px; color: rgba(242, 243, 248, .7); }
+
+.s7-result { display: flex; flex-direction: column; gap: 12px; }
+.s7-result[hidden] { display: none; }
+
+.s7-streak { display: flex; align-items: center; gap: 14px; }
+.s7-fire { flex: none; font-size: 38px; line-height: 1; }
+.s7-streak div { display: flex; flex-direction: column; line-height: 1.3; }
+.s7-streak-num { font-size: 24px; letter-spacing: -0.03em; color: var(--fire); }
+.s7-streak div span { font-size: 15px; color: var(--ink-muted); }
+
+.s7-uni { display: flex; align-items: center; gap: 12px; border-color: var(--good); background: var(--good-soft); }
+.s7-uni-icon { flex: none; font-size: 24px; line-height: 1; }
+.s7-uni-name { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.s7-uni-name b { font-size: 16px; }
+.s7-uni-name span { font-size: 15px; color: var(--ink-muted); }
+.s7-uni-match { margin-left: auto; font-size: 18px; color: var(--good); }
+
+/* ---------- Демо-меню: шторка снизу, как .gsheet на лендинге ---------- */
+
+.demo-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 13, 36, .45);
+}
+.demo-backdrop[hidden], .demo-sheet[hidden] { display: none; }
+
+.demo-sheet {
+  position: absolute;
+  left: 12px; right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 18px 16px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 22px;
+  background: var(--surface-1);
+  box-shadow: 0 -2px 6px rgba(11, 13, 36, .04), 0 18px 50px -12px rgba(11, 13, 36, .35);
+}
+/* «Ручка» сверху, как у нижних шторок iOS */
+.demo-sheet::before {
+  content: "";
+  position: absolute; top: 6px; left: 50%;
+  width: 38px; height: 4px; margin-left: -19px;
+  border-radius: 4px;
+  background: var(--hairline-str);
+}
+.demo-title { margin: 4px 0 2px; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.demo-sub { margin: 0 0 12px; font-size: 15px; color: var(--ink-muted); }
+.demo-actions { display: flex; flex-direction: column; gap: 8px; }
+.demo-actions .btn { min-height: 52px; padding: 12px 18px; }
