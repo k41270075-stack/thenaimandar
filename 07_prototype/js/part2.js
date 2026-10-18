@@ -201,9 +201,15 @@
         if (closed) return;
         closed = true;
         dim.classList.add('is-out');
-        el.classList.add('s5-go');               // запускает серию и полосу плана
-        HUD.bump('streak');
         s5Timers.push(setTimeout(function () { dim.remove(); }, FX.reduced ? 0 : 260));
+        function reveal() {
+          if (Screens.current() !== 's5') return;
+          el.classList.add('s5-go');             // запускает серию и полосу плана
+          HUD.bump('streak');
+        }
+        // Мощная сцена серии участника 2 (DEV_PLAN 3.5), если она уже есть; иначе своя анимация
+        if (window.StreakFX && typeof window.StreakFX.play === 'function') window.StreakFX.play(0, 1).then(reveal, reveal);
+        else reveal();
       }
       dim.addEventListener('click', close);
 
