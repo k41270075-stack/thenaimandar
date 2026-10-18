@@ -50,6 +50,7 @@
 .s1-stage {
   --k: .92;
   position: relative;
+  flex: none;                /* на низком телефоне сцена не сплющивается, экран просто прокручивается */
   height: 300px;
   margin: 4px 0;
   border-radius: var(--r-panel);
@@ -64,7 +65,7 @@
 .s1-radar {
   position: absolute; left: 50%; top: 50%;
   width: 0; height: 0;
-  transform: scale(var(--k)) scaleY(.72);
+  transform: scale(var(--k)) scaleX(var(--kx, 1)) scaleY(.72);
 }
 .s1-ring {
   position: absolute;
@@ -99,6 +100,7 @@
   transform: translate(-50%, -50%) translate(calc(var(--x) * var(--k)), calc(var(--y) * var(--k))) scale(.96);
   animation: s1-chip-in .35s cubic-bezier(.23, 1, .32, 1) calc(var(--hit) * .25) forwards, s1-hit .5s cubic-bezier(.23, 1, .32, 1) var(--hit);
 }
+.s1-chip[hidden] { display: none; }
 @keyframes s1-chip-in { to { opacity: 1; transform: translate(-50%, -50%) translate(calc(var(--x) * var(--k)), calc(var(--y) * var(--k))); } }
 @keyframes s1-hit {
   0%   { color: #fff; border-color: rgba(198, 244, 50, .9); box-shadow: 0 0 0 4px rgba(198, 244, 50, .18); }
@@ -499,7 +501,7 @@
   font-size: 15px; font-weight: 800; letter-spacing: -.005em;
 }
 .s2-card-k { font-size: 15px; opacity: .78; margin-top: 6px; }
-.s2-card-t { font-size: 26px; font-weight: 750; letter-spacing: -.035em; line-height: 1.1; text-wrap: balance; }
+.s2-card-t { font-size: 26px; font-weight: 750; letter-spacing: -.035em; line-height: 1.1; text-wrap: balance; min-width: 0; overflow-wrap: break-word; hyphens: manual; }
 .s2-card-m { font-size: 16px; opacity: .92; }
 .s2-card-m b { color: var(--lime); font-size: 20px; font-variant-numeric: tabular-nums; }
 
@@ -583,7 +585,8 @@
 .s2-mini-t { fill: none; stroke: color-mix(in srgb, var(--ink) 8%, transparent); stroke-width: 4; }
 .s2-mini-f { fill: none; stroke: var(--good); stroke-width: 4; stroke-linecap: round; stroke-dasharray: calc(var(--p) * .942) 94.2; }
 .s2-uni-locked .s2-uni-name { filter: blur(4px); user-select: none; }
-.s2-lock { flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 650; color: var(--ink-muted); padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-2); }
+.s2-uni-locked .s2-uni-name { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+.s2-lock { flex: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 650; color: var(--ink-muted); padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-2); }
 .s2-lock .ico { width: 14px; height: 14px; }
 
 /* Шанс на грант: кольцо с числом в центре + сценарий «что если» стопкой */

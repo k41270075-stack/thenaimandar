@@ -92,6 +92,68 @@
     ['Monash', 330, 2], ['NUS', 110, 1], ['Bocconi', 150, 1], ['Leiden', 320, 1]];
   var RX = [62, 104, 146], SWEEP = 1100, SWEEP_START = 200;
 
+  // Радар под ширину сцены. На узком телефоне кольца сжимаются по горизонтали (--kx), чтобы крайние вузы
+  // не обрезались краем. Вузы ученика ставятся первыми: если место занято центром или другим вузом,
+  // берётся ближайший свободный угол на среднем или внешнем кольце. Фоновые вузы, которым места нет,
+  // прячутся: они декоративные.
+  function layoutRadar(stage) {
+    if (!stage) return;
+    var W = stage.clientWidth, H = stage.clientHeight;
+    var chips = [].slice.call(stage.querySelectorAll('.s1-chip'));
+    if (!W || !chips.length) return;
+    var k = parseFloat(getComputedStyle(stage).getPropertyValue('--k')) || 0.92;
+    var kx = Math.min(1, Math.max(0.55, (W / 2 - 44) / (RX[2] * k)));
+    stage.style.setProperty('--kx', kx.toFixed(3));
+    var placed = [], PAD = 3, core = 50 * k / 0.92;
+    function spot(ang, ring) {
+      var a = ang * Math.PI / 180;
+      return { x: Math.sin(a) * RX[ring] * kx, y: -Math.cos(a) * RX[ring] * 0.72 };
+    }
+    function box(c, p, mine) {
+      var w = c.offsetWidth * (mine ? 1.08 : 1), h = c.offsetHeight * (mine ? 1.08 : 1);
+      var x = W / 2 + p.x * k, y = H / 2 + p.y * k;
+      return { l: x - w / 2 - PAD, r: x + w / 2 + PAD, t: y - h / 2 - PAD, b: y + h / 2 + PAD };
+    }
+    function free(r) {
+      if (r.l < 6 || r.r > W - 6 || r.t < 6 || r.b > H - 6) return false;
+      if (r.l < W / 2 + core && r.r > W / 2 - core && r.t < H / 2 + core && r.b > H / 2 - core) return false;
+      return !placed.some(function (p) { return r.l < p.r && r.r > p.l && r.t < p.b && r.b > p.t; });
+    }
+    function put(c, ang, ring) {
+      var p = spot(ang, ring);
+      c.style.setProperty('--x', Math.round(p.x) + 'px');
+      c.style.setProperty('--y', Math.round(p.y) + 'px');
+      c.style.setProperty('--hit', Math.round(SWEEP_START + ((ang % 360) + 360) % 360 / 360 * SWEEP) + 'ms');
+    }
+    chips.sort(function (a, b) { return b.classList.contains('is-mine') - a.classList.contains('is-mine'); });
+    chips.forEach(function (c) {
+      var mine = c.classList.contains('is-mine');
+      var ang = +c.dataset.a, ring = +c.dataset.r;
+      var tries = [[ang, ring]];
+      if (mine) for (var d = 15; d <= 180; d += 15) tries.push([ang + d, 1], [ang - d, 1], [ang + d, 2], [ang - d, 2]);
+      for (var i = 0; i < tries.length; i++) {
+        var r = box(c, spot(tries[i][0], tries[i][1]), mine);
+        if (free(r)) { put(c, tries[i][0], tries[i][1]); placed.push(r); return; }
+      }
+      if (!mine) { c.hidden = true; return; }
+      // На кольцах места нет (узкий телефон): ставим вуз ученика в свободный угол сцены
+      var hw = (W / 2 - c.offsetWidth * 0.54 - PAD - 9) / k, hh = (H / 2 - c.offsetHeight * 0.54 - PAD - 9) / k;
+      var grid = [[1, -1], [-1, 1], [-1, -1], [1, 1], [0, -1], [0, 1], [1, -.55], [-1, .55], [-1, -.55], [1, .55]];
+      for (var j = 0; j < grid.length; j++) {
+        var p = { x: grid[j][0] * hw, y: grid[j][1] * hh }, rg = box(c, p, true);
+        if (!free(rg)) continue;
+        c.style.setProperty('--x', Math.round(p.x) + 'px');
+        c.style.setProperty('--y', Math.round(p.y) + 'px');
+        var deg = (Math.atan2(p.x, -p.y) * 180 / Math.PI + 360) % 360;
+        c.style.setProperty('--hit', Math.round(SWEEP_START + deg / 360 * SWEEP) + 'ms');
+        placed.push(rg);
+        return;
+      }
+      put(c, ang, ring);
+      placed.push(box(c, spot(ang, ring), true));
+    });
+  }
+
   var s1Timers = [];
   Screens.register('s1', {
     enter: function (el, state) {
@@ -104,7 +166,7 @@
       var chips = RADAR.concat(mine).map(function (c) {
         var ang = c[1] * Math.PI / 180, rx = RX[c[2]];
         var hit = SWEEP_START + c[1] / 360 * SWEEP;    // момент, когда луч проходит над вузом
-        return '<span class="s1-chip' + (c[3] ? ' is-mine' : '') + '" style="--x:' + Math.round(Math.sin(ang) * rx) + 'px;--y:' + Math.round(-Math.cos(ang) * rx * 0.72) +
+        return '<span class="s1-chip' + (c[3] ? ' is-mine' : '') + '" data-a="' + c[1] + '" data-r="' + c[2] + '" style="--x:' + Math.round(Math.sin(ang) * rx) + 'px;--y:' + Math.round(-Math.cos(ang) * rx * 0.72) +
           'px;--hit:' + Math.round(hit) + 'ms">' + esc(c[0]) + (c[3] ? '<b>' + c[3] + '%</b>' : '') + '</span>';
       }).join('');
       el.innerHTML = '' +
@@ -123,6 +185,10 @@
           '<li style="--d:1500ms">Считаю шанс для ' + (GRADE_LABEL[a.grade] || 'тебя') + '</li>' +
         '</ul>' +
         '<p class="s1-skip">Нажми, чтобы пропустить</p></div>';
+
+      layoutRadar(el.querySelector('.s1-stage'));
+      // Цифры совпадения набраны шрифтом Unbounded: после его загрузки чипы шире, раскладываем заново
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (Screens.current() === 's1') layoutRadarAgain(); });
 
       countFmt(el.querySelector('#s1-pct'), 100, 2300, '%');
       countFmt(el.querySelector('#s1-u'), 1000, 1800, '+');
@@ -167,6 +233,47 @@
       '</ul></div>';
   }
 
+  // Ширина самого длинного слова при текущем шрифте. Меряем невидимой копией без переносов в body:
+  // там нет анимации карточки (scale, rotateY), а scrollWidth не видит долей пикселя.
+  // После дефиса браузер переносит сам, поэтому «Врач-исследователь» — это «Врач-» и «исследователь».
+  function longestWord(node) {
+    var cs = getComputedStyle(node);
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;';
+    ['fontFamily', 'fontSize', 'fontWeight', 'letterSpacing', 'fontStyle'].forEach(function (k) { probe.style[k] = cs[k]; });
+    document.body.appendChild(probe);
+    var max = 0;
+    node.textContent.split(/\s+|(?<=-)/).forEach(function (w) {
+      if (!w) return;
+      probe.textContent = w;
+      max = Math.max(max, probe.getBoundingClientRect().width);
+    });
+    probe.remove();
+    return max;
+  }
+
+  // Длинное название уменьшает шрифт, пока самое длинное слово не влезет целиком (без переноса посередине)
+  function fitText(node, min) {
+    if (!node || !node.isConnected) return;
+    node.style.fontSize = '';
+    var size = parseFloat(getComputedStyle(node).fontSize);
+    min = min || 17;
+    while (longestWord(node) > node.clientWidth - 2 && size > min) {
+      size -= 1;
+      node.style.fontSize = size + 'px';
+    }
+  }
+  window.addEventListener('resize', function () {
+    fitText(document.querySelector('[data-screen="s2"] .s2-card-t'));
+    if (Screens.current() === 's1') layoutRadarAgain();
+  });
+  function layoutRadarAgain() {
+    var stage = document.querySelector('[data-screen="s1"] .s1-stage');
+    if (!stage) return;
+    stage.querySelectorAll('.s1-chip[hidden]').forEach(function (c) { c.hidden = false; });
+    layoutRadar(stage);
+  }
+
   function renderResult(el, p) {
     var profs = p.professions.map(function (pr, i) {
       return '<li class="s2-prof' + (i === 0 ? ' is-top' : '') + '" title="' + esc(pr[0]) + ': ' + pr[1] + '% совпадения">' +
@@ -208,6 +315,12 @@
         '<section class="card s2-block s2-late s2-profs" style="--i:0"><h2 class="h2">Профессии под тебя</h2><ol class="s2-prof-list">' + profs + '</ol></section>' +
         '<section class="card s2-block s2-late s2-unis-card" style="--i:2"><h2 class="h2">Вузы под тебя</h2><ul class="s2-unis">' + unis + '</ul></section>' +
       '</div>';
+
+    // Длинное название профессии («Врач-исследователь») не должно вылезать за карточку:
+    // уменьшаем шрифт, пока самое длинное слово не влезет. Пересчёт после загрузки шрифта и при смене ширины.
+    var title = el.querySelector('.s2-card-t');
+    fitText(title);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitText(title); });
 
     // Голографическая карта: после вылета наклоняется за мышкой, по ней бежит радужный блик
     var card = el.querySelector('.s2-card');

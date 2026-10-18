@@ -340,13 +340,13 @@
 .streakfx-unit { margin: -2px 0 6px; font-size: 17px; font-weight: 600; color: #C9CCF5; animation: streakfx-rise .35s var(--ease-out) .9s both; }
 
 /* Дни недели: огонёк по очереди «впрыгивает» в каждый день серии, сегодняшний со вспышкой */
-.streakfx-week { display: grid; grid-template-columns: repeat(7, 40px); gap: 8px; margin: 0 0 8px; padding: 0; list-style: none; }
+.streakfx-week { display: grid; grid-template-columns: repeat(7, minmax(0, 40px)); gap: clamp(4px, 2vw, 8px); width: 100%; max-width: 328px; justify-content: center; margin: 0 0 8px; padding: 0; list-style: none; }
 .streakfx-week li { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 15px; color: rgba(244, 245, 255, .55); }
 .streakfx-week li.is-on { color: #F4F5FF; }
 .streakfx-dot {
   position: relative;
   display: grid; place-items: center;
-  width: 40px; height: 40px;
+  width: 100%; max-width: 40px; aspect-ratio: 1;
   border-radius: 50%;
   border: 1.5px solid rgba(244, 245, 255, .2);
   font-size: 20px;
@@ -390,8 +390,8 @@
 
 @media (min-width: 900px) {
   html:not([data-view="phone"]) .streakfx-stage { transform: scale(1.15); }
-  html:not([data-view="phone"]) .streakfx-week { grid-template-columns: repeat(7, 48px); }
-  html:not([data-view="phone"]) .streakfx-dot { width: 48px; height: 48px; font-size: 24px; }
+  html:not([data-view="phone"]) .streakfx-week { grid-template-columns: repeat(7, 48px); max-width: none; gap: 8px; }
+  html:not([data-view="phone"]) .streakfx-dot { width: 48px; max-width: 48px; height: 48px; font-size: 24px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

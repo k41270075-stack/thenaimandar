@@ -1,0 +1,256 @@
+/* Полировка: исправления вёрстки, дизайн и дополнительные анимации поверх всех частей.
+   Подключается после desktop.css, разметку экранов не меняет: только добавляет слои и классы из js/polish.js.
+   Движение: transform и opacity, кривые --ease-out / --ease-spring, при «уменьшить движение» всё гасит base.css.
+   Префикс .pl- у всего, что добавляет этот файл. */
+
+/* ---------- Исправления ---------- */
+
+/* Полоса прокрутки внутри телефона (macOS с мышкой рисует её поверх рамки) */
+.screen, .streakfx, .s5-share-sheet { scrollbar-width: none; }
+.screen::-webkit-scrollbar, .streakfx::-webkit-scrollbar, .s5-share-sheet::-webkit-scrollbar { display: none; }
+
+/* Искра логотипа налезала на кнопку палитры */
+.hud-logo { padding-right: 10px; flex: none; }
+.hud-stats { min-width: 0; }
+
+/* Длинные слова в заголовках и карточках не вылезают за рамки */
+.h1, .h2, .lead, .s4-q, .s5-locked b, .s7-uni-name b, .s2-uni-name, .streakfx-title { overflow-wrap: break-word; }
+.s2-prof-top span { min-width: 0; overflow-wrap: anywhere; }
+.s7-streak > div, .s5-locked > div, .s5-pro > div, .s6-time > div { min-width: 0; }
+
+/* Узкий телефон (320–360): кнопки и крупные числа не ломают строки */
+@media (max-width: 360px) {
+  .s3-go { font-size: 16px; min-height: 76px; padding-left: 16px; padding-right: 12px; letter-spacing: -.02em; }
+  .s2-lock { padding: 4px 8px; font-size: 14px; }
+  .s2-grant-row { gap: 12px; }
+  .s2-ring-wrap { width: 96px; height: 96px; }
+  .s2-grant-v { font-size: 26px; }
+  .s7-streak-num { font-size: 21px; }
+  .s7-uni-match { font-size: 16px; }
+  .streakfx-week li { font-size: 13px; }
+}
+
+/* ---------- Дизайн: карточки ---------- */
+
+/* Карточки и панели: мягкий верхний блик и свечение под курсором (на ноутбуке) */
+.card, .panel, .s4-card, .s1-stats div {
+  position: relative;
+  isolation: isolate;
+}
+.card::before, .panel::before, .s4-card::before {
+  content: "";
+  position: absolute; inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(260px circle at var(--pl-mx, 50%) var(--pl-my, -40%), color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity .3s var(--ease-out);
+}
+.pl-lit::before { opacity: 1; }
+
+@media (prefers-color-scheme: dark) {
+  .card, .s4-card, .s1-stats div {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .035), transparent 40%),
+      var(--surface-1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 18px 40px -28px rgba(0, 0, 0, .9);
+  }
+  .panel { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), var(--lift); }
+  /* Цветные карточки сохраняют свой фон */
+  .s5-locked { background: var(--accent-soft); }
+  .s5-pro { background: linear-gradient(135deg, color-mix(in srgb, var(--violet) 12%, var(--surface-1)), var(--surface-1) 70%); }
+  .s7-uni { background: var(--good-soft); }
+}
+
+/* Подъём карточек под мышкой */
+@media (hover: hover) and (pointer: fine) {
+  .card, .s1-stats div { transition: transform .35s var(--ease-out), border-color .3s ease, box-shadow .35s var(--ease-out); }
+  .card:hover, .s1-stats div:hover { transform: translateY(-3px); border-color: var(--accent-line); }
+}
+
+/* Лидер в рейтинге профессий: подсветка строки */
+.s2-prof.is-top { position: relative; }
+.s2-prof.is-top::after {
+  content: "";
+  position: absolute; inset: -8px -10px;
+  z-index: -1;
+  border-radius: 12px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lime) 14%, transparent), transparent 80%);
+  opacity: 0;
+  animation: pl-fade .5s var(--ease-out) 1.4s forwards;
+}
+.s2-prof-list { isolation: isolate; }
+
+/* ---------- Анимация: заголовки по словам ---------- */
+.pl-w {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(.45em) rotate(3deg);
+  transform-origin: 0 100%;
+  animation: pl-word .62s var(--ease-out) forwards;
+  animation-delay: calc(90ms + var(--wi) * 55ms);
+}
+@keyframes pl-word { to { opacity: 1; transform: none; } }
+
+/* ---------- Анимация: кнопки ---------- */
+
+/* Блик пробегает по главным кнопкам, как по лаймовой */
+.btn:not(.btn-ghost):not(.btn-lime)::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .3) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: btn-shine 5s var(--ease) 1.6s infinite;
+}
+/* Стрелка в круге: лёгкий «толчок» вперёд, зовёт нажать */
+.btn-arrow { transition: transform .25s var(--ease-out); }
+.btn:not([disabled]) .btn-arrow::before { animation: pl-nudge 2.6s var(--ease-in-out) 1.2s infinite; }
+@keyframes pl-nudge { 0%, 70%, 100% { translate: 0 0; } 80% { translate: 3px 0; } 90% { translate: -1px 0; } }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .btn-arrow { transform: translateX(4px) scale(1.06); }
+}
+
+/* Волна от точки нажатия: кнопки, чипы, ответы */
+.pl-ripple {
+  position: absolute;
+  left: var(--rx); top: var(--ry);
+  width: var(--rs); height: var(--rs);
+  margin: calc(var(--rs) / -2) 0 0 calc(var(--rs) / -2);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .22;
+  transform: scale(0);
+  pointer-events: none;
+  animation: pl-ripple .55s var(--ease-out) forwards;
+}
+@keyframes pl-ripple { to { transform: scale(1); opacity: 0; } }
+.chip, .s4-opt { position: relative; overflow: hidden; isolation: isolate; }
+
+/* S0: «Готово» оживает, когда выбраны все ответы */
+.s0-done:not([disabled]) { animation: pl-ready .55s var(--ease-spring), glow 3.2s ease-in-out .6s infinite; }
+@keyframes pl-ready { 0% { transform: scale(.96); } 55% { transform: scale(1.04); } 100% { transform: none; } }
+
+/* ---------- Шапка ---------- */
+
+/* Огонь серии «горит», когда серия больше нуля */
+.hud-streak.pl-lit .ico { animation: pl-flicker 1.6s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes pl-flicker {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.08, .96) rotate(-4deg); }
+  50% { transform: scale(.96, 1.06) rotate(3deg); }
+  75% { transform: scale(1.05, .98) rotate(-2deg); }
+}
+.hud-streak.pl-lit { border-color: color-mix(in srgb, var(--fire) 40%, var(--hairline)); box-shadow: 0 0 16px -6px color-mix(in srgb, var(--fire) 70%, transparent); }
+
+/* Полоса XP переливается */
+.hud-xp-fill { overflow: hidden; }
+.hud-xp-fill::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .55) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: pl-sweep 3.4s var(--ease-in-out) infinite;
+}
+@keyframes pl-sweep { 60%, 100% { transform: translateX(100%); } }
+
+/* ---------- S1: радар ---------- */
+.s1-stats div { overflow: hidden; }
+.s1-stats div::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--lime));
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: s1-prog 2.3s linear forwards;
+}
+
+/* ---------- S2: карточка профессии ---------- */
+
+/* После вылета карточка «парит», блик проходит по ней снова и снова */
+.s2-card.is-live { animation: pl-float 4.6s ease-in-out infinite; }
+@keyframes pl-float { 50% { translate: 0 -6px; } }
+.s2-card.is-live .s2-shine { animation: pl-shine-loop 5.5s cubic-bezier(.645, .045, .355, 1) 1s infinite; }
+@keyframes pl-shine-loop { 0% { transform: translateX(-120%); } 22%, 100% { transform: translateX(120%); } }
+/* Пропуск тапом ускоряет только вылет, а не бесконечные «парение» и блик */
+.s2-skip .s2-card.is-live { animation-duration: 4.6s !important; }
+.s2-skip .s2-card.is-live .s2-shine { animation-duration: 5.5s !important; animation-delay: 1s !important; }
+.s2-card.pl-gyro .s2-foil { opacity: .7; }
+.s2-rarity { animation: pl-badge .6s var(--ease-spring) .7s both; }
+@keyframes pl-badge { from { opacity: 0; transform: scale(.4) rotate(-10deg); } }
+.s2-card-m b { display: inline-block; animation: pl-pop .5s var(--ease-spring) 1s both; }
+@keyframes pl-pop { from { opacity: 0; transform: scale(.5); } }
+
+/* Мини-кольца вузов заполняются по очереди */
+.s2-mini-f { animation: pl-mini 1s var(--ease-out) both; animation-delay: calc(900ms + var(--pl-i, 0) * 140ms); }
+@keyframes pl-mini { from { stroke-dasharray: 0 94.2; } }
+.s2-lock .ico { animation: s5-lock 3s ease-in-out 2s infinite; transform-origin: 50% 20%; }
+
+/* ---------- S4: верный ответ ---------- */
+.pl-burst { position: absolute; z-index: 36; width: 0; height: 0; pointer-events: none; }
+.pl-burst i {
+  position: absolute;
+  width: var(--s); height: var(--s);
+  margin: calc(var(--s) / -2);
+  background: var(--c);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: pl-burst .7s cubic-bezier(.2, .7, .3, 1) forwards;
+}
+@keyframes pl-burst {
+  0% { opacity: 1; transform: translate(0, 0) scale(.4) rotate(0); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(160deg); }
+}
+.s4-card { transform-origin: 50% 0; }
+.s4-q { animation: pl-fade .4s var(--ease-out) .05s both; }
+
+/* ---------- S5 ---------- */
+.s5-go .s5-week li.is-today { animation: pl-pop .5s var(--ease-spring) .5s both; }
+.s5-pro-ico .ico { animation: pl-twinkle 2.8s ease-in-out infinite; }
+@keyframes pl-twinkle { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.18) rotate(20deg); } }
+
+/* ---------- S6: кнопка Telegram зовёт расходящимся кольцом ---------- */
+.s6-connect { animation: pl-ring 2.2s var(--ease-out) 1.4s infinite; }
+@keyframes pl-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent), 0 1px 2px rgba(59, 71, 255, .3); }
+  70%, 100% { box-shadow: 0 0 0 14px transparent, 0 1px 2px rgba(59, 71, 255, .3); }
+}
+.s6-avatar { animation: pl-pop .5s var(--ease-spring) .2s both; }
+
+/* ---------- S7: уведомление ждёт тапа ---------- */
+.s7-notif { position: relative; }
+.s7-notif:not(.is-read)::after {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--lime), 0 0 24px rgba(198, 244, 50, .45);
+  opacity: 0;
+  pointer-events: none;
+  animation: pl-notif 2s ease-in-out 2s infinite;
+}
+@keyframes pl-notif { 50% { opacity: .9; } }
+
+/* ---------- Свечение за курсором на ноутбуке ---------- */
+.pl-glow {
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 0;
+  width: 520px; height: 520px;
+  margin: -260px 0 0 -260px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+.pl-glow.is-on { opacity: 1; }
+html[data-view="phone"] .pl-glow { display: none; }
+
+@keyframes pl-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-w { opacity: 1; transform: none; animation: none; }
+  .pl-glow, .pl-burst, .pl-ripple { display: none; }
+  .s2-card.is-live { animation: none; }
+}
