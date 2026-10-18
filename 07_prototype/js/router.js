@@ -18,7 +18,7 @@
           node.innerHTML =
             '<div class="stub"><span class="stub-id">' + id.toUpperCase() + '</span>' +
             '<h2>' + title + '</h2><p>Заглушка. Этот экран делает другая часть.</p>' +
-            (next ? '<button class="btn btn-primary" data-go="' + next + '">Дальше</button>' : '') +
+            (next ? '<button class="btn" data-go="' + next + '"><span>Дальше</span><span class="btn-arrow"></span></button>' : '') +
             '</div>';
         }
       };
@@ -41,8 +41,10 @@
     current = id;
     next.scrollTop = 0;
     if (defs[id] && defs[id].enter) defs[id].enter(next, State.get());
-    // Кадр задержки, чтобы сработал переход
-    requestAnimationFrame(function () { next.classList.add('is-active'); });
+    // Принудительный пересчёт стилей вместо requestAnimationFrame: переход срабатывает,
+    // и при быстрых нажатиях не остаётся «зависших» активных экранов
+    void next.offsetWidth;
+    next.classList.add('is-active');
     State.set({ screen: id });
   };
 

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0d1f">
+<meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0B14" media="(prefers-color-scheme: dark)">
 <title>Ventorme · Первые 5 минут</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<link rel="icon" href="img/ventorme-icon.png">
+<!-- Стиль один с лендингом 03_landing: системный шрифт, без внешних шрифтов -->
 <!-- ОБЩЕЕ: не трогать без договорённости -->
 <link rel="stylesheet" href="css/base.css">
 <!-- Каждая часть правит только свой файл -->
@@ -17,13 +17,16 @@
 </head>
 <body>
 <div class="phone" id="app">
-  <!-- Фон: рисует часть 1 -->
+  <!-- Фон: 3D-звёзды как на лендинге, рисует участник 1 -->
   <canvas id="bg" aria-hidden="true"></canvas>
 
   <!-- Шапка: серия, XP, уровень. Рисует js/hud.js -->
   <header class="hud" id="hud">
     <button class="hud-logo" id="hud-logo" type="button" aria-label="Ventorme">
-      <span class="hud-logo-mark">V</span><span class="hud-logo-text">ventorme</span>
+      <picture>
+        <source srcset="img/ventorme-logo-white.svg" media="(prefers-color-scheme: dark)">
+        <img src="img/ventorme-logo.svg" alt="Ventorme" width="104" height="23">
+      </picture>
     </button>
     <div class="hud-stats">
       <span class="hud-streak" id="hud-streak" title="Серия дней">🔥 <b>0</b></span>

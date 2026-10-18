@@ -1,45 +1,99 @@
 /* ОБЩЕЕ: токены, рамка телефона, шапка, экраны, кнопки, базовые эффекты.
-   Части не меняют этот файл; свои стили пишут в css/partN.css с префиксом своих экранов (.s0-…, .s3-…). */
+   Участники не меняют этот файл; свои стили пишут в css/partN.css с префиксом своих экранов (.s0-…, .s6-…).
+
+   Стиль один с нашим лендингом (03_landing/site/styles.css):
+   - те же токены: лестница поверхностей, волосяные линии, синий Ventorme #3B47FF и лайм #C6F432;
+   - системный шрифт, без внешних шрифтов (Instagram-браузер медленный);
+   - кнопки-пилюли со стрелкой в круге и бликом, панели 20px, карточки 14px, чипы 12px;
+   - одна кривая --ease на все переходы, движение только на transform и opacity;
+   - светлая и тёмная тема по настройке телефона. */
 
 :root {
-  --blue: #3b47ff;
-  --blue-dark: #2530c9;
-  --blue-soft: rgba(59, 71, 255, 0.18);
-  --lime: #dfff00;
-  --lime-dark: #a9c200;
-  --fire: #ff9a3c;
-  --green: #2bd67b;
-  --green-dark: #18a35a;
-  --red: #ff4d5e;
-  --red-dark: #c92a3a;
+  color-scheme: light dark;
 
-  --bg: #0b0d1f;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.1);
-  --line: rgba(255, 255, 255, 0.12);
-  --ink: #f5f6ff;
-  --muted: rgba(245, 246, 255, 0.68);
-  --faint: rgba(245, 246, 255, 0.45);
+  /* Лестница поверхностей: холст → карточка → поднятая карточка */
+  --canvas:       #FBFBFD;
+  --surface-1:    #FFFFFF;
+  --surface-2:    #F3F4F9;
+  --hairline:     #E4E6EF;
+  --hairline-str: #D0D3E0;
 
-  --radius: 20px;
-  --radius-sm: 14px;
-  --hud-h: 56px;
+  --ink:          #0B0D24;
+  --ink-muted:    #4A4E66;
+  --ink-subtle:   #676B82;
+
+  --accent:       #3B47FF;
+  --accent-press: #2B36E0;
+  --accent-soft:  #EEF0FF;
+  --accent-line:  #C9CDFF;
+  --on-accent:    #FFFFFF;
+  --band:         #00033E;
+
+  --lime:         #C6F432;
+  --lime-ink:     #0B0D24;
+  --violet:       #7B5CFF;
+
+  /* Смысловые цвета игры */
+  --good:         #1F9D6C;
+  --good-soft:    #E3F7EE;
+  --bad:          #E5484D;
+  --bad-soft:     #FDECEC;
+  --fire:         #FF8A3D;
+
+  --r-pill:  999px;
+  --r-panel: 20px;
+  --r-card:  14px;
+  --r-chip:  12px;
+
+  --lift: 0 1px 2px rgba(17, 20, 15, .04),
+          0 8px 24px -12px rgba(17, 20, 15, .10),
+          0 24px 48px -28px rgba(17, 20, 15, .12);
+
+  /* Одна кривая на все переходы, как на лендинге. Пружина только для «вау»-моментов. */
+  --ease: cubic-bezier(.32, .72, 0, 1);
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
-  --ease-out: cubic-bezier(.22, 1, .36, 1);
+
+  --hud-h: 56px;
 }
 
-* { box-sizing: border-box; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas:       #0A0B14;
+    --surface-1:    #12141F;
+    --surface-2:    #181B28;
+    --hairline:     #23263A;
+    --hairline-str: #33374F;
+
+    --ink:          #F2F3F8;
+    --ink-muted:    #ADB0C4;
+    --ink-subtle:   #8C90A6;
+
+    --accent:       #8C94FF;
+    --accent-press: #7A83FF;
+    --accent-soft:  #171A35;
+    --accent-line:  #2C3170;
+    --on-accent:    #0A0B14;
+    --band:         #0E1240;
+
+    --good:         #4FD39A;
+    --good-soft:    #0F2A20;
+    --bad:          #FF7A7E;
+    --bad-soft:     #2E1416;
+
+    --lift: 0 1px 2px rgba(0, 0, 0, .40),
+            0 10px 30px -14px rgba(0, 0, 0, .55);
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
 
 body {
-  background: #05060f;
+  background: var(--canvas);
   color: var(--ink);
-  font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 1.45;
+  font: 400 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
-  -webkit-tap-highlight-color: transparent;
   overflow: hidden;
 }
 
@@ -53,18 +107,51 @@ button { font: inherit; color: inherit; }
   max-width: 430px;
   margin: 0 auto;
   overflow: hidden;
-  background: radial-gradient(120% 80% at 50% 0%, #1a1f5c 0%, var(--bg) 60%);
+  background: var(--canvas);
   isolation: isolate;
 }
 
+/* Северное сияние за экранами, как за первым экраном лендинга */
+.phone::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  left: -10%; top: -10%;
+  width: 120%; height: 60%;
+  background:
+    radial-gradient(40% 40% at 30% 40%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%),
+    radial-gradient(35% 35% at 70% 60%, rgba(198, 244, 50, .16), transparent 70%);
+  filter: blur(20px);
+  animation: aurora 16s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate3d(-6%, 4%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(4%, -3%, 0) rotate(-6deg) scale(.96); }
+}
+
+/* Зерно, как на лендинге */
+.phone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+@media (prefers-color-scheme: dark) { .phone::after { opacity: .055; } }
+
 @media (min-width: 600px) and (min-height: 700px) {
-  body { display: grid; place-items: center; background: radial-gradient(circle at 50% 30%, #141838, #05060f 70%); }
+  body { display: grid; place-items: center; background: var(--surface-2); }
   .phone {
     width: 390px;
     height: min(844px, 94dvh);
     border-radius: 44px;
-    border: 10px solid #1d2030;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    border: 10px solid #15172A;
+    box-shadow: var(--lift), 0 40px 80px -30px rgba(11, 13, 36, .45);
   }
 }
 
@@ -80,9 +167,7 @@ button { font: inherit; color: inherit; }
 /* Шапка */
 .hud {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 20;
   height: calc(var(--hud-h) + env(safe-area-inset-top, 0px));
   padding: env(safe-area-inset-top, 0px) 14px 0;
@@ -90,33 +175,20 @@ button { font: inherit; color: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  background: linear-gradient(to bottom, rgba(11, 13, 31, 0.9), rgba(11, 13, 31, 0));
+  background: linear-gradient(to bottom, var(--canvas) 55%, color-mix(in srgb, var(--canvas) 0%, transparent));
 }
 
 .hud-logo {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 4px;
+  padding: 6px 2px;
   background: none;
   border: 0;
   cursor: pointer;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: -0.01em;
 }
+.hud-logo img { display: block; width: 104px; height: auto; }
 
-.hud-logo-mark {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  background: var(--blue);
-  font-size: 15px;
-}
-
-.hud-stats { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.hud-stats { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 650; }
 
 .hud-streak, .hud-level, .hud-xp {
   display: inline-flex;
@@ -124,29 +196,26 @@ button { font: inherit; color: inherit; }
   gap: 4px;
   height: 30px;
   padding: 0 10px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
   white-space: nowrap;
 }
-
 .hud-streak b { color: var(--fire); }
-.hud-level b { color: var(--lime); }
+.hud-level b { color: var(--accent); }
 
-.hud-xp { position: relative; overflow: hidden; min-width: 76px; justify-content: center; }
+.hud-xp { position: relative; overflow: hidden; min-width: 74px; justify-content: center; }
 .hud-xp b { position: relative; }
 .hud-xp-fill {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  left: 0; top: 0; bottom: 0;
   width: 0;
-  background: var(--blue);
-  transition: width 0.5s var(--ease-out);
+  background: var(--accent-line);
+  transition: width .5s var(--ease);
 }
 
-.hud-bump { animation: hud-bump 0.45s var(--ease-spring); }
-@keyframes hud-bump { 40% { transform: scale(1.18); } }
+.hud-bump { animation: hud-bump .45s var(--ease-spring); }
+@keyframes hud-bump { 40% { transform: scale(1.16); } }
 
 /* Экраны */
 .screens { position: absolute; inset: 0; z-index: 1; }
@@ -163,66 +232,174 @@ button { font: inherit; color: inherit; }
   opacity: 0;
   visibility: hidden;
   transform: translateX(40px);
-  transition: opacity 0.28s ease, transform 0.28s var(--ease-out), visibility 0s linear 0.28s;
+  transition: opacity .28s var(--ease), transform .28s var(--ease), visibility 0s linear .28s;
 }
-
 .screen.is-active {
   opacity: 1;
   visibility: visible;
   transform: none;
-  transition: opacity 0.28s ease, transform 0.28s var(--ease-out), visibility 0s;
+  transition: opacity .28s var(--ease), transform .28s var(--ease), visibility 0s;
 }
-
 .screen.is-leaving { transform: translateX(-40px); }
 
 .overlay-root { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
 .overlay-root > * { pointer-events: auto; }
 
-/* Типографика */
-.h1 { margin: 0; font-size: 28px; line-height: 1.12; font-weight: 800; letter-spacing: -0.02em; }
-.h2 { margin: 0; font-size: 21px; line-height: 1.2; font-weight: 700; }
-.muted { color: var(--muted); }
-.tag-example { font-size: 11px; color: var(--faint); }
+/* Типографика, как на лендинге */
+.h1 {
+  margin: 0;
+  font-size: clamp(28px, 8vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.042em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+/* Выделенное слово переливается фирменным градиентом */
+.h1 em {
+  font-style: normal;
+  background: linear-gradient(100deg, var(--accent) 0%, var(--violet) 35%, var(--accent) 60%, var(--accent-press) 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ink-flow 7s ease-in-out infinite alternate;
+}
+@keyframes ink-flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+
+.h2 { margin: 0; font-size: 21px; line-height: 1.2; font-weight: 700; letter-spacing: -0.03em; }
+.lead { margin: 0; font-size: 16.5px; line-height: 1.5; color: var(--ink-muted); text-wrap: pretty; }
+.muted { color: var(--ink-muted); }
+.tag-example { font-size: 12px; color: var(--ink-subtle); }
+
+/* Вложенный корпус: обойма с волосяной линией и ядро внутри (как .panel на лендинге) */
+.panel {
+  padding: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-panel);
+  background: var(--surface-2);
+  box-shadow: var(--lift);
+}
+.panel-core {
+  padding: 18px;
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+@media (prefers-color-scheme: dark) { .panel-core { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05); } }
 
 .card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
   padding: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  background: var(--surface-1);
 }
 
-/* Кнопки в стиле Duolingo: толстая нижняя граница, при нажатии проседает */
+/* Чипы выбора, как в мини-вопросе лендинга */
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.chip {
+  appearance: none;
+  min-height: 48px;
+  padding: 0 15px;
+  border: 1px solid var(--hairline-str);
+  border-radius: var(--r-chip);
+  background: var(--surface-1);
+  color: var(--ink);
+  font-size: 15.5px;
+  font-weight: 560;
+  letter-spacing: -0.012em;
+  cursor: pointer;
+  transition: border-color .2s var(--ease), background-color .2s var(--ease), transform .12s var(--ease), color .2s var(--ease);
+}
+.chip:active { transform: scale(.97); }
+.chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  animation: chip-pop .45s var(--ease);
+}
+@media (prefers-color-scheme: dark) { .chip[aria-pressed="true"] { color: var(--ink); } }
+@keyframes chip-pop { 40% { transform: scale(1.06); } }
+
+/* Кнопки-пилюли, как на лендинге. Стрелка живёт в своём круге: <span class="btn-arrow"></span> */
 .btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  min-height: 54px;
-  padding: 0 20px;
+  min-height: 56px;
+  padding: 14px 16px 14px 24px;
   border: 0;
-  border-radius: 16px;
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 16.5px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  text-align: center;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: background-color .25s var(--ease), transform .12s var(--ease), box-shadow .25s var(--ease);
+  box-shadow: 0 1px 2px rgba(59, 71, 255, .30), inset 0 1px 0 rgba(255, 255, 255, .18);
   user-select: none;
 }
+.btn:active { transform: scale(.975); }
+.btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 3px; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
 
-.btn:active { transform: translateY(4px); box-shadow: none !important; }
-.btn:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+/* Блик пробегает по кнопке, как на лендинге */
+.btn:not(.btn-ghost)::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .28) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: btn-shine 4.5s var(--ease) 1.2s infinite;
+}
+@keyframes btn-shine { 0% { transform: translateX(-120%); } 35%, 100% { transform: translateX(120%); } }
 
-.btn-primary { background: var(--blue); color: #fff; box-shadow: 0 4px 0 var(--blue-dark); }
-.btn-lime { background: var(--lime); color: #11131f; box-shadow: 0 4px 0 var(--lime-dark); }
-.btn-green { background: var(--green); color: #06210f; box-shadow: 0 4px 0 var(--green-dark); }
-.btn-ghost { background: var(--surface-2); color: var(--ink); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
+.btn-arrow {
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .18);
+  display: grid; place-items: center;
+}
+.btn-arrow::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg) translate(-1px, 1px);
+}
+
+.btn-primary { /* основной цвет уже у .btn */ }
+.btn-lime { background: var(--lime); color: var(--lime-ink); box-shadow: 0 6px 18px -8px rgba(198, 244, 50, .7); }
+.btn-lime .btn-arrow { background: rgba(11, 13, 36, .1); }
+.btn-ghost {
+  background: var(--surface-1);
+  color: var(--ink);
+  border: 1px solid var(--hairline-str);
+  box-shadow: none;
+}
+.btn-ghost .btn-arrow { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+
+/* Главная кнопка экрана мягко «дышит» свечением, как закреплённая кнопка лендинга */
+.btn-glow { animation: glow 3.2s ease-in-out infinite; }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 6px 18px -8px rgba(59, 71, 255, .45); }
+  50%      { box-shadow: 0 10px 30px -6px rgba(59, 71, 255, .75); }
+}
 
 /* Заглушка экрана */
 .stub { margin: auto 0; display: flex; flex-direction: column; gap: 12px; text-align: center; }
-.stub-id { align-self: center; padding: 4px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--lime); font-weight: 800; font-size: 13px; }
-.stub h2 { margin: 0; font-size: 24px; }
-.stub p { margin: 0 0 8px; color: var(--muted); }
+.stub-id { align-self: center; padding: 4px 12px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px; }
+.stub h2 { margin: 0; font-size: 24px; letter-spacing: -0.03em; }
+.stub p { margin: 0 0 8px; color: var(--ink-muted); }
 
 /* Общие эффекты */
 .fx-flash {
@@ -231,11 +408,11 @@ button { font: inherit; color: inherit; }
   z-index: 40;
   background: #fff;
   pointer-events: none;
-  animation: fx-flash 0.38s ease-out forwards;
+  animation: fx-flash .38s ease-out forwards;
 }
 @keyframes fx-flash { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
 
-.fx-shake { animation: fx-shake 0.32s linear; }
+.fx-shake { animation: fx-shake .32s linear; }
 @keyframes fx-shake {
   15% { transform: translateX(-7px); } 30% { transform: translateX(6px); } 45% { transform: translateX(-5px); }
   60% { transform: translateX(4px); } 75% { transform: translateX(-2px); } 100% { transform: none; }
@@ -246,15 +423,15 @@ button { font: inherit; color: inherit; }
   z-index: 35;
   transform: translate(-50%, -50%);
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--lime);
-  color: #11131f;
-  font-weight: 800;
+  color: var(--lime-ink);
+  font-weight: 700;
   font-size: 15px;
   pointer-events: none;
-  transition: transform 0.6s var(--ease-out), opacity 0.6s ease;
+  transition: transform .6s var(--ease), opacity .6s var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

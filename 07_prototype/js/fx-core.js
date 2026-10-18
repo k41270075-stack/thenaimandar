@@ -29,7 +29,7 @@
     // Конфетти: FX.confetti() — два залпа с краёв
     confetti: function (opts) {
       if (reduced || !window.confetti) return;
-      var base = Object.assign({ particleCount: 70, spread: 70, startVelocity: 45, colors: ['#3b47ff', '#dfff00', '#ff9a3c', '#ffffff'] }, opts || {});
+      var base = Object.assign({ particleCount: 70, spread: 70, startVelocity: 45, colors: ['#3B47FF', '#C6F432', '#7B5CFF', '#FF8A3D'] }, opts || {});
       window.confetti(Object.assign({}, base, { angle: 60, origin: { x: 0, y: 0.7 } }));
       window.confetti(Object.assign({}, base, { angle: 120, origin: { x: 1, y: 0.7 } }));
     },
