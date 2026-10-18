@@ -14,7 +14,7 @@ export const FIELDS = { it: 'IT', med: 'медицина', biz: 'бизнес' }
 export const RESULTS = {
   it: { title: 'AI-аналитик', match: 96 },
   med: { title: 'Врач-исследователь', match: 93 },
-  biz: { title: 'Продакт-менеджер', match: 91 }
+  biz: { title: 'Продакт-менеджер', match: 94 }
 };
 
 // Следующий шаг плана поступления по цели
